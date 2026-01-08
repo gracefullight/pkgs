@@ -517,32 +517,52 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
             <CardDescription>{t("result.sinsals_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {result.sinsals.matches.map((sinsal, index) => (
-                <div
-                  key={`${sinsal.sinsal.key}-${sinsal.position}-${index}`}
-                  className={`p-3 rounded-lg text-center ${
-                    sinsal.sinsal.type === "auspicious"
-                      ? "bg-green-100 dark:bg-green-900/30"
-                      : sinsal.sinsal.type === "inauspicious"
-                        ? "bg-red-100 dark:bg-red-900/30"
-                        : "bg-muted"
-                  }`}
-                >
-                  <p className="text-xl font-bold mb-1">{sinsal.sinsal.hanja}</p>
-                  <p className="text-sm text-primary font-medium">{sinsal.sinsal.korean}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{sinsal.sinsal.meaning}</p>
-                  <p className="text-xs text-muted-foreground mt-1 border-t pt-1">
-                    {sinsal.position === "year"
-                      ? t("result.year_pillar")
-                      : sinsal.position === "month"
-                        ? t("result.month_pillar")
-                        : sinsal.position === "day"
-                          ? t("result.day_pillar")
-                          : t("result.hour_pillar")}
-                  </p>
-                </div>
-              ))}
+            <div className="grid grid-cols-4 gap-3">
+              {(["year", "month", "day", "hour"] as const).map((position) => {
+                const pillarSinsals = result.sinsals.matches
+                  .filter((s) => s.position === position)
+                  .sort((a, b) => {
+                    const order = { auspicious: 0, neutral: 1, inauspicious: 2 };
+                    return order[a.sinsal.type] - order[b.sinsal.type];
+                  });
+
+                return (
+                  <div key={position} className="flex flex-col gap-2">
+                    <p className="text-xs text-muted-foreground text-center font-medium border-b pb-1">
+                      {position === "year"
+                        ? t("result.year_pillar")
+                        : position === "month"
+                          ? t("result.month_pillar")
+                          : position === "day"
+                            ? t("result.day_pillar")
+                            : t("result.hour_pillar")}
+                    </p>
+                    {pillarSinsals.map((sinsal, index) => (
+                      <div
+                        key={`${sinsal.sinsal.key}-${sinsal.position}-${index}`}
+                        className={`p-3 rounded-lg text-center ${
+                          sinsal.sinsal.type === "auspicious"
+                            ? "bg-green-100 dark:bg-green-900/30"
+                            : sinsal.sinsal.type === "inauspicious"
+                              ? "bg-red-100 dark:bg-red-900/30"
+                              : "bg-muted"
+                        }`}
+                      >
+                        <p className="text-xl font-bold mb-1">{sinsal.sinsal.hanja}</p>
+                        <p className="text-sm text-primary font-medium">{sinsal.sinsal.korean}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {sinsal.sinsal.meaning}
+                        </p>
+                      </div>
+                    ))}
+                    {pillarSinsals.length === 0 && (
+                      <div className="p-3 rounded-lg text-center bg-muted/50">
+                        <p className="text-xs text-muted-foreground">-</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
