@@ -949,7 +949,3 @@ MIT © [gracefullight](https://github.com/gracefullight)
 - [문서](https://github.com/gracefullight/saju#readme)
 - [이슈 트래커](https://github.com/gracefullight/saju/issues)
 - [토론](https://github.com/gracefullight/saju/discussions)
-
----
-
-Made by [gracefullight](https://github.com/gracefullight)

@@ -15,7 +15,13 @@
 - **Solar Time Correction** - Optional mean solar time adjustment based on longitude
 - **Tree-shakeable** - Import only what you need
 - **Fully Typed** - Complete TypeScript definitions
-- **Well Tested** - 85+ tests with 91%+ coverage
+- **Well Tested** - 176+ tests with 91%+ coverage
+- **Ten Gods Analysis** - Detailed ten gods and five elements distribution with hidden stems
+- **Strength Assessment** - 7-level strength analysis considering season, support, and momentum
+- **Relations Analysis** - Combinations, clashes, harms, punishments analysis
+- **Major/Yearly Luck** - Major luck and yearly luck calculation based on gender and year pillar
+- **Yongshen Extraction** - Favorable element recommendation with fortune enhancement guide
+- **Solar Terms Analysis** - Current/next solar term info with elapsed days calculation
 
 ## What is Saju (四柱)?
 
@@ -59,6 +65,39 @@ pnpm add date-fns date-fns-tz
 ```typescript
 import { DateTime } from "luxon";
 import { createLuxonAdapter } from "@gracefullight/saju/adapters/luxon";
+import { getSaju, STANDARD_PRESET } from "@gracefullight/saju";
+
+const adapter = await createLuxonAdapter();
+
+const birthDateTime = DateTime.fromObject(
+  { year: 2000, month: 1, day: 1, hour: 18, minute: 0 },
+  { zone: "Asia/Seoul" }
+);
+
+// getSaju: Calculate pillars, ten gods, strength, relations, yongshen, solar terms, major luck, yearly luck all at once
+const result = getSaju(adapter, birthDateTime, {
+  longitudeDeg: 126.9778,
+  gender: "male",  // Required: needed for major luck calculation
+  preset: STANDARD_PRESET,
+  currentYear: 2024,  // For default yearly luck range (optional)
+  yearlyLuckRange: { from: 2024, to: 2030 },  // Specify yearly luck range directly (optional)
+});
+
+console.log(result.pillars);     // { year: "己卯", month: "丙子", ... }
+console.log(result.tenGods);     // Ten gods and hidden stems analysis
+console.log(result.strength);    // Strength assessment (e.g., "weak")
+console.log(result.relations);   // Relations analysis
+console.log(result.yongShen);    // Yongshen and fortune tips
+console.log(result.solarTerms);  // Solar term info (current/next term, elapsed days)
+console.log(result.majorLuck);   // Major luck info
+console.log(result.yearlyLuck);  // Yearly luck info
+```
+
+### Calculate Four Pillars Only
+
+```typescript
+import { DateTime } from "luxon";
+import { createLuxonAdapter } from "@gracefullight/saju/adapters/luxon";
 import { getFourPillars, STANDARD_PRESET } from "@gracefullight/saju";
 
 const adapter = await createLuxonAdapter();
@@ -74,24 +113,6 @@ const result = getFourPillars(adapter, birthDateTime, {
 });
 
 console.log(result);
-// {
-//   year: "己卯",    // Year Pillar (Heavenly Stem + Earthly Branch)
-//   month: "丙子",   // Month Pillar
-//   day: "辛巳",     // Day Pillar
-//   hour: "戊戌",    // Hour Pillar
-//   lunar: {
-//     lunarYear: 1999,
-//     lunarMonth: 11,
-//     lunarDay: 25,
-//     isLeapMonth: false
-//   },
-//   meta: {
-//     solarYearUsed: 1999,
-//     sunLonDeg: 280.9,
-//     effectiveDayDate: { year: 2000, month: 1, day: 1 },
-//     adjustedDtForHour: "2000-01-01T18:00:00.000+09:00"
-//   }
-// }
 ```
 
 ## Usage
@@ -207,6 +228,25 @@ Traditional interpretation with Zi hour (23:00) day boundary and solar time corr
 ```
 
 ### Core Functions
+
+#### `getSaju(adapter, datetime, options)`
+
+Calculate all saju analysis results (pillars, ten gods, strength, relations, yongshen, solar terms, major luck, yearly luck) at once.
+
+```typescript
+function getSaju<T>(
+  adapter: DateAdapter<T>,
+  dtLocal: T,
+  options: {
+    longitudeDeg: number;
+    gender: "male" | "female";  // Required
+    tzOffsetHours?: number;
+    preset?: typeof STANDARD_PRESET;
+    currentYear?: number;  // For default yearly luck range
+    yearlyLuckRange?: { from: number; to: number };  // Specify yearly luck range directly
+  }
+): SajuResult;
+```
 
 #### `getFourPillars(adapter, datetime, options)`
 
@@ -421,6 +461,109 @@ function effectiveDayDate<T>(
 }
 ```
 
+### Analysis Functions
+
+#### `analyzeTenGods(year, month, day, hour)`
+
+Analyzes ten gods and hidden stems of the four pillars.
+
+```typescript
+function analyzeTenGods(
+  year: string,
+  month: string,
+  day: string,
+  hour: string
+): FourPillarsTenGods;
+```
+
+#### `analyzeStrength(year, month, day, hour)`
+
+Assesses the strength of the day master on a 7-level scale.
+
+```typescript
+function analyzeStrength(
+  year: string,
+  month: string,
+  day: string,
+  hour: string
+): StrengthResult;
+```
+
+#### `analyzeRelations(year, month, day, hour)`
+
+Analyzes combinations, clashes, harms, and punishments between stems and branches.
+
+```typescript
+function analyzeRelations(
+  year: string,
+  month: string,
+  day: string,
+  hour: string
+): RelationsResult;
+```
+
+#### `calculateMajorLuck(adapter, datetime, gender, year, month)`
+
+Calculates major luck periods and starting age.
+
+```typescript
+function calculateMajorLuck<T>(
+  adapter: DateAdapter<T>,
+  birthDateTime: T,
+  gender: "male" | "female",
+  yearPillar: string,
+  monthPillar: string
+): MajorLuckResult;
+```
+
+#### `analyzeYongShen(year, month, day, hour)`
+
+Extracts favorable elements considering suppression and climate adjustment.
+
+```typescript
+function analyzeYongShen(
+  year: string,
+  month: string,
+  day: string,
+  hour: string
+): YongShenResult;
+```
+
+#### `analyzeSolarTerms(adapter, datetime)`
+
+Calculates current and next solar term info with elapsed days.
+
+```typescript
+function analyzeSolarTerms<T>(
+  adapter: DateAdapter<T>,
+  dtLocal: T
+): SolarTermInfo;
+```
+
+**Returns:**
+```typescript
+{
+  current: { name: "소한", hanja: "小寒", longitude: 285 },
+  currentDate: { year: 2024, month: 1, day: 6, hour: 5, minute: 30 },
+  daysSinceCurrent: 5,
+  next: { name: "대한", hanja: "大寒", longitude: 300 },
+  nextDate: { year: 2024, month: 1, day: 20, hour: 12, minute: 15 },
+  daysUntilNext: 10
+}
+```
+
+#### `getSolarTermsForYear(adapter, year, timezone)`
+
+Calculates all 24 solar terms for a specific year.
+
+```typescript
+function getSolarTermsForYear<T>(
+  adapter: DateAdapter<T>,
+  year: number,
+  timezone: string
+): Array<{ term: SolarTerm; date: {...} }>;
+```
+
 ## Advanced Usage
 
 ### Solar Time Correction
@@ -494,6 +637,85 @@ Common city longitudes for reference:
 | Taipei, Taiwan | 121.5654°E | `longitudeDeg: 121.5654` |
 
 ## Examples
+
+### Major and Yearly Luck Calculation
+
+```typescript
+const saju = getSaju(adapter, dt, {
+  longitudeDeg: 126.9778,
+  gender: "female",
+  yearlyLuckRange: { from: 2024, to: 2030 }
+});
+
+// Check major luck
+console.log(saju.majorLuck.pillars); // Major luck pillars list
+console.log(saju.majorLuck.startAge); // Starting age for major luck
+
+// Check yearly luck
+saju.yearlyLuck.forEach(luck => {
+  console.log(`Year ${luck.year} (${luck.pillar}): Age ${luck.age}`);
+});
+```
+
+### Solar Terms Info
+
+```typescript
+const saju = getSaju(adapter, dt, {
+  longitudeDeg: 126.9778,
+  gender: "male",
+});
+
+// Current solar term
+console.log(saju.solarTerms.current.name);  // "소한"
+console.log(saju.solarTerms.current.hanja); // "小寒"
+console.log(saju.solarTerms.daysSinceCurrent); // 5 (days since term started)
+
+// Next solar term
+console.log(saju.solarTerms.next.name);     // "대한"
+console.log(saju.solarTerms.daysUntilNext); // 10 (days until next term)
+
+// Solar term dates
+console.log(saju.solarTerms.currentDate);   // { year: 2024, month: 1, day: 6, ... }
+console.log(saju.solarTerms.nextDate);      // { year: 2024, month: 1, day: 20, ... }
+```
+
+### Ten Gods and Five Elements Analysis
+
+```typescript
+import { analyzeTenGods, countElements } from "@gracefullight/saju";
+
+const tenGods = analyzeTenGods("己卯", "丙子", "辛巳", "戊戌");
+console.log(tenGods.dayMaster); // "辛"
+
+const elements = countElements(tenGods);
+console.log(elements); // { wood: 1, fire: 1, earth: 3, metal: 1, water: 2 }
+```
+
+### Strength and Yongshen Analysis
+
+```typescript
+import { analyzeStrength, analyzeYongShen, getElementRecommendations } from "@gracefullight/saju";
+
+const strength = analyzeStrength("己卯", "丙子", "辛巳", "戊戌");
+console.log(strength.level); // "weak"
+
+const yongShen = analyzeYongShen("己卯", "丙子", "辛巳", "戊戌");
+console.log(yongShen.primary); // Favorable element (e.g., "earth")
+
+const tips = getElementRecommendations(yongShen);
+console.log(tips.colors); // Lucky colors
+```
+
+### Relations Analysis
+
+```typescript
+import { analyzeRelations } from "@gracefullight/saju";
+
+const relations = analyzeRelations("己卯", "丙子", "辛巳", "戊戌");
+relations.clashes.forEach(c => {
+  console.log(`${c.positions[0]}-${c.positions[1]} branch clash: ${c.pair[0]}-${c.pair[1]}`);
+});
+```
 
 ### Calculate for Different Timezones
 
@@ -727,7 +949,3 @@ This library is based on traditional Chinese calendar algorithms and astronomica
 - [Documentation](https://github.com/gracefullight/saju#readme)
 - [Issue Tracker](https://github.com/gracefullight/saju/issues)
 - [Discussions](https://github.com/gracefullight/saju/discussions)
-
----
-
-Made by [gracefullight](https://github.com/gracefullight)
