@@ -824,7 +824,15 @@ packages/saju/
 │   │   ├── luxon.ts        # Luxon 어댑터
 │   │   └── date-fns.ts     # date-fns 어댑터
 │   ├── core/               # 핵심 계산 로직
-│   │   └── four-pillars.ts # 메인 알고리즘
+│   │   ├── four-pillars.ts # 사주 팔자 계산
+│   │   ├── ten-gods.ts     # 십신 분석
+│   │   ├── strength.ts     # 신강/신약 판정
+│   │   ├── relations.ts    # 합충형파해 분석
+│   │   ├── luck.ts         # 대운/세운 계산
+│   │   ├── yongshen.ts     # 용신 추출
+│   │   ├── solar-terms.ts  # 절기 계산
+│   │   └── lunar.ts        # 음력 변환
+│   ├── types/              # 타입 정의
 │   ├── __tests__/          # 테스트 스위트
 │   └── index.ts            # 공개 API
 ├── dist/                   # 컴파일된 출력

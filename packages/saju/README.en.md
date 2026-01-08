@@ -602,7 +602,15 @@ packages/saju/
 │   │   ├── luxon.ts        # Luxon adapter
 │   │   └── date-fns.ts     # date-fns adapter
 │   ├── core/               # Core calculation logic
-│   │   └── four-pillars.ts # Main algorithms
+│   │   ├── four-pillars.ts # Four pillars calculation
+│   │   ├── ten-gods.ts     # Ten gods analysis
+│   │   ├── strength.ts     # Strength assessment
+│   │   ├── relations.ts    # Relations analysis
+│   │   ├── luck.ts         # Major/yearly luck
+│   │   ├── yongshen.ts     # Yongshen extraction
+│   │   ├── solar-terms.ts  # Solar terms calculation
+│   │   └── lunar.ts        # Lunar conversion
+│   ├── types/              # Type definitions
 │   ├── __tests__/          # Test suites
 │   └── index.ts            # Public API
 ├── dist/                   # Compiled output
