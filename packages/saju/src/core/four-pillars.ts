@@ -6,7 +6,7 @@ export { STEMS, BRANCHES };
 
 export const STANDARD_PRESET = {
   dayBoundary: "midnight" as const,
-  useMeanSolarTimeForHour: false,
+  useMeanSolarTimeForHour: true,
   useMeanSolarTimeForBoundary: false,
 };
 
