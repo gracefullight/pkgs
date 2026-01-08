@@ -1,20 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { DateTime } from "luxon";
-import { createLuxonAdapter } from "@gracefullight/saju/adapters/luxon";
 import {
-  getSaju,
-  countElements,
-  type SajuResult,
-  type Gender,
-  type StemCombination,
   type BranchSixCombination,
+  countElements,
+  type Gender,
+  getSaju,
+  type SajuResult,
+  type StemCombination,
 } from "@gracefullight/saju";
+import { createLuxonAdapter } from "@gracefullight/saju/adapters/luxon";
+import { DateTime } from "luxon";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 const SEOUL_LONGITUDE = 126.9778;
 
@@ -86,6 +88,7 @@ interface FormData {
 }
 
 export default function HomePage() {
+  const t = useTranslations("HomePage");
   const [formData, setFormData] = useState<FormData>({
     year: "1990",
     month: "1",
@@ -123,7 +126,7 @@ export default function HomePage() {
 
       setResult(sajuResult);
     } catch {
-      setError("사주 계산 중 오류가 발생했습니다.");
+      setError(t("form.error"));
     } finally {
       setLoading(false);
     }
@@ -139,20 +142,23 @@ export default function HomePage() {
     <main className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-2">사주 분석기</h1>
-          <p className="text-muted-foreground">생년월일시와 성별을 입력하여 사주를 분석해보세요</p>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h1 className="text-4xl font-bold text-foreground">{t("title")}</h1>
+            <LanguageSwitcher />
+          </div>
+          <p className="text-muted-foreground">{t("description")}</p>
         </header>
 
         <Card>
           <CardHeader>
-            <CardTitle>생년월일시 입력</CardTitle>
-            <CardDescription>출생 정보를 입력해주세요 (도시: 서울)</CardDescription>
+            <CardTitle>{t("form.submit")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="year">년</Label>
+                  <Label htmlFor="year">{t("form.year")}</Label>
                   <Select
                     id="year"
                     value={formData.year}
@@ -166,7 +172,7 @@ export default function HomePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="month">월</Label>
+                  <Label htmlFor="month">{t("form.month")}</Label>
                   <Select
                     id="month"
                     value={formData.month}
@@ -180,7 +186,7 @@ export default function HomePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="day">일</Label>
+                  <Label htmlFor="day">{t("form.day")}</Label>
                   <Select
                     id="day"
                     value={formData.day}
@@ -194,7 +200,7 @@ export default function HomePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="hour">시</Label>
+                  <Label htmlFor="hour">{t("form.hour")}</Label>
                   <Select
                     id="hour"
                     value={formData.hour}
@@ -202,13 +208,13 @@ export default function HomePage() {
                   >
                     {hours.map((hour) => (
                       <option key={hour} value={hour}>
-                        {hour}시
+                        {hour}
                       </option>
                     ))}
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="minute">분</Label>
+                  <Label htmlFor="minute">{t("form.minute")}</Label>
                   <Select
                     id="minute"
                     value={formData.minute}
@@ -216,7 +222,7 @@ export default function HomePage() {
                   >
                     {minutes.map((minute) => (
                       <option key={minute} value={minute}>
-                        {minute}분
+                        {minute}
                       </option>
                     ))}
                   </Select>
@@ -224,7 +230,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex gap-4 items-center">
-                <Label>성별</Label>
+                <Label>{t("form.gender")}</Label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -240,7 +246,7 @@ export default function HomePage() {
                       }
                       className="w-4 h-4 accent-primary"
                     />
-                    <span>남성</span>
+                    <span>{t("form.male")}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -256,13 +262,13 @@ export default function HomePage() {
                       }
                       className="w-4 h-4 accent-primary"
                     />
-                    <span>여성</span>
+                    <span>{t("form.female")}</span>
                   </label>
                 </div>
               </div>
 
               <Button type="submit" size="lg" disabled={loading}>
-                {loading ? "분석 중..." : "사주 분석하기"}
+                {loading ? t("form.submitting") : t("form.submit")}
               </Button>
             </form>
           </CardContent>
@@ -283,11 +289,13 @@ export default function HomePage() {
 }
 
 function SajuResultDisplay({ result }: { result: SajuResult }) {
+  const t = useTranslations("HomePage");
+
   const pillars = [
-    { label: "년주", value: result.pillars.year },
-    { label: "월주", value: result.pillars.month },
-    { label: "일주", value: result.pillars.day },
-    { label: "시주", value: result.pillars.hour },
+    { label: t("result.year_pillar"), value: result.pillars.year },
+    { label: t("result.month_pillar"), value: result.pillars.month },
+    { label: t("result.day_pillar"), value: result.pillars.day },
+    { label: t("result.hour_pillar"), value: result.pillars.hour },
   ];
 
   const elementCounts = countElements(result.tenGods);
@@ -303,10 +311,14 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>사주 팔자 (四柱八字)</CardTitle>
+          <CardTitle>{t("result.pillars")}</CardTitle>
           <CardDescription>
-            음력: {result.lunar.lunarYear}년 {result.lunar.lunarMonth}월 {result.lunar.lunarDay}일
-            {result.lunar.isLeapMonth && " (윤달)"}
+            {t("result.pillars_desc", {
+              year: result.lunar.lunarYear,
+              month: result.lunar.lunarMonth,
+              day: result.lunar.lunarDay,
+              leap: result.lunar.isLeapMonth ? t("result.leap_month") : "",
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -324,8 +336,10 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>십신 분석</CardTitle>
-          <CardDescription>일간(日干): {result.tenGods.dayMaster}</CardDescription>
+          <CardTitle>{t("result.ten_gods")}</CardTitle>
+          <CardDescription>
+            {t("result.ten_gods_desc", { dayMaster: result.tenGods.dayMaster })}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -333,21 +347,21 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
               <div key={pos} className="bg-muted p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground mb-3 text-center">
                   {pos === "year"
-                    ? "년주"
+                    ? t("result.year_pillar")
                     : pos === "month"
-                      ? "월주"
+                      ? t("result.month_pillar")
                       : pos === "day"
-                        ? "일주"
-                        : "시주"}
+                        ? t("result.day_pillar")
+                        : t("result.hour_pillar")}
                 </p>
                 <div className="space-y-3">
                   <div className="text-center">
-                    <p className="text-xs text-muted-foreground">천간</p>
+                    <p className="text-xs text-muted-foreground">{t("result.heavenly_stem")}</p>
                     <p className="text-xl font-bold">{result.tenGods[pos].stem.tenGod.hanja}</p>
                     <p className="text-sm text-primary">{result.tenGods[pos].stem.tenGod.korean}</p>
                   </div>
                   <div className="text-center border-t pt-2">
-                    <p className="text-xs text-muted-foreground">지지</p>
+                    <p className="text-xs text-muted-foreground">{t("result.earthly_branch")}</p>
                     <div className="space-y-1">
                       {result.tenGods[pos].branch.hiddenStems.map((h) => (
                         <div key={h.stem}>
@@ -366,8 +380,8 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>신강약 판정</CardTitle>
-          <CardDescription>일간의 힘과 에너지 상태</CardDescription>
+          <CardTitle>{t("result.strength")}</CardTitle>
+          <CardDescription>{t("result.strength_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -377,7 +391,7 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">강도 점수:</span>
+                <span className="text-sm text-muted-foreground">{t("result.strength_score")}</span>
                 <span className="font-bold text-lg">{result.strength.score.toFixed(1)}</span>
               </div>
               <p className="text-sm text-muted-foreground">{result.strength.description}</p>
@@ -388,7 +402,7 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>오행 분포</CardTitle>
+          <CardTitle>{t("result.elements")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-5 gap-4">
@@ -407,24 +421,28 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>용신 (用神)</CardTitle>
-          <CardDescription>운세 개선에 도움이 되는 오행</CardDescription>
+          <CardTitle>{t("result.yongshen")}</CardTitle>
+          <CardDescription>{t("result.yongshen_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 bg-accent/20 p-6 rounded-lg text-center">
-              <p className="text-sm text-muted-foreground mb-2">용신 (用神)</p>
+              <p className="text-sm text-muted-foreground mb-2">{t("result.yongshen_primary")}</p>
               <p className={`text-3xl font-bold ${ELEMENT_COLORS[result.yongShen.primary.key]}`}>
                 {result.yongShen.primary.hanja}
               </p>
               <p className={`text-lg ${ELEMENT_COLORS[result.yongShen.primary.key]}`}>
                 {result.yongShen.primary.korean}
               </p>
-              <p className="text-xs text-muted-foreground mt-2">가장 필요한 오행</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {t("result.yongshen_primary_desc")}
+              </p>
             </div>
             {result.yongShen.secondary && (
               <div className="flex-1 bg-muted p-6 rounded-lg text-center">
-                <p className="text-sm text-muted-foreground mb-2">희신 (喜神)</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {t("result.yongshen_secondary")}
+                </p>
                 <p
                   className={`text-3xl font-bold ${ELEMENT_COLORS[result.yongShen.secondary.key]}`}
                 >
@@ -433,13 +451,15 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
                 <p className={`text-lg ${ELEMENT_COLORS[result.yongShen.secondary.key]}`}>
                   {result.yongShen.secondary.korean}
                 </p>
-                <p className="text-xs text-muted-foreground mt-2">용신을 돕는 오행</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t("result.yongshen_secondary_desc")}
+                </p>
               </div>
             )}
           </div>
           <div className="mt-4 p-3 bg-secondary rounded-lg">
             <p className="text-sm">
-              <span className="text-muted-foreground">분석 방법: </span>
+              <span className="text-muted-foreground">{t("result.method")}</span>
               <span className="font-medium">{result.yongShen.method.hanja}</span>
               <span className="text-primary ml-1">({result.yongShen.method.korean})</span>
             </p>
@@ -449,8 +469,8 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>십이운성</CardTitle>
-          <CardDescription>일간의 생명주기 에너지 흐름</CardDescription>
+          <CardTitle>{t("result.twelve_stages")}</CardTitle>
+          <CardDescription>{t("result.twelve_stages_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -458,12 +478,12 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
               <div key={pos} className="bg-muted p-4 rounded-lg text-center">
                 <p className="text-sm text-muted-foreground mb-2">
                   {pos === "year"
-                    ? "년주"
+                    ? t("result.year_pillar")
                     : pos === "month"
-                      ? "월주"
+                      ? t("result.month_pillar")
                       : pos === "day"
-                        ? "일주"
-                        : "시주"}
+                        ? t("result.day_pillar")
+                        : t("result.hour_pillar")}
                 </p>
                 <p className="text-2xl font-bold mb-1">{result.twelveStages[pos].hanja}</p>
                 <p className="text-sm text-primary font-medium mb-2">
@@ -478,10 +498,12 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>대운 (大運)</CardTitle>
+          <CardTitle>{t("result.major_luck")}</CardTitle>
           <CardDescription>
-            대운 시작 나이: {result.majorLuck.startAgeDetail.years}세{" "}
-            {result.majorLuck.startAgeDetail.months}개월
+            {t("result.major_luck_desc", {
+              years: result.majorLuck.startAgeDetail.years,
+              months: result.majorLuck.startAgeDetail.months,
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -501,7 +523,7 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>세운 (歲運)</CardTitle>
+          <CardTitle>{t("result.yearly_luck")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
@@ -518,26 +540,26 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>절기 정보</CardTitle>
+          <CardTitle>{t("result.solar_terms")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-secondary p-4 rounded-lg">
-              <p className="text-sm text-muted-foreground">현재 절기</p>
+              <p className="text-sm text-muted-foreground">{t("result.current_term")}</p>
               <p className="text-xl font-bold">
                 {result.solarTerms.current.korean} ({result.solarTerms.current.hanja})
               </p>
               <p className="text-sm text-muted-foreground">
-                {result.solarTerms.daysSinceCurrent}일 경과
+                {t("result.days_since", { days: result.solarTerms.daysSinceCurrent })}
               </p>
             </div>
             <div className="bg-muted p-4 rounded-lg">
-              <p className="text-sm text-muted-foreground">다음 절기</p>
+              <p className="text-sm text-muted-foreground">{t("result.next_term")}</p>
               <p className="text-xl font-bold">
                 {result.solarTerms.next.korean} ({result.solarTerms.next.hanja})
               </p>
               <p className="text-sm text-muted-foreground">
-                {result.solarTerms.daysUntilNext}일 후
+                {t("result.days_until", { days: result.solarTerms.daysUntilNext })}
               </p>
             </div>
           </div>
@@ -547,21 +569,20 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
       {result.sinsals.matches.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>신살 (神殺)</CardTitle>
-            <CardDescription>사주에서 발견된 특별한 기운</CardDescription>
+            <CardTitle>{t("result.sinsals")}</CardTitle>
+            <CardDescription>{t("result.sinsals_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {result.sinsals.matches.map((sinsal, index) => (
                 <div
                   key={`${sinsal.sinsal.key}-${index}`}
-                  className={`p-3 rounded-lg text-center ${
-                    sinsal.sinsal.type === "auspicious"
-                      ? "bg-green-100 dark:bg-green-900/30"
-                      : sinsal.sinsal.type === "inauspicious"
-                        ? "bg-red-100 dark:bg-red-900/30"
-                        : "bg-muted"
-                  }`}
+                  className={`p-3 rounded-lg text-center ${sinsal.sinsal.type === "auspicious"
+                    ? "bg-green-100 dark:bg-green-900/30"
+                    : sinsal.sinsal.type === "inauspicious"
+                      ? "bg-red-100 dark:bg-red-900/30"
+                      : "bg-muted"
+                    }`}
                 >
                   <p className="text-xl font-bold mb-1">{sinsal.sinsal.hanja}</p>
                   <p className="text-sm text-primary font-medium">{sinsal.sinsal.korean}</p>
@@ -574,20 +595,22 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
       )}
 
       {stemCombinations.length > 0 ||
-      branchSixCombinations.length > 0 ||
-      result.relations.clashes.length > 0 ? (
+        branchSixCombinations.length > 0 ||
+        result.relations.clashes.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>합충 관계</CardTitle>
+            <CardTitle>{t("result.relations")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {stemCombinations.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">천간합</p>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  {t("result.stem_combine")}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {stemCombinations.map((combo, index) => (
                     <span
-                      key={index}
+                      key={`${combo.pair.join("-")}-${index}`}
                       className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
                     >
                       {combo.pair[0]}-{combo.pair[1]}
@@ -598,11 +621,13 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
             )}
             {branchSixCombinations.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">육합</p>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  {t("result.branch_six_combine")}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {branchSixCombinations.map((combo, index) => (
                     <span
-                      key={index}
+                      key={`${combo.pair.join("-")}-${index}`}
                       className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
                     >
                       {combo.pair[0]}-{combo.pair[1]}
@@ -613,11 +638,13 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
             )}
             {result.relations.clashes.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">충</p>
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  {t("result.clash")}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {result.relations.clashes.map((clash, index) => (
                     <span
-                      key={index}
+                      key={`${clash.pair.join("-")}-${index}`}
                       className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm"
                     >
                       {clash.pair[0]}-{clash.pair[1]}
