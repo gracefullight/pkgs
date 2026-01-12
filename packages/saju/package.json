@@ -49,6 +49,9 @@
     "url": "http://github.com/gracefullight/workspace/packages/saju"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "date-fns": "^4.0.0",
     "date-fns-tz": "^3.0.0",

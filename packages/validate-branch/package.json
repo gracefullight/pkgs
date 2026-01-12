@@ -42,6 +42,9 @@
     "url": "http://github.com/gracefullight/workspace/packages/validate-branch"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^24.10.4",
     "tsup": "^8.5.1",
