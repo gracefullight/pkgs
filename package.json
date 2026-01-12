@@ -1,7 +1,15 @@
 {
-  "name": "@gracefullight/saju-workspace",
+  "name": "@gracefullight/workspace",
   "version": "0.0.0",
   "private": true,
+  "author": {
+    "name": "Eunkwang Shin",
+    "email": "gracefullight.dev@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gracefullight/workspace.git"
+  },
   "scripts": {
     "build": "pnpm -r build",
     "lint": "biome check .",

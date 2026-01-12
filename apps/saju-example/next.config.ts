@@ -8,8 +8,8 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: isProd ? "/saju" : "",
-  assetPrefix: isProd ? "/saju/" : "",
+  basePath: isProd ? "/workspace/saju-example" : "",
+  assetPrefix: isProd ? "/workspace/saju-example/" : "",
   images: {
     unoptimized: true,
   },

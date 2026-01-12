@@ -1,6 +1,6 @@
-# Saju Monorepo
+# Gracefullight TypeScript Monorepo
 
-> TypeScript packages for Korean/Chinese Four Pillars (Saju) astrology
+> Gracefullight's TypeScript packages monorepo
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -10,66 +10,14 @@
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| [@gracefullight/saju](./packages/saju) | Core Saju calculation library | [![npm](https://img.shields.io/npm/v/@gracefullight/saju.svg)](https://www.npmjs.com/package/@gracefullight/saju) |
+| [@gracefullight/saju](./packages/saju) | Korean/Chinese Four Pillars (Saju) calculation library | [![npm](https://img.shields.io/npm/v/@gracefullight/saju.svg)](https://www.npmjs.org/package/@gracefullight/saju) |
+| [@gracefullight/validate-branch](./packages/validate-branch) | Git branch name validation tool with custom regexp support | [![npm](https://img.shields.io/npm/v/@gracefullight/validate-branch.svg)](https://www.npmjs.org/package/@gracefullight/validate-branch) |
 
-## Key Features
+## Demo
 
-### @gracefullight/saju
+- **[Saju Example](https://gracefullight.dev/workspace/saju-example/)** - Next.js example app
 
-- **Accurate Four Pillars Calculation** - Traditional Chinese calendar algorithms with astronomical precision
-- **Flexible Date Adapters** - Use Luxon, date-fns, or your preferred date library
-- **Ten Gods Analysis** - Detailed ten gods and five elements distribution including hidden stems
-- **Strength Analysis** - 9-level day master strength evaluation
-- **Relationships** - Stems combinations, six combinations, triple combinations, clashes, harms, punishments
-- **Luck Cycles** - Major luck, yearly luck, monthly luck, daily luck based on solar terms
-- **Twelve Life Stages** - Long life to nurturing 12-stage life cycle analysis
-- **Sinsals (Spirit Stars)** - 16 types including Peach Blossom, Sky Horse, Sky Noble
-- **Yongshen Extraction** - Useful god recommendation following proper methodology
-- **Solar Terms** - 24 solar terms information and elapsed days
 
-## Quick Start
-
-```bash
-pnpm add @gracefullight/saju luxon @types/luxon
-```
-
-```typescript
-import { DateTime } from "luxon";
-import { createLuxonAdapter } from "@gracefullight/saju/adapters/luxon";
-import { getSaju } from "@gracefullight/saju";
-
-const adapter = await createLuxonAdapter();
-
-const result = getSaju(adapter, DateTime.fromObject(
-  { year: 2000, month: 1, day: 1, hour: 18, minute: 0 },
-  { zone: "Asia/Seoul" }
-), {
-  gender: "male",
-});
-
-console.log(result.pillars);      // Four Pillars
-console.log(result.tenGods);      // Ten Gods analysis
-console.log(result.strength);     // Day master strength
-console.log(result.twelveStages); // Twelve life stages
-console.log(result.sinsals);      // Spirit stars
-console.log(result.yongShen);     // Useful god
-```
-
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Run tests
-pnpm test
-
-# Build
-pnpm build
-
-# Lint
-pnpm lint
-```
 
 ## License
 
