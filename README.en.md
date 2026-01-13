@@ -12,6 +12,7 @@
 |---------|-------------|---------|
 | [@gracefullight/saju](./packages/saju) | Korean/Chinese Four Pillars (Saju) calculation library | [![npm](https://img.shields.io/npm/v/@gracefullight/saju.svg)](https://www.npmjs.org/package/@gracefullight/saju) |
 | [@gracefullight/validate-branch](./packages/validate-branch) | Git branch name validation tool with custom regexp support | [![npm](https://img.shields.io/npm/v/@gracefullight/validate-branch.svg)](https://www.npmjs.org/package/@gracefullight/validate-branch) |
+| [create-fullstack-starter](./packages/create-fullstack-starter) | Fullstack Starter template CLI | [![npm](https://img.shields.io/npm/v/create-fullstack-starter.svg)](https://www.npmjs.org/package/create-fullstack-starter) |
 
 ## Demo
 

@@ -12,6 +12,7 @@
 |--------|------|------|
 | [@gracefullight/saju](./packages/saju) | 사주명리 계산 라이브러리 | [![npm](https://img.shields.io/npm/v/@gracefullight/saju.svg)](https://www.npmjs.org/package/@gracefullight/saju) |
 | [@gracefullight/validate-branch](./packages/validate-branch) | Git 브랜치 이름 유효성 검사 도구 | [![npm](https://img.shields.io/npm/v/@gracefullight/validate-branch.svg)](https://www.npmjs.org/package/@gracefullight/validate-branch) |
+| [create-fullstack-starter](./packages/create-fullstack-starter) | Fullstack Starter 템플릿 CLI | [![npm](https://img.shields.io/npm/v/create-fullstack-starter.svg)](https://www.npmjs.org/package/create-fullstack-starter) |
 
 ## 데모
 
