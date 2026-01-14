@@ -1,5 +1,5 @@
 {
-  "name": "@gracefullight/ts-workspace",
+  "name": "@gracefullight/pkgs",
   "version": "0.0.0",
   "private": true,
   "author": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gracefullight/ts-workspace.git"
+    "url": "git+https://github.com/gracefullight/pkgs.git"
   },
   "scripts": {
     "build": "pnpm -r build",

@@ -39,12 +39,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gracefullight/ts-workspace.git",
+    "url": "https://github.com/gracefullight/pkgs.git",
     "directory": "packages/validate-branch"
   },
-  "homepage": "https://github.com/gracefullight/ts-workspace/tree/main/packages/validate-branch#readme",
+  "homepage": "https://github.com/gracefullight/pkgs/tree/main/packages/validate-branch#readme",
   "bugs": {
-    "url": "https://github.com/gracefullight/ts-workspace/issues"
+    "url": "https://github.com/gracefullight/pkgs/issues"
   },
   "license": "MIT",
   "funding": {

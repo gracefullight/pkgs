@@ -1,17 +1,17 @@
 # @gracefullight/saju
 
-## [1.1.0](https://github.com/gracefullight/ts-workspace/compare/@gracefullight/saju@1.0.1...@gracefullight/saju@1.1.0) (2026-01-14)
+## [1.1.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.0.1...@gracefullight/saju@1.1.0) (2026-01-14)
 
 
 ### Features
 
-* add GitHub Sponsors funding link to npm packages ([c68dfee](https://github.com/gracefullight/ts-workspace/commit/c68dfeebe02e4b3e2cc2aaaaec525b8037edb6d1))
+* add GitHub Sponsors funding link to npm packages ([c68dfee](https://github.com/gracefullight/pkgs/commit/c68dfeebe02e4b3e2cc2aaaaec525b8037edb6d1))
 
 ## 1.0.1
 
 ### Patch Changes
 
-- f92a4ad: chore: rename repository from workspace to ts-workspace
+- f92a4ad: chore: rename repository from workspace to pkgs
 
 ## 1.0.0
 
