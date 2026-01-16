@@ -6,7 +6,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --base-href /pkgs/ng-daum-address-example/ && rm -rf out && mv dist/ng-daum-address-example/browser out",
     "test": "vitest"
   },
   "dependencies": {
