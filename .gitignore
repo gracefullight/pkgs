@@ -8,3 +8,6 @@ coverage
 .dart_tool/
 .packages
 pubspec.lock
+
+# Local env files
+.env
