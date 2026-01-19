@@ -1,43 +1,65 @@
-name: Deploy MCP Cafe24 Callback to Vercel
+name: Deploy Vercel (mcp-cafe24-admin-example)
 
 on:
   push:
     branches: [main]
     paths:
       - "apps/mcp-cafe24-admin-example/**"
-      - ".github/workflows/vercel.yml"
-  workflow_dispatch:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+  pull_request:
+    paths:
+      - "apps/mcp-cafe24-admin-example/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+
+concurrency:
+  group: vercel-cafe24-admin-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     env:
+      APP_DIR: apps/mcp-cafe24-admin-example
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CAFE24_ADMIN_EXAMPLE }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: "10.0.0"
+          version: 10
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          cache: "pnpm"
+          node-version: 24
+          cache: pnpm
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - name: Install dependencies (workspace)
+        run: pnpm -w install --frozen-lockfile
 
-      - name: Pull Vercel environment
-        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+      - name: Vercel Pull
+        run: |
+          npx vercel pull --yes \
+            --environment=${{ github.ref_name == 'main' && 'production' || 'preview' }} \
+            --cwd $APP_DIR \
+            --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Vercel project
-        run: vercel build --prod --token=$VERCEL_TOKEN
+      - name: Vercel Build
+        run: |
+          npx vercel build \
+            ${{ github.ref_name == 'main' && '--prod' || '' }} \
+            --cwd $APP_DIR \
+            --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+      - name: Vercel Deploy
+        run: |
+          npx vercel deploy --prebuilt \
+            ${{ github.ref_name == 'main' && '--prod' || '' }} \
+            --cwd $APP_DIR \
+            --token=${{ secrets.VERCEL_TOKEN }}
