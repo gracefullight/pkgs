@@ -1,5 +1,6 @@
 {
   "version": 2,
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm build"
+  "buildCommand": "pnpm build",
+  "workingDirectory": "apps/mcp-cafe24-admin-example"
 }
