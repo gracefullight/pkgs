@@ -1,4 +1,4 @@
-name: Deploy Vercel (mcp-cafe24-admin-example)
+name: Deploy Vercel
 
 on:
   push:
