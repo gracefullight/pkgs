@@ -36,6 +36,11 @@ jobs:
       - name: Install dependencies (workspace)
         run: pnpm -w install --frozen-lockfile
 
+      - name: Debug Vercel Project
+        run: |
+          echo "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID"
+          echo "VERCEL_ORG_ID=$VERCEL_ORG_ID"
+
       - name: Vercel Pull
         run: |
           npx vercel pull --yes \
