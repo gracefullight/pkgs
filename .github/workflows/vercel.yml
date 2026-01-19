@@ -38,8 +38,8 @@ jobs:
 
       - name: Debug Vercel Project
         run: |
-          echo "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID"
-          echo "VERCEL_ORG_ID=$VERCEL_ORG_ID"
+          echo "VERCEL_PROJECT_ID=${VERCEL_PROJECT_ID:0:4}****"
+          echo "VERCEL_ORG_ID=${VERCEL_ORG_ID:0:4}****"
 
       - name: Vercel Pull
         run: |
