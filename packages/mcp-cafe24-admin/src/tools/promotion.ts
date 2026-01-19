@@ -1,0 +1,140 @@
+import { z } from "zod";
+import { handleApiError, makeApiRequest } from "../services/api-client.js";
+
+export const CouponsSearchParamsSchema = z
+  .object({
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20)
+      .describe("Maximum results to return (1-100)"),
+    offset: z.number().int().min(0).default(0).describe("Number of results to skip"),
+    benefit_no: z.number().optional().describe("Filter by benefit number"),
+  })
+  .strict();
+
+export const CouponDetailParamsSchema = z
+  .object({
+    coupon_no: z.string().describe("Coupon number"),
+  })
+  .strict();
+
+export const CouponCreateParamsSchema = z
+  .object({
+    benefit_no: z.number().describe("Benefit number"),
+    coupon_no: z.string().describe("Coupon number"),
+    coupon_type: z
+      .enum(["D", "P", "B", "C", "E", "F", "G"])
+      .describe("Coupon type: D=Discount, P=Percent, etc."),
+    coupon_name: z.string().describe("Coupon name"),
+    apply_method: z.string().describe("Application method"),
+    valid_start_date: z.string().describe("Validity start date (YYYY-MM-DD)"),
+    valid_end_date: z.string().describe("Validity end date (YYYY-MM-DD)"),
+    discount_value: z.number().describe("Discount value"),
+    issue_limit: z.number().optional().describe("Maximum issuance count"),
+  })
+  .strict();
+
+export async function cafe24_list_coupons(params: z.infer<typeof CouponsSearchParamsSchema>) {
+  try {
+    const data = await makeApiRequest("/admin/benefits", "GET", undefined, {
+      limit: params.limit,
+      offset: params.offset,
+      ...(params.benefit_no ? { benefit_no: params.benefit_no } : {}),
+    });
+
+    const benefits = data.benefits || [];
+    const total = data.total || 0;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `Found ${total} benefits/coupons (showing ${benefits.length})\n\n` +
+            benefits
+              .map(
+                (b: any) =>
+                  `## ${b.benefit_name || "Benefit"}\n` + `- **Benefit No**: ${b.benefit_no}\n`,
+              )
+              .join(""),
+        },
+      ],
+      structuredContent: {
+        total,
+        count: benefits.length,
+        offset: params.offset,
+        benefits: benefits.map((b: any) => ({
+          id: b.benefit_no.toString(),
+          name: b.benefit_name,
+        })),
+        has_more: total > params.offset + benefits.length,
+        ...(total > params.offset + benefits.length
+          ? {
+              next_offset: params.offset + benefits.length,
+            }
+          : {}),
+      },
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text" as const, text: handleApiError(error) }],
+    };
+  }
+}
+
+export async function cafe24_get_coupon(params: z.infer<typeof CouponDetailParamsSchema>) {
+  try {
+    const data = await makeApiRequest(`/admin/coupons/${params.coupon_no}`, "GET");
+    const coupon = data.coupon || {};
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `Coupon Details\n\n` +
+            `- **Coupon No**: ${coupon.coupon_no}\n` +
+            `- **Coupon Name**: ${coupon.coupon_name}\n`,
+        },
+      ],
+      structuredContent: {
+        id: coupon.coupon_no,
+        name: coupon.coupon_name,
+      },
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text" as const, text: handleApiError(error) }],
+    };
+  }
+}
+
+export async function cafe24_create_coupon(params: z.infer<typeof CouponCreateParamsSchema>) {
+  try {
+    const data = await makeApiRequest("/admin/coupons", "POST", params);
+    const coupon = data.coupon || {};
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `Coupon created successfully\n\n` +
+            `- **Coupon No**: ${coupon.coupon_no}\n` +
+            `- **Coupon Name**: ${coupon.coupon_name}\n`,
+        },
+      ],
+      structuredContent: {
+        id: coupon.coupon_no,
+        name: coupon.coupon_name,
+      },
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text" as const, text: handleApiError(error) }],
+    };
+  }
+}
