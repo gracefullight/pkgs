@@ -12,6 +12,16 @@ const UsersSearchParamsSchema = z
       .default(20)
       .describe("Maximum results to return (1-100)"),
     offset: z.number().int().min(0).default(0).describe("Number of results to skip"),
+    search_type: z.enum(["member_id", "name"]).optional().describe("Search type"),
+    keyword: z.string().optional().describe("Search keyword"),
+    admin_type: z.enum(["P", "A"]).optional().describe("Admin type: P=Principal, A=Sub-admin"),
+  })
+  .strict();
+
+const UserDetailParamsSchema = z
+  .object({
+    user_id: z.string().describe("User ID"),
+    shop_no: z.number().int().min(1).default(1).describe("Shop number"),
   })
   .strict();
 
@@ -47,11 +57,20 @@ const StoreUpdateParamsSchema = z
   })
   .strict();
 
+const StoreAccountsParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
 async function cafe24_list_users(params: z.infer<typeof UsersSearchParamsSchema>) {
   try {
     const data = await makeApiRequest("/admin/users", "GET", undefined, {
       limit: params.limit,
       offset: params.offset,
+      search_type: params.search_type,
+      keyword: params.keyword,
+      admin_type: params.admin_type,
     });
 
     const users = data.users || [];
@@ -66,7 +85,11 @@ async function cafe24_list_users(params: z.infer<typeof UsersSearchParamsSchema>
             users
               .map(
                 (u: any) =>
-                  `## ${u.user_name || u.member_id} (${u.user_id})\n- **Email**: ${u.email}\n- **Group**: ${u.group || "N/A"}\n- **Status**: ${u.status}\n`,
+                  `## ${u.user_name} (${u.user_id})\n` +
+                  `- **Type**: ${u.admin_type === "P" ? "Principal" : "Sub-admin"}\n` +
+                  `- **Email**: ${u.email}\n` +
+                  `- **Last Login**: ${u.last_login_date || "Never"}\n` +
+                  `- **IP Restriction**: ${u.ip_restriction_type === "A" ? "Active" : "Inactive"}\n`,
               )
               .join(""),
         },
@@ -75,18 +98,43 @@ async function cafe24_list_users(params: z.infer<typeof UsersSearchParamsSchema>
         total,
         count: users.length,
         offset: params.offset,
-        users: users.map((u: any) => ({
-          id: u.user_id,
-          name: u.user_name,
-          email: u.email,
-          group: u.group,
-          status: u.status,
-        })),
+        users: users,
         has_more: total > params.offset + users.length,
         ...(total > params.offset + users.length
           ? { next_offset: params.offset + users.length }
           : {}),
       },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_get_user_detail(params: z.infer<typeof UserDetailParamsSchema>) {
+  try {
+    const data = await makeApiRequest(`/admin/users/${params.user_id}`, "GET", undefined, {
+      shop_no: params.shop_no,
+    });
+    const user = data.user || {};
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## User Details: ${user.user_name} (${user.user_id})\n\n` +
+            `- **Shop No**: ${user.shop_no}\n` +
+            `- **Type**: ${user.admin_type === "P" ? "Principal" : "Sub-admin"}\n` +
+            `- **Nickname**: ${user.nick_name || "N/A"}\n` +
+            `- **Mobile**: ${user.phone}\n` +
+            `- **Email**: ${user.email}\n` +
+            `- **Available**: ${user.available === "T" ? "Yes" : "No"}\n` +
+            `- **Memo**: ${user.memo || ""}\n` +
+            `- **Multishop Access**: ${user.multishop_access_authority === "T" ? "Yes" : "No"}\n` +
+            `- **IP Access Restriction**: ${user.ip_access_restriction?.usage === "T" ? "Yes" : "No"}\n`,
+        },
+      ],
+      structuredContent: user,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
@@ -149,21 +197,23 @@ async function cafe24_get_store(params: z.infer<typeof StoreDetailParamsSchema>)
         {
           type: "text" as const,
           text:
-            `Store Details\n\n` +
-            `- **Mall ID**: ${store.mall_id}\n` +
-            `- **Mall Name**: ${store.mall_name}\n` +
-            `- **Shop No**: ${store.shop_no}\n` +
-            `- **Currency**: ${store.currency_code}\n` +
-            `- **Currency Symbol**: ${store.currency_symbol}\n`,
+            `Store Details (Shop #${store.shop_no})\n\n` +
+            `- **Mall Name**: ${store.mall_name} (${store.mall_id})\n` +
+            `- **Company**: ${store.company_name} (Reg: ${store.company_registration_no})\n` +
+            `- **President**: ${store.president_name}\n` +
+            `- **Base Domain**: ${store.base_domain}\n` +
+            `- **Primary Domain**: ${store.primary_domain || "N/A"}\n` +
+            `- **Email**: ${store.email}\n` +
+            `- **Phone**: ${store.phone} (CS: ${store.customer_service_phone})\n` +
+            `- **Address**: ${store.address1} ${store.address2}\n` +
+            `- **Categories**: ${
+              Array.isArray(store.sales_product_categories)
+                ? store.sales_product_categories.join(", ")
+                : "N/A"
+            }\n`,
         },
       ],
-      structuredContent: {
-        mall_id: store.mall_id,
-        mall_name: store.mall_name,
-        shop_no: store.shop_no,
-        currency_code: store.currency_code,
-        currency_symbol: store.currency_symbol,
-      },
+      structuredContent: store,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
@@ -198,13 +248,50 @@ async function cafe24_update_store(params: z.infer<typeof StoreUpdateParamsSchem
   }
 }
 
+async function cafe24_get_store_accounts(params: z.infer<typeof StoreAccountsParamsSchema>) {
+  try {
+    const queryParams: Record<string, any> = {};
+    if (params.shop_no) {
+      queryParams.shop_no = params.shop_no;
+    }
+
+    const data = await makeApiRequest("/admin/store/accounts", "GET", undefined, queryParams);
+    const accounts = data.accounts || [];
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Store Bank Accounts (Shop #${params.shop_no || 1})\n\n` +
+            accounts
+              .map(
+                (account: any) =>
+                  `### ${account.bank_name} (${account.bank_code})\n` +
+                  `- **Account Number**: ${account.bank_account_no}\n` +
+                  `- **Holder**: ${account.bank_account_holder}\n` +
+                  `- **Use Account**: ${account.use_account === "T" ? "Enabled" : "Disabled"}\n`,
+              )
+              .join("\n"),
+        },
+      ],
+      structuredContent: {
+        shop_no: params.shop_no ?? 1,
+        accounts: accounts,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 export function registerTools(server: McpServer): void {
   server.registerTool(
     "cafe24_list_users",
     {
       title: "List Cafe24 Admin Users",
       description:
-        "Retrieve a list of admin users in Cafe24. Returns user details including ID, name, email, group, and status. Supports pagination and filtering by member ID, email, or name.",
+        "Retrieve a list of admin users. Supports filtering by admin_type (P: Principal, A: Sub), search_type (member_id, name), and keyword.",
       inputSchema: UsersSearchParamsSchema,
       annotations: {
         readOnlyHint: true,
@@ -214,6 +301,23 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_list_users,
+  );
+
+  server.registerTool(
+    "cafe24_get_user_detail",
+    {
+      title: "Get Cafe24 Admin User Details",
+      description:
+        "Retrieve detailed information about a specific admin user, including permissions and access settings.",
+      inputSchema: UserDetailParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_user_detail,
   );
 
   server.registerTool(
@@ -265,5 +369,21 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_update_store,
+  );
+
+  server.registerTool(
+    "cafe24_get_store_accounts",
+    {
+      title: "Get Cafe24 Store Bank Accounts",
+      description: "Retrieve list of bank accounts registered for the shop.",
+      inputSchema: StoreAccountsParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_store_accounts,
   );
 }

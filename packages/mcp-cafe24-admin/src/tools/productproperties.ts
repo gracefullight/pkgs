@@ -1,0 +1,163 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import { handleApiError, makeApiRequest } from "../services/api-client.js";
+
+const ProductPropertiesParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
+const TextStyleSchema = z.object({
+  use: z.enum(["T", "F"]).optional().describe("Use text style: T=Yes, F=No"),
+  color: z.string().optional().describe("Text color (Hex code, e.g. #999999)"),
+  font_size: z.union([z.string(), z.number()]).optional().describe("Font size (e.g. 12 or '12')"),
+  font_type: z
+    .enum(["N", "B", "I", "D"])
+    .optional()
+    .describe("Font type: N=Normal, B=Bold, I=Italic, D=Bold Italic"),
+});
+
+const ProductPropertiesUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+    strikethrough_retail_price: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Strikethrough retail price: T=Yes, F=No"),
+    strikethrough_price: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Strikethrough selling price: T=Yes, F=No"),
+    product_tax_type_text: TextStyleSchema.optional().describe("Tax amount display text style"),
+    product_discount_price_text: TextStyleSchema.optional().describe(
+      "Discount price display text style",
+    ),
+    optimum_discount_price_text: TextStyleSchema.optional().describe(
+      "Optimum discount price display text style",
+    ),
+  })
+  .strict();
+
+async function cafe24_get_product_properties_setting(
+  params: z.infer<typeof ProductPropertiesParamsSchema>,
+) {
+  try {
+    const queryParams: Record<string, any> = {};
+    if (params.shop_no) {
+      queryParams.shop_no = params.shop_no;
+    }
+
+    const data = await makeApiRequest(
+      "/admin/products/properties/setting",
+      "GET",
+      undefined,
+      queryParams,
+    );
+    const product = data.product || data;
+
+    const formatTextStyle = (style: any) => {
+      if (!style) return "N/A";
+      return `Use: ${style.use}, Color: ${style.color}, Size: ${style.font_size}, Type: ${style.font_type}`;
+    };
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Product Properties Settings (Shop #${product.shop_no || 1})\n\n` +
+            `- **Strikethrough Retail Price**: ${product.strikethrough_retail_price === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Strikethrough Selling Price**: ${product.strikethrough_price === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Tax Text Style**: ${formatTextStyle(product.product_tax_type_text)}\n` +
+            `- **Discount Text Style**: ${formatTextStyle(product.product_discount_price_text)}\n` +
+            `- **Optimum Discount Text Style**: ${formatTextStyle(product.optimum_discount_price_text)}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: product.shop_no ?? 1,
+        strikethrough_retail_price: product.strikethrough_retail_price,
+        strikethrough_price: product.strikethrough_price,
+        product_tax_type_text: product.product_tax_type_text,
+        product_discount_price_text: product.product_discount_price_text,
+        optimum_discount_price_text: product.optimum_discount_price_text,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_update_product_properties_setting(
+  params: z.infer<typeof ProductPropertiesUpdateParamsSchema>,
+) {
+  try {
+    const { shop_no, ...settings } = params;
+
+    const requestBody: Record<string, any> = {
+      shop_no: shop_no ?? 1,
+      request: settings,
+    };
+
+    const data = await makeApiRequest("/admin/products/properties/setting", "PUT", requestBody);
+    const product = data.product || data;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Product Properties Settings Updated (Shop #${product.shop_no || 1})\n\n` +
+            `- **Strikethrough Retail Price**: ${product.strikethrough_retail_price === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Strikethrough Selling Price**: ${product.strikethrough_price === "T" ? "Enabled" : "Disabled"}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: product.shop_no ?? 1,
+        strikethrough_retail_price: product.strikethrough_retail_price,
+        strikethrough_price: product.strikethrough_price,
+        product_tax_type_text: product.product_tax_type_text,
+        product_discount_price_text: product.product_discount_price_text,
+        optimum_discount_price_text: product.optimum_discount_price_text,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+export function registerTools(server: McpServer): void {
+  server.registerTool(
+    "cafe24_get_product_properties_setting",
+    {
+      title: "Get Cafe24 Product Properties Settings",
+      description:
+        "Retrieve product display property settings, including strikethrough prices and text styles for tax and discount amounts.",
+      inputSchema: ProductPropertiesParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_product_properties_setting,
+  );
+
+  server.registerTool(
+    "cafe24_update_product_properties_setting",
+    {
+      title: "Update Cafe24 Product Properties Settings",
+      description:
+        "Update product display property settings. Configure strikethrough options for retail/selling prices and customize text styles (color, size, font type) for tax, discount, and optimum discount amounts.",
+      inputSchema: ProductPropertiesUpdateParamsSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    cafe24_update_product_properties_setting,
+  );
+}

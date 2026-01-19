@@ -1,0 +1,167 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import { handleApiError, makeApiRequest } from "../services/api-client.js";
+
+const CartSettingParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
+const CartSettingUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+    wishlist_display: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Display wishlist in cart: T=Yes, F=No"),
+    add_action_type: z
+      .enum(["M", "S"])
+      .optional()
+      .describe("Action after adding to cart: M=Go to cart page, S=Show selection popup"),
+    cart_item_direct_purchase: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Allow direct purchase from cart: T=Yes, F=No"),
+    storage_period: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Enable cart storage period: T=Yes, F=No"),
+    period: z
+      .enum(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "30"])
+      .optional()
+      .describe("Cart storage period in days: 1-10, 14, or 30"),
+    icon_display: z.enum(["T", "F"]).optional().describe("Display add to cart icon: T=Yes, F=No"),
+    cart_item_option_change: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Allow option change in cart: T=Yes, F=No"),
+    discount_display: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Display discount amount in cart: T=Yes, F=No"),
+  })
+  .strict();
+
+async function cafe24_get_cart_setting(params: z.infer<typeof CartSettingParamsSchema>) {
+  try {
+    const queryParams: Record<string, any> = {};
+    if (params.shop_no) {
+      queryParams.shop_no = params.shop_no;
+    }
+
+    const data = await makeApiRequest("/admin/carts/setting", "GET", undefined, queryParams);
+    const cart = data.cart || data;
+
+    const actionTypeMap: Record<string, string> = {
+      M: "Go to cart page",
+      S: "Show selection popup",
+    };
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Cart Settings (Shop #${cart.shop_no || 1})\n\n` +
+            `- **Wishlist Display**: ${cart.wishlist_display === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Add Action Type**: ${actionTypeMap[cart.add_action_type] || cart.add_action_type}\n` +
+            `- **Direct Purchase**: ${cart.cart_item_direct_purchase === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Storage Period**: ${cart.storage_period === "T" ? `${cart.period} days` : "Not set"}\n` +
+            `- **Icon Display**: ${cart.icon_display === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Option Change**: ${cart.cart_item_option_change === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Discount Display**: ${cart.discount_display === "T" ? "Enabled" : "Disabled"}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: cart.shop_no ?? 1,
+        wishlist_display: cart.wishlist_display,
+        add_action_type: cart.add_action_type,
+        cart_item_direct_purchase: cart.cart_item_direct_purchase,
+        storage_period: cart.storage_period,
+        period: cart.period,
+        icon_display: cart.icon_display,
+        cart_item_option_change: cart.cart_item_option_change,
+        discount_display: cart.discount_display,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_update_cart_setting(params: z.infer<typeof CartSettingUpdateParamsSchema>) {
+  try {
+    const { shop_no, ...settings } = params;
+
+    const requestBody: Record<string, any> = {
+      shop_no: shop_no ?? 1,
+      request: settings,
+    };
+
+    const data = await makeApiRequest("/admin/carts/setting", "PUT", requestBody);
+    const cart = data.cart || data;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Cart Settings Updated (Shop #${cart.shop_no || 1})\n\n` +
+            `- **Wishlist Display**: ${cart.wishlist_display === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Storage Period**: ${cart.storage_period === "T" ? `${cart.period} days` : "Not set"}\n` +
+            `- **Discount Display**: ${cart.discount_display === "T" ? "Enabled" : "Disabled"}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: cart.shop_no ?? 1,
+        wishlist_display: cart.wishlist_display,
+        add_action_type: cart.add_action_type,
+        cart_item_direct_purchase: cart.cart_item_direct_purchase,
+        storage_period: cart.storage_period,
+        period: cart.period,
+        icon_display: cart.icon_display,
+        cart_item_option_change: cart.cart_item_option_change,
+        discount_display: cart.discount_display,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+export function registerTools(server: McpServer): void {
+  server.registerTool(
+    "cafe24_get_cart_setting",
+    {
+      title: "Get Cafe24 Cart Settings",
+      description:
+        "Retrieve cart settings including wishlist display, add action type, direct purchase, storage period, icon display, option change, and discount display.",
+      inputSchema: CartSettingParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_cart_setting,
+  );
+
+  server.registerTool(
+    "cafe24_update_cart_setting",
+    {
+      title: "Update Cafe24 Cart Settings",
+      description:
+        "Update cart settings including wishlist display, add action type (M=go to cart, S=selection popup), direct purchase, storage period (1-10, 14, or 30 days), icon display, option change, and discount display.",
+      inputSchema: CartSettingUpdateParamsSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    cafe24_update_cart_setting,
+  );
+}

@@ -32,6 +32,25 @@ const OrderUpdateStatusParamsSchema = z
   })
   .strict();
 
+const OrderStatusSearchParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).default(1).describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
+const OrderStatusRequestSchema = z.object({
+  status_name_id: z.number().int().describe("Status name ID"),
+  custom_name: z.string().optional().describe("Custom status name"),
+  reservation_custom_name: z.string().optional().describe("Custom reservation status name"),
+});
+
+const OrderStatusUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).default(1).describe("Multi-shop number (default: 1)"),
+    requests: z.array(OrderStatusRequestSchema).describe("List of status updates"),
+  })
+  .strict();
+
 async function cafe24_list_orders(params: z.infer<typeof OrdersSearchParamsSchema>) {
   try {
     const data = await makeApiRequest("/admin/orders", "GET", undefined, {
@@ -152,6 +171,72 @@ async function cafe24_update_order_status(params: z.infer<typeof OrderUpdateStat
   }
 }
 
+async function cafe24_list_order_statuses(params: z.infer<typeof OrderStatusSearchParamsSchema>) {
+  try {
+    const data = await makeApiRequest("/admin/orders/status", "GET", undefined, {
+      shop_no: params.shop_no,
+    });
+    const statuses = data.status || [];
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `Found ${statuses.length} order statuses\n\n` +
+            statuses
+              .map(
+                (s: any) =>
+                  `## ${s.basic_name} (${s.status_name_id})\n` +
+                  `- **Type**: ${s.status_type}\n` +
+                  `- **Custom Name**: ${s.custom_name || "N/A"}\n` +
+                  `- **Reservation Name**: ${s.reservation_custom_name || "N/A"}\n`,
+              )
+              .join("\n"),
+        },
+      ],
+      structuredContent: {
+        count: statuses.length,
+        statuses: statuses.map((s: any) => ({
+          id: s.status_name_id,
+          type: s.status_type,
+          basic_name: s.basic_name,
+          custom_name: s.custom_name,
+          reservation_custom_name: s.reservation_custom_name,
+        })),
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_update_order_statuses(params: z.infer<typeof OrderStatusUpdateParamsSchema>) {
+  try {
+    const { shop_no, requests } = params;
+    const data = await makeApiRequest("/admin/orders/status", "PUT", {
+      shop_no,
+      requests,
+    });
+    const statuses = data.status || [];
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Updated ${statuses.length} order statuses successfully.`,
+        },
+      ],
+      structuredContent: {
+        count: statuses.length,
+        statuses: statuses,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 export function registerTools(server: McpServer): void {
   server.registerTool(
     "cafe24_list_orders",
@@ -202,5 +287,39 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_update_order_status,
+  );
+
+  server.registerTool(
+    "cafe24_list_order_statuses",
+    {
+      title: "List Cafe24 Order Statuses",
+      description:
+        "Retrieve a list of order status definitions from Cafe24. Returns details including status ID, type, basic name, custom name, and reservation custom name.",
+      inputSchema: OrderStatusSearchParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_list_order_statuses,
+  );
+
+  server.registerTool(
+    "cafe24_update_order_statuses",
+    {
+      title: "Update Cafe24 Order Statuses",
+      description:
+        "Update the custom names of order statuses in Cafe24. Allows updating multiple statuses at once.",
+      inputSchema: OrderStatusUpdateParamsSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+    },
+    cafe24_update_order_statuses,
   );
 }

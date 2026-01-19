@@ -24,6 +24,35 @@ const CustomerDetailParamsSchema = z
   })
   .strict();
 
+const CustomerSettingParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
+const CustomerSettingUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+    simple_member_join: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Join form display: T=Basic, F=Detailed"),
+    member_authentication: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Member authentication: T=Yes, F=No"),
+    minimum_age_restriction: z
+      .enum(["M", "T", "F"])
+      .optional()
+      .describe("Under 14 restriction: M=After auth, T=Direct use, F=No join"),
+    join_standard: z.enum(["id", "email"]).optional().describe("Join standard: id or email"),
+    use_update_birthday: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Allow birthday update: T=Yes, F=No"),
+  })
+  .strict();
+
 async function cafe24_list_customers(params: z.infer<typeof CustomersSearchParamsSchema>) {
   try {
     const data = await makeApiRequest("/admin/customers", "GET", undefined, {
@@ -121,6 +150,108 @@ async function cafe24_get_customer(params: z.infer<typeof CustomerDetailParamsSc
   }
 }
 
+async function cafe24_get_customer_setting(params: z.infer<typeof CustomerSettingParamsSchema>) {
+  try {
+    const queryParams: Record<string, any> = {};
+    if (params.shop_no) {
+      queryParams.shop_no = params.shop_no;
+    }
+
+    const data = await makeApiRequest("/admin/customers/setting", "GET", undefined, queryParams);
+    const customer = data.customer || data;
+
+    const joinFormMap: Record<string, string> = { T: "Basic fields", F: "Detailed fields" };
+    const ageRestrictionMap: Record<string, string> = {
+      M: "After authentication",
+      T: "Direct use without auth",
+      F: "No registration allowed",
+    };
+    const genderMap: Record<string, string> = { B: "None", M: "Male only", F: "Female only" };
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Customer Settings (Shop #${customer.shop_no || 1})\n\n` +
+            `- **Join Form**: ${joinFormMap[customer.simple_member_join] || customer.simple_member_join}\n` +
+            `- **Member Auth**: ${customer.member_authentication === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Under 14 Restriction**: ${ageRestrictionMap[customer.minimum_age_restriction] || customer.minimum_age_restriction}\n` +
+            `- **Under 19 Restriction**: ${customer.adult_age_restriction === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Gender Restriction**: ${genderMap[customer.gender_restriction] || customer.gender_restriction}\n` +
+            `- **Rejoin Restriction**: ${customer.member_rejoin_restriction === "T" ? `${customer.member_rejoin_restriction_day} days` : "Disabled"}\n` +
+            `- **Join Standard**: ${customer.join_standard}\n` +
+            `- **Display Group**: ${customer.display_group === "T" ? "Yes" : "No"}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: customer.shop_no ?? 1,
+        simple_member_join: customer.simple_member_join,
+        member_authentication: customer.member_authentication,
+        minimum_age_restriction: customer.minimum_age_restriction,
+        adult_age_restriction: customer.adult_age_restriction,
+        adult_purchase_restriction: customer.adult_purchase_restriction,
+        adult_image_restriction: customer.adult_image_restriction,
+        gender_restriction: customer.gender_restriction,
+        member_rejoin_restriction: customer.member_rejoin_restriction,
+        member_rejoin_restriction_day: customer.member_rejoin_restriction_day,
+        password_authentication: customer.password_authentication,
+        member_join_confirmation: customer.member_join_confirmation,
+        email_duplication: customer.email_duplication,
+        password_recovery: customer.password_recovery,
+        link_social_account: customer.link_social_account,
+        save_member_id: customer.save_member_id,
+        unregistration_admin_approval: customer.unregistration_admin_approval,
+        unregistration_reason: customer.unregistration_reason,
+        display_group: customer.display_group,
+        join_standard: customer.join_standard,
+        use_update_birthday: customer.use_update_birthday,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_update_customer_setting(
+  params: z.infer<typeof CustomerSettingUpdateParamsSchema>,
+) {
+  try {
+    const { shop_no, ...settings } = params;
+
+    const requestBody: Record<string, any> = {
+      shop_no: shop_no ?? 1,
+      request: settings,
+    };
+
+    const data = await makeApiRequest("/admin/customers/setting", "PUT", requestBody);
+    const customer = data.customer || data;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Customer Settings Updated (Shop #${customer.shop_no || 1})\n\n` +
+            `- **Join Form**: ${customer.simple_member_join === "T" ? "Basic" : "Detailed"}\n` +
+            `- **Member Auth**: ${customer.member_authentication === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Join Standard**: ${customer.join_standard}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: customer.shop_no ?? 1,
+        simple_member_join: customer.simple_member_join,
+        member_authentication: customer.member_authentication,
+        minimum_age_restriction: customer.minimum_age_restriction,
+        join_standard: customer.join_standard,
+        use_update_birthday: customer.use_update_birthday,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 export function registerTools(server: McpServer): void {
   server.registerTool(
     "cafe24_list_customers",
@@ -154,5 +285,39 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_get_customer,
+  );
+
+  server.registerTool(
+    "cafe24_get_customer_setting",
+    {
+      title: "Get Cafe24 Customer Settings",
+      description:
+        "Retrieve customer/member settings including join form type, authentication, age restrictions, gender restrictions, rejoin policy, password recovery, SNS linking, and display options.",
+      inputSchema: CustomerSettingParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_customer_setting,
+  );
+
+  server.registerTool(
+    "cafe24_update_customer_setting",
+    {
+      title: "Update Cafe24 Customer Settings",
+      description:
+        "Update customer/member settings including join form type (T=Basic, F=Detailed), authentication, age restrictions (M/T/F), join standard (id/email), and birthday update permission.",
+      inputSchema: CustomerSettingUpdateParamsSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    cafe24_update_customer_setting,
   );
 }

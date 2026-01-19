@@ -22,6 +22,40 @@ const BoardDetailParamsSchema = z
   })
   .strict();
 
+const BoardSettingParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
+const SpamAutoPreventionSchema = z
+  .object({
+    type: z.enum(["S", "R"]).describe("Spam prevention type: S=Security code, R=Google reCAPTCHA"),
+    site_key: z.string().optional().describe("Google reCAPTCHA site key (required for type R)"),
+    secret_key: z.string().optional().describe("Google reCAPTCHA secret key (required for type R)"),
+  })
+  .strict();
+
+const BoardSettingUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+    admin_name: z
+      .enum(["name", "nickname", "shopname", "storename"])
+      .optional()
+      .describe("Board admin name: name, nickname, shopname, storename"),
+    password_rules: z.enum(["T", "F"]).optional().describe("Password rules: T=Enable, F=Disable"),
+    linked_board: z
+      .union([z.literal("F"), z.number()])
+      .optional()
+      .describe("Linked board: F=Disabled, or board number"),
+    review_button_mode: z
+      .enum(["all", "shipbegin_date", "shipend_date"])
+      .optional()
+      .describe("Review button display: all, shipbegin_date, shipend_date"),
+    spam_auto_prevention: SpamAutoPreventionSchema.optional().describe("Spam prevention settings"),
+  })
+  .strict();
+
 async function cafe24_list_boards(params: z.infer<typeof BoardsSearchParamsSchema>) {
   try {
     const data = await makeApiRequest("/admin/boards", "GET", undefined, {
@@ -107,6 +141,98 @@ async function cafe24_get_board(params: z.infer<typeof BoardDetailParamsSchema>)
   }
 }
 
+async function cafe24_get_board_setting(params: z.infer<typeof BoardSettingParamsSchema>) {
+  try {
+    const queryParams: Record<string, any> = {};
+    if (params.shop_no) {
+      queryParams.shop_no = params.shop_no;
+    }
+
+    const data = await makeApiRequest("/admin/boards/setting", "GET", undefined, queryParams);
+    const board = data.board || data;
+
+    const adminNameMap: Record<string, string> = {
+      name: "Operator Name",
+      nickname: "Operator Nickname",
+      shopname: "Shop Name",
+      storename: "Store Name",
+    };
+
+    const reviewModeMap: Record<string, string> = {
+      all: "Regardless of order status",
+      shipbegin_date: "Shipping started",
+      shipend_date: "After delivery",
+    };
+
+    const spamTypeMap: Record<string, string> = {
+      S: "Security code",
+      R: "Google reCAPTCHA",
+    };
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Board Settings (Shop #${board.shop_no || 1})\n\n` +
+            `- **Admin Name**: ${adminNameMap[board.admin_name] || board.admin_name}\n` +
+            `- **Password Rules**: ${board.password_rules === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Linked Board**: ${board.linked_board === "F" ? "Disabled" : `Board #${board.linked_board}`}\n` +
+            `- **Review Button Mode**: ${reviewModeMap[board.review_button_mode] || board.review_button_mode}\n` +
+            `- **Spam Prevention**: ${board.spam_auto_prevention ? spamTypeMap[board.spam_auto_prevention.type] : "Not configured"}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: board.shop_no ?? 1,
+        admin_name: board.admin_name,
+        password_rules: board.password_rules,
+        linked_board: board.linked_board,
+        review_button_mode: board.review_button_mode,
+        spam_auto_prevention: board.spam_auto_prevention,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_update_board_setting(params: z.infer<typeof BoardSettingUpdateParamsSchema>) {
+  try {
+    const { shop_no, ...settings } = params;
+
+    const requestBody: Record<string, any> = {
+      shop_no: shop_no ?? 1,
+      request: settings,
+    };
+
+    const data = await makeApiRequest("/admin/boards/setting", "PUT", requestBody);
+    const board = data.board || data;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `## Board Settings Updated (Shop #${board.shop_no || 1})\n\n` +
+            `- **Admin Name**: ${board.admin_name}\n` +
+            `- **Password Rules**: ${board.password_rules === "T" ? "Enabled" : "Disabled"}\n` +
+            `- **Review Button Mode**: ${board.review_button_mode}\n`,
+        },
+      ],
+      structuredContent: {
+        shop_no: board.shop_no ?? 1,
+        admin_name: board.admin_name,
+        password_rules: board.password_rules,
+        linked_board: board.linked_board,
+        review_button_mode: board.review_button_mode,
+        spam_auto_prevention: board.spam_auto_prevention,
+      },
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 export function registerTools(server: McpServer): void {
   server.registerTool(
     "cafe24_list_boards",
@@ -140,5 +266,39 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_get_board,
+  );
+
+  server.registerTool(
+    "cafe24_get_board_setting",
+    {
+      title: "Get Cafe24 Board Settings",
+      description:
+        "Retrieve board settings including admin name, password rules, linked board, review button mode, and spam prevention settings.",
+      inputSchema: BoardSettingParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_board_setting,
+  );
+
+  server.registerTool(
+    "cafe24_update_board_setting",
+    {
+      title: "Update Cafe24 Board Settings",
+      description:
+        "Update board settings including admin name (name/nickname/shopname/storename), password rules, linked board, review button mode, and spam prevention (security code or Google reCAPTCHA).",
+      inputSchema: BoardSettingUpdateParamsSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    cafe24_update_board_setting,
   );
 }
