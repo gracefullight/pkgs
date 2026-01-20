@@ -12,11 +12,12 @@ export function getApiBaseUrl(): string {
 }
 
 // Make API request
-export async function makeApiRequest<T = any>(
+// Make API request
+export async function makeApiRequest<T = unknown>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  data?: any,
-  params?: any,
+  data?: unknown,
+  params?: unknown,
   headers?: Record<string, string>,
 ): Promise<T> {
   const baseUrl = getApiBaseUrl();
@@ -42,9 +43,10 @@ export async function makeApiRequest<T = any>(
 
     // Cafe24 API returns data in different formats
     // Check if response has error structure
-    if (response.data.error) {
+    const errorResponse = response.data as { error?: { message: string; code: string } };
+    if (errorResponse.error) {
       throw new Error(
-        `Cafe24 API Error: ${response.data.error.message} (${response.data.error.code})`,
+        `Cafe24 API Error: ${errorResponse.error.message} (${errorResponse.error.code})`,
       );
     }
 
@@ -55,7 +57,9 @@ export async function makeApiRequest<T = any>(
       const axiosError = error as AxiosError;
       if (axiosError.response) {
         const status = axiosError.response.status;
-        const errorData = axiosError.response.data as any;
+        const errorData = axiosError.response.data as {
+          error?: { message?: string };
+        };
 
         switch (status) {
           case 400:

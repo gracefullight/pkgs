@@ -1,102 +1,20 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import type { DisplaySetting, TextStyle } from "@/types/index.js";
+import {
+  type CreateMainProperty,
+  CreateMainPropertySchema,
+  type ListMainProperties,
+  ListMainPropertiesSchema,
+  type MainSettingParams,
+  MainSettingParamsSchema,
+  type MainSettingUpdateParams,
+  MainSettingUpdateParamsSchema,
+  type UpdateMainProperties,
+  UpdateMainPropertiesSchema,
+} from "../schemas/main.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { DisplaySetting, TextStyle } from "../types.js";
 
-const MainPropertySchema = z.object({
-  key: z.string().describe("Property key (e.g., product_name)"),
-  name: z.string().optional().describe("Property name text"),
-  display: z.enum(["T", "F"]).optional().describe("Display property"),
-  display_name: z.enum(["T", "F"]).optional().describe("Display property name"),
-  font_type: z
-    .enum(["N", "B", "I", "D"])
-    .optional()
-    .describe("Font type (N: Normal, B: Bold, I: Italic, D: Bold Italic)"),
-  font_size: z.number().int().optional().describe("Font size"),
-  font_color: z.string().optional().describe("Font color"),
-});
-
-const ListMainPropertiesSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
-    display_group: z.number().int().min(2).optional().default(2).describe("Display group number"),
-  })
-  .strict();
-
-const CreateMainPropertySchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
-    multishop_display_names: z
-      .array(
-        z.object({
-          shop_no: z.number().int(),
-          name: z.string(),
-        }),
-      )
-      .min(1)
-      .describe("Display names for multiple shops"),
-    display: z.enum(["T", "F"]).optional().default("F").describe("Display property"),
-    display_name: z.enum(["T", "F"]).optional().default("T").describe("Display property name"),
-    font_type: z
-      .enum(["N", "B", "I", "D"])
-      .optional()
-      .default("N")
-      .describe("Font type (N: Normal, B: Bold, I: Italic, D: Bold Italic)"),
-    font_size: z.number().int().optional().default(12).describe("Font size"),
-    font_color: z.string().optional().default("#555555").describe("Font color"),
-    exposure_group_type: z
-      .enum(["A", "M"])
-      .optional()
-      .default("A")
-      .describe("Exposure group type (A: All, M: Member)"),
-  })
-  .strict();
-
-const UpdateMainPropertiesSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
-    display_group: z.number().int().min(2).describe("Display group number"),
-    properties: z.array(MainPropertySchema).describe("List of properties to update"),
-  })
-  .strict();
-
-const MainSettingParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-  })
-  .strict();
-
-const TextStyleSchema = z
-  .object({
-    use: z.enum(["T", "F"]).optional().describe("Use: T=Yes, F=No"),
-    color: z.string().optional().describe("Font color (e.g., #000000)"),
-    font_size: z.union([z.number(), z.string()]).optional().describe("Font size (in pixels)"),
-    font_type: z
-      .enum(["N", "B", "I", "D"])
-      .optional()
-      .describe("Font type: N=Normal, B=Bold, I=Italic, D=Bold Italic"),
-  })
-  .strict();
-
-const MainSettingUpdateParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    strikethrough_retail_price: z
-      .enum(["T", "F"])
-      .optional()
-      .describe("Strikethrough retail price: T=Yes, F=No"),
-    strikethrough_price: z.enum(["T", "F"]).optional().describe("Strikethrough price: T=Yes, F=No"),
-    product_tax_type_text: TextStyleSchema.optional().describe("Tax type display settings"),
-    product_discount_price_text: TextStyleSchema.optional().describe(
-      "Discount price display settings",
-    ),
-    optimum_discount_price_text: TextStyleSchema.optional().describe(
-      "Optimum discount price display settings",
-    ),
-  })
-  .strict();
-
-async function cafe24_list_main_properties(params: z.infer<typeof ListMainPropertiesSchema>) {
+async function cafe24_list_main_properties(params: ListMainProperties) {
   try {
     const { shop_no, ...queryParams } = params;
     const requestHeaders = shop_no ? { "X-Cafe24-Shop-No": shop_no.toString() } : undefined;
@@ -109,8 +27,9 @@ async function cafe24_list_main_properties(params: z.infer<typeof ListMainProper
       requestHeaders,
     );
 
-    const main = data.main || {};
-    const properties = main.properties || [];
+    const responseData = data as { main?: Record<string, unknown> };
+    const main = responseData.main || {};
+    const properties = (main.properties || []) as Record<string, unknown>[];
 
     return {
       content: [
@@ -121,7 +40,7 @@ async function cafe24_list_main_properties(params: z.infer<typeof ListMainProper
             `Display Group: ${main.display_group}\n\n` +
             properties
               .map(
-                (p: Record<string, unknown>) =>
+                (p) =>
                   `- Key: ${p.key}\n` +
                   `  Name: ${p.name}\n` +
                   `  Display: ${p.display === "T" ? "Yes" : "No"}\n` +
@@ -144,7 +63,7 @@ async function cafe24_list_main_properties(params: z.infer<typeof ListMainProper
   }
 }
 
-async function cafe24_create_main_property(params: z.infer<typeof CreateMainPropertySchema>) {
+async function cafe24_create_main_property(params: CreateMainProperty) {
   try {
     const { shop_no, ...requestBody } = params;
     const requestHeaders = shop_no ? { "X-Cafe24-Shop-No": shop_no.toString() } : undefined;
@@ -163,7 +82,8 @@ async function cafe24_create_main_property(params: z.infer<typeof CreateMainProp
       requestHeaders,
     );
 
-    const result = data?.main?.property || {};
+    const responseData = data as { main?: { property?: Record<string, unknown> } };
+    const result = responseData?.main?.property || {};
 
     return {
       content: [
@@ -179,7 +99,7 @@ async function cafe24_create_main_property(params: z.infer<typeof CreateMainProp
   }
 }
 
-async function cafe24_update_main_properties(params: z.infer<typeof UpdateMainPropertiesSchema>) {
+async function cafe24_update_main_properties(params: UpdateMainProperties) {
   try {
     const { shop_no, ...requestBody } = params;
     const requestHeaders = shop_no ? { "X-Cafe24-Shop-No": shop_no.toString() } : undefined;
@@ -197,13 +117,14 @@ async function cafe24_update_main_properties(params: z.infer<typeof UpdateMainPr
       requestHeaders,
     );
 
-    const result = data.main || {};
+    const responseData = data as { main?: Record<string, unknown> };
+    const result = (responseData.main || {}) as Record<string, unknown>;
 
     return {
       content: [
         {
           type: "text" as const,
-          text: `Updated main properties.\nDisplay Group: ${result.display_group}\nCount: ${result.properties?.length || 0}`,
+          text: `Updated main properties.\nDisplay Group: ${result.display_group}\nCount: ${(result.properties as unknown[])?.length || 0}`,
         },
       ],
       structuredContent: result as unknown as Record<string, unknown>,
@@ -213,7 +134,7 @@ async function cafe24_update_main_properties(params: z.infer<typeof UpdateMainPr
   }
 }
 
-async function cafe24_get_main_setting(params: z.infer<typeof MainSettingParamsSchema>) {
+async function cafe24_get_main_setting(params: MainSettingParams) {
   try {
     const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
@@ -226,7 +147,8 @@ async function cafe24_get_main_setting(params: z.infer<typeof MainSettingParamsS
       undefined,
       queryParams,
     );
-    const main = (data as any).main || data;
+    const response = data as { main?: DisplaySetting };
+    const main = (response.main || data) as DisplaySetting;
 
     const formatStyle = (style?: TextStyle) => {
       if (!style) return "N/A";
@@ -270,7 +192,7 @@ async function cafe24_get_main_setting(params: z.infer<typeof MainSettingParamsS
   }
 }
 
-async function cafe24_update_main_setting(params: z.infer<typeof MainSettingUpdateParamsSchema>) {
+async function cafe24_update_main_setting(params: MainSettingUpdateParams) {
   try {
     const { shop_no, ...settings } = params;
 
@@ -284,7 +206,8 @@ async function cafe24_update_main_setting(params: z.infer<typeof MainSettingUpda
       "PUT",
       requestBody,
     );
-    const main = (data as any).main || data;
+    const response = data as { main?: DisplaySetting };
+    const main = (response.main || data) as DisplaySetting;
 
     return {
       content: [

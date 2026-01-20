@@ -1,21 +1,25 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { type DashboardParams, DashboardParamsSchema } from "@/schemas/dashboard.js";
+import type { Dashboard, SummaryStat } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_dashboard(params: DashboardParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/dashboard", "GET", undefined, queryParams);
-    const dashboards = data.dashboard || [];
-    const dashboard = dashboards[0] || {};
+    const responseData = data as
+      | { dashboard?: Record<string, unknown>[] }
+      | { dashboard?: Record<string, unknown>[] };
+    const dashboards = responseData.dashboard || [];
+    const dashboard = (dashboards[0] || {}) as Dashboard;
 
     const dailyStats = dashboard.daily_sales_stats || [];
-    const weeklyStats = dashboard.weekly_sales_stats || {};
-    const monthlyStats = dashboard.monthly_sales_stats || {};
+    const weeklyStats = (dashboard.weekly_sales_stats || {}) as SummaryStat;
+    const monthlyStats = (dashboard.monthly_sales_stats || {}) as SummaryStat;
     const boardList = dashboard.board_list || [];
 
     // Get today's stats (last item in dailyStats)

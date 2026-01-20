@@ -7,8 +7,8 @@ import {
   type AutomessageSettingUpdateParams,
   AutomessageSettingUpdateParamsSchema,
 } from "@/schemas/automessage.js";
+import type { AutomessageArgument, AutomessageSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { AutomessageArgument, AutomessageSetting } from "../types.js";
 
 async function cafe24_get_automessage_arguments(params: AutomessageArgumentsParams) {
   try {
@@ -75,7 +75,10 @@ async function cafe24_get_automessage_setting(params: AutomessageSettingParams) 
       undefined,
       queryParams,
     );
-    const settings = (data as any).automessages || data;
+    const responseData = data as { automessages?: AutomessageSetting } | AutomessageSetting;
+    const settings = (
+      "automessages" in responseData ? responseData.automessages : responseData
+    ) as AutomessageSetting;
 
     const useSmsText = settings.use_sms === "T" ? "Enabled" : "Disabled";
     const useKakaoText = settings.use_kakaoalimtalk === "T" ? "Enabled" : "Disabled";
@@ -113,23 +116,23 @@ async function cafe24_get_automessage_setting(params: AutomessageSettingParams) 
 
 async function cafe24_update_automessage_setting(params: AutomessageSettingUpdateParams) {
   try {
-    const requestBody: Record<string, unknown> = {
+    const requestBody = {
       shop_no: params.shop_no ?? 1,
       request: {
         send_method: params.send_method,
-      },
+        send_method_push: params.send_method_push,
+      } as Record<string, unknown>,
     };
-
-    if (params.send_method_push !== undefined) {
-      (requestBody.request as any).send_method_push = params.send_method_push;
-    }
 
     const data = await makeApiRequest<{ automessages: AutomessageSetting } | AutomessageSetting>(
       "/admin/automessages/setting",
       "PUT",
       requestBody,
     );
-    const settings = (data as any).automessages || data;
+    const responseData = data as { automessages?: AutomessageSetting } | AutomessageSetting;
+    const settings = (
+      "automessages" in responseData ? responseData.automessages : responseData
+    ) as AutomessageSetting;
 
     const sendMethodText = settings.send_method === "S" ? "SMS" : "KakaoAlimtalk (SMS fallback)";
     const sendMethodPushText =

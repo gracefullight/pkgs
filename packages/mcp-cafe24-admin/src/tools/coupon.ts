@@ -7,8 +7,8 @@ import {
   type CouponsSearchParams,
   CouponsSearchParamsSchema,
 } from "@/schemas/coupon.js";
+import type { Benefit, Coupon } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { Benefit, Coupon } from "../types.js";
 
 async function cafe24_list_coupons(params: CouponsSearchParams) {
   try {

@@ -1,3 +1,5 @@
+import type { AxiosError } from "axios";
+
 import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
@@ -303,7 +305,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow(
@@ -318,7 +320,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow("Not Found: Resource not found");
@@ -335,7 +337,7 @@ describe("API Client", () => {
           },
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow(
@@ -350,7 +352,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow(
@@ -365,7 +367,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow(
@@ -377,7 +379,7 @@ describe("API Client", () => {
       const mockError = {
         code: "ECONNABORTED",
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow("Request timed out. Please try again.");
@@ -394,7 +396,7 @@ describe("API Client", () => {
           },
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow("Bad Request: Bad parameters");
@@ -407,7 +409,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow("Conflict: Resource already exists");
@@ -420,7 +422,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow(
@@ -435,7 +437,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow(
@@ -450,7 +452,7 @@ describe("API Client", () => {
           data: {},
         },
         isAxiosError: true,
-      } as any;
+      } as unknown as AxiosError;
       vi.mocked(axios).mockRejectedValue(mockError);
 
       await expect(makeApiRequest("/test")).rejects.toThrow("API Request failed with status 418");

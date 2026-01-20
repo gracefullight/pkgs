@@ -11,8 +11,8 @@ import {
   type SpamAutoPrevention,
   SpamAutoPreventionSchema,
 } from "@/schemas/board.js";
+import type { Board } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { Board } from "../types.js";
 
 async function cafe24_list_boards(params: BoardsSearchParams) {
   try {
@@ -112,7 +112,8 @@ async function cafe24_get_board_setting(params: BoardSettingParams) {
     }
 
     const data = await makeApiRequest("/admin/boards/setting", "GET", undefined, queryParams);
-    const board = data.board || data;
+    const responseData = data as { board?: Record<string, unknown> } | Record<string, unknown>;
+    const board = (responseData.board || responseData) as Record<string, any>;
 
     const adminNameMap: Record<string, string> = {
       name: "Operator Name",
@@ -169,7 +170,8 @@ async function cafe24_update_board_setting(params: BoardSettingUpdateParams) {
     };
 
     const data = await makeApiRequest("/admin/boards/setting", "PUT", requestBody);
-    const board = data.board || data;
+    const responseData = data as { board?: Record<string, unknown> } | Record<string, unknown>;
+    const board = (responseData.board || responseData) as Record<string, any>;
 
     return {
       content: [

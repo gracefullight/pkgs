@@ -15,7 +15,8 @@ async function cafe24_get_product_common_setting(params: ProductSettingParams) {
     }
 
     const data = await makeApiRequest("/admin/products/setting", "GET", undefined, queryParams);
-    const product = data.product || data;
+    const responseData = data as { product?: Record<string, unknown> } | Record<string, unknown>;
+    const product = (responseData.product || responseData) as Record<string, any>;
 
     return {
       content: [
@@ -53,7 +54,8 @@ async function cafe24_update_product_common_setting(params: ProductSettingUpdate
     };
 
     const data = await makeApiRequest("/admin/products/setting", "PUT", requestBody);
-    const product = data.product || data;
+    const responseData = data as { product?: Record<string, unknown> } | Record<string, unknown>;
+    const product = (responseData.product || responseData) as Record<string, any>;
 
     return {
       content: [

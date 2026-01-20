@@ -3,17 +3,21 @@ import {
   type ShippingManagerParams,
   ShippingManagerParamsSchema,
 } from "@/schemas/shippingmanager.js";
+import type { ShippingManagerStatus } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_shippingmanager_status(params: ShippingManagerParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/shippingmanager", "GET", undefined, queryParams);
-    const status = data.shippingmanager || {};
+    const responseData = data as
+      | { shippingmanager?: Record<string, unknown> }
+      | Record<string, unknown>;
+    const status = (responseData.shippingmanager || {}) as ShippingManagerStatus;
 
     return {
       content: [

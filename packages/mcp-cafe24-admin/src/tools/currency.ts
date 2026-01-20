@@ -5,17 +5,19 @@ import {
   type CurrencyUpdateParams,
   CurrencyUpdateParamsSchema,
 } from "@/schemas/currency.js";
+import type { CurrencySetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_currency(params: CurrencyParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/currency", "GET", undefined, queryParams);
-    const currency = data.currency || data;
+    const responseData = data as { currency?: Record<string, unknown> } | Record<string, unknown>;
+    const currency = (responseData.currency || responseData) as CurrencySetting;
 
     return {
       content: [
@@ -45,7 +47,7 @@ async function cafe24_get_currency(params: CurrencyParams) {
 
 async function cafe24_update_currency(params: CurrencyUpdateParams) {
   try {
-    const requestBody: Record<string, any> = {
+    const requestBody: Record<string, unknown> = {
       shop_no: params.shop_no,
       request: {
         exchange_rate: params.exchange_rate,
@@ -53,7 +55,8 @@ async function cafe24_update_currency(params: CurrencyUpdateParams) {
     };
 
     const data = await makeApiRequest("/admin/currency", "PUT", requestBody);
-    const currency = data.currency || data;
+    const responseData = data as { currency?: Record<string, unknown> } | Record<string, unknown>;
+    const currency = (responseData.currency || responseData) as CurrencySetting;
 
     return {
       content: [

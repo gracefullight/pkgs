@@ -15,7 +15,8 @@ async function cafe24_get_payment_setting(params: PaymentSettingParams) {
     }
 
     const data = await makeApiRequest("/admin/payment/setting", "GET", undefined, queryParams);
-    const setting = data.setting || data;
+    const responseData = data as { setting?: Record<string, unknown> } | Record<string, unknown>;
+    const setting = (responseData.setting || responseData) as Record<string, any>;
 
     return {
       content: [
@@ -58,7 +59,8 @@ async function cafe24_update_payment_setting(params: PaymentSettingUpdateParams)
     };
 
     const data = await makeApiRequest("/admin/payment/setting", "PUT", requestBody);
-    const setting = data.setting || data;
+    const responseData = data as { setting?: Record<string, unknown> } | Record<string, unknown>;
+    const setting = (responseData.setting || responseData) as Record<string, any>;
 
     return {
       content: [

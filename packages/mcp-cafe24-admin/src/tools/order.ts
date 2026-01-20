@@ -1,56 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import type { z } from "zod";
+import type { Order, OrderStatus } from "@/types/index.js";
+import {
+  OrderDetailParamsSchema,
+  OrderStatusSearchParamsSchema,
+  OrderStatusUpdateParamsSchema,
+  OrdersSearchParamsSchema,
+  OrderUpdateStatusParamsSchema,
+} from "../schemas/order.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { Order, OrderStatus } from "../types.js";
-
-const OrdersSearchParamsSchema = z
-  .object({
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(100)
-      .default(20)
-      .describe("Maximum results to return (1-100)"),
-    offset: z.number().int().min(0).default(0).describe("Number of results to skip"),
-    order_id: z.string().optional().describe("Filter by specific order ID(s), comma-separated"),
-    start_date: z.string().optional().describe("Filter orders from this date (YYYY-MM-DD)"),
-    end_date: z.string().optional().describe("Filter orders until this date (YYYY-MM-DD)"),
-    order_status_code: z.string().optional().describe("Filter by order status code"),
-  })
-  .strict();
-
-const OrderDetailParamsSchema = z
-  .object({
-    order_id: z.string().describe("Order ID"),
-  })
-  .strict();
-
-const OrderUpdateStatusParamsSchema = z
-  .object({
-    order_id: z.string().describe("Order ID"),
-    order_status_code: z.string().describe("New order status code"),
-  })
-  .strict();
-
-const OrderStatusSearchParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).default(1).describe("Multi-shop number (default: 1)"),
-  })
-  .strict();
-
-const OrderStatusRequestSchema = z.object({
-  status_name_id: z.number().int().describe("Status name ID"),
-  custom_name: z.string().optional().describe("Custom status name"),
-  reservation_custom_name: z.string().optional().describe("Custom reservation status name"),
-});
-
-const OrderStatusUpdateParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).default(1).describe("Multi-shop number (default: 1)"),
-    requests: z.array(OrderStatusRequestSchema).describe("List of status updates"),
-  })
-  .strict();
 
 async function cafe24_list_orders(params: z.infer<typeof OrdersSearchParamsSchema>) {
   try {
@@ -122,7 +80,8 @@ async function cafe24_list_orders(params: z.infer<typeof OrdersSearchParamsSchem
 async function cafe24_get_order(params: z.infer<typeof OrderDetailParamsSchema>) {
   try {
     const data = await makeApiRequest<{ order: Order }>(`/admin/orders/${params.order_id}`, "GET");
-    const order = data.order || {};
+    const responseData = data as { order?: Order };
+    const order = responseData.order || ({} as Order);
 
     return {
       content: [

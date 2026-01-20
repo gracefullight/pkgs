@@ -1,36 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import type { z } from "zod";
+import {
+  ProductDisplaySettingParamsSchema,
+  ProductDisplaySettingUpdateParamsSchema,
+} from "../schemas/productdisplay.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-
-const ProductDisplaySettingParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-  })
-  .strict();
-
-const SortingOptionSchema = z.enum([
-  "new_product",
-  "product_name",
-  "low_price",
-  "high_price",
-  "manufacture",
-  "popular_product",
-  "review",
-  "hit_count",
-  "like_count",
-]);
-
-const ProductDisplaySettingUpdateParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    sorting_options: z
-      .array(SortingOptionSchema)
-      .min(1)
-      .describe(
-        "Sorting options: new_product, product_name, low_price, high_price, manufacture, popular_product, review, hit_count, like_count",
-      ),
-  })
-  .strict();
 
 async function cafe24_get_product_display_setting(
   params: z.infer<typeof ProductDisplaySettingParamsSchema>,
@@ -47,7 +21,8 @@ async function cafe24_get_product_display_setting(
       undefined,
       queryParams,
     );
-    const product = data.product || data;
+    const responseData = data as { product?: Record<string, unknown> } | Record<string, unknown>;
+    const product = (responseData.product || responseData) as Record<string, any>;
 
     const sortLabels: Record<string, string> = {
       new_product: "New Product",
@@ -96,7 +71,8 @@ async function cafe24_update_product_display_setting(
     };
 
     const data = await makeApiRequest("/admin/products/display/setting", "PUT", requestBody);
-    const product = data.product || data;
+    const responseData = data as { product?: Record<string, unknown> } | Record<string, unknown>;
+    const product = (responseData.product || responseData) as Record<string, any>;
 
     return {
       content: [

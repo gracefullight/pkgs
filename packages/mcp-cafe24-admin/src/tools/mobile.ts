@@ -5,17 +5,19 @@ import {
   type MobileSettingUpdateParams,
   MobileSettingUpdateParamsSchema,
 } from "@/schemas/mobile.js";
+import type { MobileSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_mobile_setting(params: MobileSettingParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/mobile/setting", "GET", undefined, queryParams);
-    const mobile = data.mobile || data;
+    const responseData = data as { mobile?: Record<string, unknown> } | Record<string, unknown>;
+    const mobile = (responseData.mobile || responseData) as MobileSetting;
 
     return {
       content: [
@@ -42,13 +44,14 @@ async function cafe24_update_mobile_setting(params: MobileSettingUpdateParams) {
   try {
     const { shop_no, ...settings } = params;
 
-    const requestBody: Record<string, any> = {
+    const requestBody: Record<string, unknown> = {
       shop_no: shop_no ?? 1,
       request: settings,
     };
 
     const data = await makeApiRequest("/admin/mobile/setting", "PUT", requestBody);
-    const mobile = data.mobile || data;
+    const responseData = data as { mobile?: Record<string, unknown> } | Record<string, unknown>;
+    const mobile = (responseData.mobile || responseData) as MobileSetting;
 
     return {
       content: [

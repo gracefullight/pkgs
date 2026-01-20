@@ -1,15 +1,28 @@
 import { z } from "zod";
 
-export const MainPropertyParamsSchema = z
+export const MainPropertySchema = z.object({
+  key: z.string().describe("Property key (e.g., product_name)"),
+  name: z.string().optional().describe("Property name text"),
+  display: z.enum(["T", "F"]).optional().describe("Display property"),
+  display_name: z.enum(["T", "F"]).optional().describe("Display property name"),
+  font_type: z
+    .enum(["N", "B", "I", "D"])
+    .optional()
+    .describe("Font type (N: Normal, B: Bold, I: Italic, D: Bold Italic)"),
+  font_size: z.number().int().optional().describe("Font size"),
+  font_color: z.string().optional().describe("Font color"),
+});
+
+export const ListMainPropertiesSchema = z
   .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number"),
-    display_group: z.number().int().min(2).optional().describe("Main display group number"),
+    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
+    display_group: z.number().int().min(2).optional().default(2).describe("Display group number"),
   })
   .strict();
 
-export const MainPropertyCreateParamsSchema = z
+export const CreateMainPropertySchema = z
   .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number"),
+    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
     multishop_display_names: z
       .array(
         z.object({
@@ -36,11 +49,11 @@ export const MainPropertyCreateParamsSchema = z
   })
   .strict();
 
-export const MainPropertiesUpdateParamsSchema = z
+export const UpdateMainPropertiesSchema = z
   .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number"),
-    display_group: z.number().int().min(2).describe("Main display group number"),
-    properties: z.array(z.object({})).describe("List of properties to update"),
+    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
+    display_group: z.number().int().min(2).describe("Display group number"),
+    properties: z.array(MainPropertySchema).describe("List of properties to update"),
   })
   .strict();
 
@@ -52,7 +65,7 @@ export const MainSettingParamsSchema = z
 
 export const TextStyleSchema = z
   .object({
-    use: z.enum(["T", "F"]).optional().describe("Use T=Yes, F=No"),
+    use: z.enum(["T", "F"]).optional().describe("Use: T=Yes, F=No"),
     color: z.string().optional().describe("Font color (e.g., #000000)"),
     font_size: z.union([z.number(), z.string()]).optional().describe("Font size (in pixels)"),
     font_type: z
@@ -80,10 +93,10 @@ export const MainSettingUpdateParamsSchema = z
   })
   .strict();
 
-export type MainProperty = z.infer<typeof MainPropertyParamsSchema>;
-export type ListMainProperties = z.infer<typeof MainPropertyParamsSchema>;
-export type CreateMainProperty = z.infer<typeof MainPropertyCreateParamsSchema>;
-export type UpdateMainProperties = z.infer<typeof MainPropertiesUpdateParamsSchema>;
+export type MainProperty = z.infer<typeof MainPropertySchema>;
+export type ListMainProperties = z.infer<typeof ListMainPropertiesSchema>;
+export type CreateMainProperty = z.infer<typeof CreateMainPropertySchema>;
+export type UpdateMainProperties = z.infer<typeof UpdateMainPropertiesSchema>;
 export type MainSettingParams = z.infer<typeof MainSettingParamsSchema>;
 export type TextStyle = z.infer<typeof TextStyleSchema>;
 export type MainSettingUpdateParams = z.infer<typeof MainSettingUpdateParamsSchema>;

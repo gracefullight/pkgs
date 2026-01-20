@@ -1,16 +1,13 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   type BundleProductComponent,
-  BundleProductComponentSchema,
-  type BundleProductSales,
-  BundleProductSalesSchema,
   type BundleProductSearchParams,
   BundleProductSearchParamsSchema,
   type CreateBundleProduct,
   CreateBundleProductSchema,
 } from "@/schemas/bundleproduct.js";
+import type { BundleProduct } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { BundleProduct } from "../types.js";
 
 async function cafe24_list_bundle_products(params: BundleProductSearchParams) {
   try {
@@ -91,7 +88,7 @@ async function cafe24_create_bundle_product(params: CreateBundleProduct) {
           text: `Created bundle product: ${product.product_name} (No: ${product.product_no}, Code: ${product.product_code})`,
         },
       ],
-      structuredContent: product as any,
+      structuredContent: product as unknown as Record<string, unknown>,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };

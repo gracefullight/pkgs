@@ -1,67 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import type { z } from "zod";
+import type { AdminUser, Shop, Store, StoreAccount } from "@/types/index.js";
+import {
+  ShopsSearchParamsSchema,
+  StoreAccountsParamsSchema,
+  StoreDetailParamsSchema,
+  UserDetailParamsSchema,
+  UsersSearchParamsSchema,
+} from "../schemas/store.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { AdminUser, Shop, Store, StoreAccount } from "../types.js";
-
-const UsersSearchParamsSchema = z
-  .object({
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(100)
-      .default(20)
-      .describe("Maximum results to return (1-100)"),
-    offset: z.number().int().min(0).default(0).describe("Number of results to skip"),
-    search_type: z.enum(["member_id", "name"]).optional().describe("Search type"),
-    keyword: z.string().optional().describe("Search keyword"),
-    admin_type: z.enum(["P", "A"]).optional().describe("Admin type: P=Principal, A=Sub-admin"),
-  })
-  .strict();
-
-const UserDetailParamsSchema = z
-  .object({
-    user_id: z.string().describe("User ID"),
-    shop_no: z.number().int().min(1).default(1).describe("Shop number"),
-  })
-  .strict();
-
-const ShopsSearchParamsSchema = z
-  .object({
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(100)
-      .default(20)
-      .describe("Maximum results to return (1-100)"),
-    offset: z.number().int().min(0).default(0).describe("Number of results to skip"),
-    shop_no: z.number().optional().describe("Filter by specific shop number"),
-  })
-  .strict();
-
-const StoreDetailParamsSchema = z
-  .object({
-    shop_no: z.number().optional().describe("Shop number for multi-store malls"),
-  })
-  .strict();
-
-const StoreUpdateParamsSchema = z
-  .object({
-    mall_name: z.string().optional().describe("Mall name"),
-    currency_code: z
-      .string()
-      .length(3)
-      .optional()
-      .describe("3-character currency code (e.g., KRW)"),
-  })
-  .strict();
-
-const StoreAccountsParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-  })
-  .strict();
 
 async function cafe24_list_users(params: z.infer<typeof UsersSearchParamsSchema>) {
   try {

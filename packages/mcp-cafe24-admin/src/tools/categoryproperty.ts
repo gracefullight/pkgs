@@ -22,7 +22,8 @@ async function cafe24_list_category_properties(params: ListCategoryProperties) {
       requestHeaders,
     );
 
-    const category = data.category || {};
+    const responseData = data as { category?: Record<string, any> };
+    const category = responseData.category || {};
     const properties = category.properties || [];
 
     return {
@@ -78,7 +79,8 @@ async function cafe24_create_category_property(params: CreateCategoryProperty) {
       requestHeaders,
     );
 
-    const result = data?.category?.property || {};
+    const responseData = data as { category?: { property?: Record<string, unknown> } };
+    const result = responseData?.category?.property || {};
 
     return {
       content: [
@@ -112,7 +114,8 @@ async function cafe24_update_category_properties(params: UpdateCategoryPropertie
       requestHeaders,
     );
 
-    const result = data.category || {};
+    const responseData = data as { category?: Record<string, any> };
+    const result = responseData.category || {};
 
     return {
       content: [

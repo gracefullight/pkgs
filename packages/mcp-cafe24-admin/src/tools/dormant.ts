@@ -5,17 +5,21 @@ import {
   type DormantAccountUpdateParams,
   DormantAccountUpdateParamsSchema,
 } from "@/schemas/dormant.js";
+import type { DormantAccount } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_dormant_account(params: DormantAccountParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/dormantaccount", "GET", undefined, queryParams);
-    const dormant = data.dormantaccount || data;
+    const responseData = data as
+      | { dormantaccount?: Record<string, unknown> }
+      | Record<string, unknown>;
+    const dormant = (responseData.dormantaccount || responseData) as DormantAccount;
 
     return {
       content: [
@@ -48,13 +52,16 @@ async function cafe24_update_dormant_account(params: DormantAccountUpdateParams)
   try {
     const { shop_no, ...settings } = params;
 
-    const requestBody: Record<string, any> = {
+    const requestBody: Record<string, unknown> = {
       shop_no: shop_no ?? 1,
       request: settings,
     };
 
     const data = await makeApiRequest("/admin/dormantaccount", "PUT", requestBody);
-    const dormant = data.dormantaccount || data;
+    const responseData = data as
+      | { dormantaccount?: Record<string, unknown> }
+      | Record<string, unknown>;
+    const dormant = (responseData.dormantaccount || responseData) as DormantAccount;
 
     return {
       content: [

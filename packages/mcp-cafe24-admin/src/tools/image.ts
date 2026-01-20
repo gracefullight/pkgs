@@ -15,7 +15,8 @@ async function cafe24_get_image_setting(params: ImageSettingParams) {
     }
 
     const data = await makeApiRequest("/admin/images/setting", "GET", undefined, queryParams);
-    const image = data.image || data;
+    const responseData = data as { image?: Record<string, unknown> } | Record<string, unknown>;
+    const image = (responseData.image || responseData) as Record<string, any>;
     const sizes = image.product_image_size || {};
 
     return {
@@ -54,7 +55,8 @@ async function cafe24_update_image_setting(params: ImageSettingUpdateParams) {
     };
 
     const data = await makeApiRequest("/admin/images/setting", "PUT", requestBody);
-    const image = data.image || data;
+    const responseData = data as { image?: Record<string, unknown> } | Record<string, unknown>;
+    const image = (responseData.image || responseData) as Record<string, any>;
     const sizes = image.product_image_size || {};
 
     return {

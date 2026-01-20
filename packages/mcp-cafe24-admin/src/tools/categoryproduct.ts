@@ -1,92 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import type { z } from "zod";
+import type { CategoryProduct } from "@/types/index.js";
+import {
+  AddCategoryProductsSchema,
+  CountCategoryProductsSchema,
+  ListCategoryProductsSchema,
+  RemoveCategoryProductSchema,
+  UpdateCategoryProductSchema,
+} from "../schemas/categoryproduct.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-
-const ListCategoryProductsSchema = z
-  .object({
-    shop_no: z.number().int().optional().default(1).describe("Shop number"),
-    category_no: z.number().int().describe("Category number"),
-    display_group: z
-      .number()
-      .int()
-      .min(1)
-      .max(3)
-      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(50000)
-      .optional()
-      .default(50000)
-      .describe("Maximum number of results"),
-  })
-  .strict();
-
-const CountCategoryProductsSchema = z
-  .object({
-    shop_no: z.number().int().optional().default(1).describe("Shop number"),
-    category_no: z.number().int().describe("Category number"),
-    display_group: z
-      .number()
-      .int()
-      .min(1)
-      .max(3)
-      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
-  })
-  .strict();
-
-const AddCategoryProductsSchema = z
-  .object({
-    shop_no: z.number().int().optional().default(1).describe("Shop number"),
-    category_no: z.number().int().describe("Category number"),
-    display_group: z
-      .number()
-      .int()
-      .min(1)
-      .max(3)
-      .optional()
-      .default(1)
-      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
-    product_no: z.array(z.number().int()).min(1).describe("List of product numbers to add"),
-  })
-  .strict();
-
-const UpdateCategoryProductSchema = z
-  .object({
-    shop_no: z.number().int().optional().default(1).describe("Shop number"),
-    category_no: z.number().int().describe("Category number"),
-    display_group: z
-      .number()
-      .int()
-      .min(1)
-      .max(3)
-      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
-    product_no: z.number().int().describe("Product number"),
-    sequence: z.number().int().min(1).max(999999).optional().describe("Display sequence"),
-    auto_sort: z.enum(["T", "F"]).optional().describe("Auto sort enabled (T: Use, F: Do not use)"),
-    fixed_sort: z
-      .enum(["T", "F"])
-      .optional()
-      .describe("Fixed sort enabled (T: Use, F: Do not use)"),
-  })
-  .strict();
-
-const RemoveCategoryProductSchema = z
-  .object({
-    shop_no: z.number().int().optional().default(1).describe("Shop number"),
-    category_no: z.number().int().describe("Category number"),
-    product_no: z.number().int().describe("Product number"),
-    display_group: z
-      .number()
-      .int()
-      .min(1)
-      .max(3)
-      .optional()
-      .default(1)
-      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
-  })
-  .strict();
 
 async function cafe24_list_category_products(params: z.infer<typeof ListCategoryProductsSchema>) {
   try {
@@ -97,11 +19,14 @@ async function cafe24_list_category_products(params: z.infer<typeof ListCategory
       `/admin/categories/${category_no}/products`,
       "GET",
       undefined,
-      queryParams as Record<string, any>,
+      queryParams as Record<string, unknown>,
       requestHeaders,
     );
 
-    const products = data.products || [];
+    const responseData = data as
+      | { products?: CategoryProduct[] }
+      | { products?: CategoryProduct[] };
+    const products = responseData.products || [];
 
     return {
       content: [
@@ -111,7 +36,7 @@ async function cafe24_list_category_products(params: z.infer<typeof ListCategory
             `Found ${products.length} products in category ${category_no}.\n\n` +
             products
               .map(
-                (p: any) =>
+                (p: CategoryProduct) =>
                   `- Product No: ${p.product_no}\n` +
                   `  Shop No: ${p.shop_no}\n` +
                   `  Sequence: ${p.sequence_no}\n` +
@@ -145,7 +70,7 @@ async function cafe24_count_category_products(params: z.infer<typeof CountCatego
       `/admin/categories/${category_no}/products/count`,
       "GET",
       undefined,
-      queryParams as Record<string, any>,
+      queryParams as Record<string, unknown>,
       requestHeaders,
     );
 
@@ -153,11 +78,11 @@ async function cafe24_count_category_products(params: z.infer<typeof CountCatego
       content: [
         {
           type: "text" as const,
-          text: `Product count in category ${category_no}: ${data.count}`,
+          text: `Product count in category ${category_no}: ${(data as { count: number }).count}`,
         },
       ],
       structuredContent: {
-        count: data.count,
+        count: (data as { count: number }).count,
         category_no,
       },
     };
@@ -183,16 +108,17 @@ async function cafe24_add_category_products(params: z.infer<typeof AddCategoryPr
       requestHeaders,
     );
 
-    const result = data.product || {};
+    const responseData = data as { product?: Record<string, unknown> };
+    const result = (responseData.product || {}) as Record<string, unknown>;
 
     return {
       content: [
         {
           type: "text" as const,
-          text: `Added products to category ${category_no}: ${result.product_no?.join(", ")} (Display Group: ${result.display_group})`,
+          text: `Added products to category ${category_no}: ${(result.product_no as number[] | undefined)?.join(", ")} (Display Group: ${result.display_group})`,
         },
       ],
-      structuredContent: result as unknown as Record<string, unknown>,
+      structuredContent: result,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
@@ -217,7 +143,8 @@ async function cafe24_update_category_product(params: z.infer<typeof UpdateCateg
       requestHeaders,
     );
 
-    const result = data.product || {};
+    const responseData = data as { product?: Record<string, unknown> };
+    const result = (responseData.product || {}) as Record<string, unknown>;
 
     return {
       content: [
@@ -226,7 +153,7 @@ async function cafe24_update_category_product(params: z.infer<typeof UpdateCateg
           text: `Updated product ${result.product_no} in category ${category_no}. Sequence: ${result.sequence}`,
         },
       ],
-      structuredContent: result as unknown as Record<string, unknown>,
+      structuredContent: result,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
@@ -242,11 +169,12 @@ async function cafe24_remove_category_product(params: z.infer<typeof RemoveCateg
       `/admin/categories/${category_no}/products/${product_no}`,
       "DELETE",
       undefined,
-      queryParams as Record<string, any>,
+      queryParams as Record<string, unknown>,
       requestHeaders,
     );
 
-    const result = data.product || {};
+    const responseData = data as { product?: Record<string, unknown> };
+    const result = (responseData.product || {}) as Record<string, unknown>;
 
     return {
       content: [
@@ -255,7 +183,7 @@ async function cafe24_remove_category_product(params: z.infer<typeof RemoveCateg
           text: `Removed product ${result.product_no} from category ${category_no} (Display Group: ${result.display_group})`,
         },
       ],
-      structuredContent: result as unknown as Record<string, unknown>,
+      structuredContent: result,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };

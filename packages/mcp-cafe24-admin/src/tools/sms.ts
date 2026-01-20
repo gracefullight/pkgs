@@ -1,16 +1,18 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { type SmsParams, SmsParamsSchema } from "@/schemas/sms.js";
+import type { SmsSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_sms_setting(params: SmsParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/sms/setting", "GET", undefined, queryParams);
-    const sms = data.sms || data;
+    const responseData = data as { sms?: Record<string, unknown> } | Record<string, unknown>;
+    const sms = (responseData.sms || responseData) as SmsSetting;
 
     return {
       content: [

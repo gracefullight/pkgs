@@ -5,17 +5,19 @@ import {
   type SocialAppleUpdateParams,
   SocialAppleUpdateParamsSchema,
 } from "@/schemas/socialapple.js";
+import type { SocialAppleSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_social_apple_setting(params: SocialAppleParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/socials/apple", "GET", undefined, queryParams);
-    const apple = data.apple || data;
+    const responseData = data as { apple?: Record<string, unknown> } | Record<string, unknown>;
+    const apple = (responseData.apple || responseData) as SocialAppleSetting;
 
     return {
       content: [
@@ -50,13 +52,14 @@ async function cafe24_update_social_apple_setting(params: SocialAppleUpdateParam
   try {
     const { shop_no, ...settings } = params;
 
-    const requestBody: Record<string, any> = {
+    const requestBody: Record<string, unknown> = {
       shop_no: shop_no ?? 1,
       request: settings,
     };
 
     const data = await makeApiRequest("/admin/socials/apple", "PUT", requestBody);
-    const apple = data.apple || data;
+    const responseData = data as { apple?: Record<string, unknown> } | Record<string, unknown>;
+    const apple = (responseData.apple || responseData) as SocialAppleSetting;
 
     return {
       content: [

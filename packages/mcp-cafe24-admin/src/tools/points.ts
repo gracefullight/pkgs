@@ -1,10 +1,13 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
+  type MileageSearchParams,
+  MileageSearchParamsSchema,
   type PointsSettingParams,
   PointsSettingParamsSchema,
   type PointsSettingUpdateParams,
   PointsSettingUpdateParamsSchema,
 } from "@/schemas/points.js";
+import type { Point } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_points_setting(params: PointsSettingParams) {
@@ -12,7 +15,8 @@ async function cafe24_get_points_setting(params: PointsSettingParams) {
     const data = await makeApiRequest("/admin/points/setting", "GET", undefined, {
       shop_no: params.shop_no,
     });
-    const point = data.point || {};
+    const responseData = data as { point?: Record<string, unknown> } | Record<string, unknown>;
+    const point = (responseData.point || responseData) as Record<string, any>;
 
     return {
       content: [
@@ -45,7 +49,8 @@ async function cafe24_update_points_setting(params: PointsSettingUpdateParams) {
       shop_no,
       request: settings,
     });
-    const point = data.point || {};
+    const responseData = data as { point?: Record<string, unknown> } | Record<string, unknown>;
+    const point = (responseData.point || responseData) as Record<string, any>;
 
     return {
       content: [
@@ -55,6 +60,63 @@ async function cafe24_update_points_setting(params: PointsSettingUpdateParams) {
         },
       ],
       structuredContent: point as unknown as Record<string, unknown>,
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_get_points(params: MileageSearchParams) {
+  try {
+    const data = await makeApiRequest<{ points: Point[]; total: number }>(
+      "/admin/points",
+      "GET",
+      undefined,
+      {
+        limit: params.limit,
+        offset: params.offset,
+        ...(params.start_date ? { start_date: params.start_date } : {}),
+        ...(params.end_date ? { end_date: params.end_date } : {}),
+      },
+    );
+
+    const points = data.points || [];
+    const total = data.total || 0;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `Found ${total} point transactions (showing ${points.length})\n\n` +
+            points
+              .map(
+                (p) =>
+                  `## ${p.point_date}\n` +
+                  `- **Member**: ${p.member_name} (${p.member_id})\n` +
+                  `- **Type**: ${p.point_type || "Earn"}\n` +
+                  `- **Amount**: ${p.point}\n`,
+              )
+              .join(""),
+        },
+      ],
+      structuredContent: {
+        total,
+        count: points.length,
+        offset: params.offset,
+        points: points.map((p) => ({
+          id: p.point_id,
+          member_id: p.member_id,
+          member_name: p.member_name,
+          point_type: p.point_type,
+          point: p.point,
+          point_date: p.point_date,
+        })),
+        has_more: total > params.offset + points.length,
+        ...(total > params.offset + points.length
+          ? { next_offset: params.offset + points.length }
+          : {}),
+      },
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
@@ -94,5 +156,22 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_update_points_setting,
+  );
+
+  server.registerTool(
+    "cafe24_get_points",
+    {
+      title: "Get Cafe24 Points Transactions",
+      description:
+        "Retrieve point/mileage transactions from Cafe24. Requires date range and supports pagination. Returns point details including member ID, type, amount, and date.",
+      inputSchema: MileageSearchParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_points,
   );
 }

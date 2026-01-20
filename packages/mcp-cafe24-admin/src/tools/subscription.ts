@@ -9,11 +9,12 @@ import {
   type SubscriptionShipmentUpdate,
   SubscriptionShipmentUpdateSchema,
 } from "@/schemas/subscription.js";
+import type { SubscriptionShipment } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_list_subscription_shipment_settings(params: SubscriptionShipmentParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) queryParams.shop_no = params.shop_no;
     if (params.subscription_no) queryParams.subscription_no = params.subscription_no;
 
@@ -23,7 +24,10 @@ async function cafe24_list_subscription_shipment_settings(params: SubscriptionSh
       undefined,
       queryParams,
     );
-    const shipments = data.shipments || [];
+    const responseData = data as
+      | { shipments?: Record<string, unknown>[] }
+      | Record<string, unknown>;
+    const shipments = (responseData.shipments || []) as SubscriptionShipment[];
 
     return {
       content: [
@@ -33,7 +37,7 @@ async function cafe24_list_subscription_shipment_settings(params: SubscriptionSh
             `Found ${shipments.length} subscription shipment settings\n\n` +
             shipments
               .map(
-                (s: any) =>
+                (s: SubscriptionShipment) =>
                   `## [${s.subscription_no}] ${s.subscription_shipments_name}\n` +
                   `- **Type**: ${s.product_binding_type}\n` +
                   `- **One-time Purchase**: ${s.one_time_purchase === "T" ? "Yes" : "No"}\n` +
@@ -62,7 +66,8 @@ async function cafe24_create_subscription_shipment_setting(params: SubscriptionS
     };
 
     const data = await makeApiRequest("/admin/subscription/shipments/setting", "POST", requestBody);
-    const shipment = data.shipment || {};
+    const responseData = data as { shipment?: Record<string, unknown> } | Record<string, unknown>;
+    const shipment = (responseData.shipment || {}) as SubscriptionShipment;
 
     return {
       content: [
@@ -91,7 +96,8 @@ async function cafe24_update_subscription_shipment_setting(params: SubscriptionS
       "PUT",
       requestBody,
     );
-    const shipment = data.shipment || {};
+    const responseData = data as { shipment?: Record<string, unknown> } | Record<string, unknown>;
+    const shipment = (responseData.shipment || {}) as SubscriptionShipment;
 
     return {
       content: [

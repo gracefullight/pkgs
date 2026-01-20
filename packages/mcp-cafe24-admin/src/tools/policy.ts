@@ -5,6 +5,7 @@ import {
   type PolicyUpdateParams,
   PolicyUpdateParamsSchema,
 } from "@/schemas/policy.js";
+import type { Policy } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_policy(params: PolicyParams) {
@@ -15,7 +16,8 @@ async function cafe24_get_policy(params: PolicyParams) {
     }
 
     const data = await makeApiRequest("/admin/policy", "GET", undefined, queryParams);
-    const policy = data.policy || data;
+    const responseData = data as { policy?: Record<string, unknown> } | Record<string, unknown>;
+    const policy = (responseData.policy || responseData) as Record<string, any>;
 
     const truncate = (str: string | undefined | null) => {
       if (!str) return "N/A";
@@ -60,7 +62,8 @@ async function cafe24_update_policy(params: PolicyUpdateParams) {
     };
 
     const data = await makeApiRequest("/admin/policy", "PUT", requestBody);
-    const policy = data.policy || data;
+    const responseData = data as { policy?: Record<string, unknown> } | Record<string, unknown>;
+    const policy = (responseData.policy || responseData) as Record<string, any>;
 
     return {
       content: [

@@ -5,17 +5,19 @@ import {
   type CartSettingUpdateParams,
   CartSettingUpdateParamsSchema,
 } from "@/schemas/cart.js";
+import type { CartSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_cart_setting(params: CartSettingParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/carts/setting", "GET", undefined, queryParams);
-    const cart = data.cart || data;
+    const responseData = data as { cart?: Record<string, unknown> } | Record<string, unknown>;
+    const cart = (responseData.cart || responseData) as CartSetting;
 
     const actionTypeMap: Record<string, string> = {
       M: "Go to cart page",
@@ -29,7 +31,7 @@ async function cafe24_get_cart_setting(params: CartSettingParams) {
           text:
             `## Cart Settings (Shop #${cart.shop_no || 1})\n\n` +
             `- **Wishlist Display**: ${cart.wishlist_display === "T" ? "Enabled" : "Disabled"}\n` +
-            `- **Add Action Type**: ${actionTypeMap[cart.add_action_type] || cart.add_action_type}\n` +
+            `- **Add Action Type**: ${actionTypeMap[cart.add_action_type || ""] || cart.add_action_type}\n` +
             `- **Direct Purchase**: ${cart.cart_item_direct_purchase === "T" ? "Enabled" : "Disabled"}\n` +
             `- **Storage Period**: ${cart.storage_period === "T" ? `${cart.period} days` : "Not set"}\n` +
             `- **Icon Display**: ${cart.icon_display === "T" ? "Enabled" : "Disabled"}\n` +
@@ -58,13 +60,14 @@ async function cafe24_update_cart_setting(params: CartSettingUpdateParams) {
   try {
     const { shop_no, ...settings } = params;
 
-    const requestBody: Record<string, any> = {
+    const requestBody: Record<string, unknown> = {
       shop_no: shop_no ?? 1,
       request: settings,
     };
 
     const data = await makeApiRequest("/admin/carts/setting", "PUT", requestBody);
-    const cart = data.cart || data;
+    const responseData = data as { cart?: Record<string, unknown> } | Record<string, unknown>;
+    const cart = (responseData.cart || responseData) as CartSetting;
 
     return {
       content: [

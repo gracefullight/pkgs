@@ -6,8 +6,8 @@ import {
   ProductPropertiesUpdateParamsSchema,
   type TextStyle,
 } from "@/schemas/productproperties.js";
+import type { DisplaySetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { DisplaySetting } from "../types.js";
 
 async function cafe24_get_product_properties_setting(params: ProductPropertiesParams) {
   try {

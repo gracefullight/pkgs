@@ -3,11 +3,12 @@ import {
   type SocialNaverShoppingParams,
   SocialNaverShoppingParamsSchema,
 } from "@/schemas/socialnavershopping.js";
+import type { SocialNaverShoppingSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_social_naver_shopping_setting(params: SocialNaverShoppingParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
@@ -18,7 +19,11 @@ async function cafe24_get_social_naver_shopping_setting(params: SocialNaverShopp
       undefined,
       queryParams,
     );
-    const navershopping = data.navershopping || data;
+    const responseData = data as
+      | { navershopping?: Record<string, unknown> }
+      | Record<string, unknown>;
+    const navershopping = (responseData.navershopping ||
+      responseData) as SocialNaverShoppingSetting;
 
     return {
       content: [

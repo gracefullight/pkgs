@@ -15,7 +15,10 @@ async function cafe24_get_benefit_setting(params: BenefitSettingParams) {
     }
 
     const data = await makeApiRequest("/admin/benefits/setting", "GET", undefined, queryParams);
-    const benefit = data.benefit || data;
+    const responseData = data as
+      | { benefit?: Record<string, unknown> }
+      | (Record<string, unknown> & { use_gift?: string });
+    const benefit = (responseData.benefit || responseData) as Record<string, unknown>;
 
     const useGiftText = benefit.use_gift === "T" ? "Enabled" : "Disabled";
     const paymentMethodText =
@@ -41,7 +44,7 @@ async function cafe24_get_benefit_setting(params: BenefitSettingParams) {
             `- **Include Shipping Fee**: ${benefit.include_shipping_fee === "I" ? "Yes" : "No"}\n` +
             `- **Grant Type**: ${grantTypeText}\n` +
             `- **Selection Mode**: ${selectionModeText}\n` +
-            `- **Selection Steps**: ${(benefit.gift_selection_step || []).join(", ")}\n` +
+            `- **Selection Steps**: ${((benefit.gift_selection_step as string[]) || []).join(", ")}\n` +
             `- **Allow Gift Review**: ${benefit.allow_gift_review === "T" ? "Yes" : "No"}\n`,
         },
       ],
@@ -78,7 +81,10 @@ async function cafe24_update_benefit_setting(params: BenefitSettingUpdateParams)
     };
 
     const data = await makeApiRequest("/admin/benefits/setting", "PUT", requestBody);
-    const benefit = data.benefit || data;
+    const responseData = data as
+      | { benefit?: Record<string, unknown> }
+      | (Record<string, unknown> & { use_gift?: string });
+    const benefit = (responseData.benefit || responseData) as Record<string, unknown>;
 
     const useGiftText = benefit.use_gift === "T" ? "Enabled" : "Disabled";
     const grantTypeText = benefit.gift_grant_type === "S" ? "Customer selection" : "Automatic";
@@ -91,7 +97,7 @@ async function cafe24_update_benefit_setting(params: BenefitSettingUpdateParams)
             `## Benefit/Gift Settings Updated\n\n` +
             `- **Gift Feature**: ${useGiftText}\n` +
             `- **Grant Type**: ${grantTypeText}\n` +
-            `- **Selection Steps**: ${(benefit.gift_selection_step || []).join(", ")}\n`,
+            `- **Selection Steps**: ${((benefit.gift_selection_step as string[]) || []).join(", ")}\n`,
         },
       ],
       structuredContent: {

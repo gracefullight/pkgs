@@ -1,23 +1,23 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
 import {
   type SeoSettingsParams,
   SeoSettingsParamsSchema,
   type SeoSettingsUpdateParams,
   SeoSettingsUpdateParamsSchema,
 } from "@/schemas/seo.js";
-
+import type { SeoSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_seo_setting(params: SeoSettingsParams) {
   try {
-    const queryParams: Record<string, any> = {};
+    const queryParams: Record<string, unknown> = {};
     if (params.shop_no) {
       queryParams.shop_no = params.shop_no;
     }
 
     const data = await makeApiRequest("/admin/seo/setting", "GET", undefined, queryParams);
-    const seo = data.seo || data;
+    const responseData = data as { seo?: Record<string, unknown> } | Record<string, unknown>;
+    const seo = (responseData.seo || responseData) as SeoSetting;
 
     return {
       content: [
@@ -52,7 +52,8 @@ async function cafe24_update_seo_setting(params: SeoSettingsUpdateParams) {
     };
 
     const data = await makeApiRequest("/admin/seo/setting", "PUT", requestBody);
-    const seo = data.seo || data;
+    const responseData = data as { seo?: Record<string, unknown> } | Record<string, unknown>;
+    const seo = (responseData.seo || responseData) as SeoSetting;
 
     return {
       content: [

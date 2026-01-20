@@ -1,11 +1,13 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { type TaxManagerParams, TaxManagerParamsSchema } from "@/schemas/taxmanager.js";
+import type { TaxManagerSetting } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
 
 async function cafe24_get_tax_manager_setting(_params: TaxManagerParams) {
   try {
     const data = await makeApiRequest("/admin/taxmanager", "GET");
-    const taxmanager = data.taxmanager || data;
+    const responseData = data as { taxmanager?: Record<string, unknown> } | Record<string, unknown>;
+    const taxmanager = (responseData.taxmanager || responseData) as TaxManagerSetting;
 
     return {
       content: [

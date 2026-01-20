@@ -41,3 +41,41 @@ export const ProductDisplaySearchParamsSchema = z
   .strict();
 
 export type ProductDisplaySearchParams = z.infer<typeof ProductDisplaySearchParamsSchema>;
+
+export const ProductDisplaySettingParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+  })
+  .strict();
+
+export type ProductDisplaySettingParams = z.infer<typeof ProductDisplaySettingParamsSchema>;
+
+export const SortingOptionSchema = z.enum([
+  "new_product",
+  "product_name",
+  "low_price",
+  "high_price",
+  "manufacture",
+  "popular_product",
+  "review",
+  "hit_count",
+  "like_count",
+]);
+
+export type SortingOption = z.infer<typeof SortingOptionSchema>;
+
+export const ProductDisplaySettingUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
+    sorting_options: z
+      .array(SortingOptionSchema)
+      .min(1)
+      .describe(
+        "Sorting options: new_product, product_name, low_price, high_price, manufacture, popular_product, review, hit_count, like_count",
+      ),
+  })
+  .strict();
+
+export type ProductDisplaySettingUpdateParams = z.infer<
+  typeof ProductDisplaySettingUpdateParamsSchema
+>;

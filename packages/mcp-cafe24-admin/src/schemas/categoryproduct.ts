@@ -1,44 +1,87 @@
 import { z } from "zod";
 
-export const CategoryProductSearchParamsSchema = z
+export const ListCategoryProductsSchema = z
   .object({
+    shop_no: z.number().int().optional().default(1).describe("Shop number"),
+    category_no: z.number().int().describe("Category number"),
+    display_group: z
+      .number()
+      .int()
+      .min(1)
+      .max(3)
+      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
     limit: z
       .number()
       .int()
       .min(1)
-      .max(100)
-      .default(20)
-      .describe("Maximum results to return (1-100)"),
-    offset: z.number().int().min(0).default(0).describe("Number of results to skip"),
-    category_no: z.number().int().describe("Category number"),
-    product_no: z.string().optional().describe("Product numbers (comma separated)"),
-    display: z.enum(["T", "F"]).optional().describe("Display status"),
-    selling: z.enum(["T", "F"]).optional().describe("Selling status"),
-    product_code: z.string().optional().describe("Product codes (comma separated)"),
-    product_tag: z.string().optional().describe("Product tags (comma separated)"),
-    custom_product_code: z.string().optional().describe("Custom product codes (comma separated)"),
-    product_name: z.string().optional().describe("Product names (comma separated)"),
-    eng_product_name: z.string().optional().describe("English product names (comma separated)"),
-    supply_product_name: z.string().optional().describe("Supply product names (comma separated)"),
-    internal_product_name: z
-      .string()
+      .max(50000)
       .optional()
-      .describe("Internal product names (comma separated)"),
-    model_name: z.string().optional().describe("Model names (comma separated)"),
-    price_min: z.string().optional().describe("Minimum price"),
-    price_max: z.string().optional().describe("Maximum price"),
-    created_start_date: z.string().optional().describe("Created start date (YYYY-MM-DD)"),
-    created_end_date: z.string().optional().describe("Created end date (YYYY-MM-DD)"),
-    updated_start_date: z.string().optional().describe("Updated start date (YYYY-MM-DD)"),
-    updated_end_date: z.string().optional().describe("Updated end date (YYYY-MM-DD)"),
-    category: z.string().optional().describe("Category number"),
-    category_unapplied: z.enum(["T"]).optional().describe("Search unapplied category"),
-    include_sub_category: z.enum(["T"]).optional().describe("Include sub-categories"),
-    product_weight: z.string().optional().describe("Product weight"),
-    sort: z.enum(["created_date", "updated_date", "product_name"]).optional().describe("Sort by"),
-    order: z.enum(["asc", "desc"]).optional().describe("Sort order"),
-    embed: z.string().optional().describe("Embed resources (comma separated)"),
+      .default(50000)
+      .describe("Maximum number of results"),
   })
   .strict();
 
-export type CategoryProductSearchParams = z.infer<typeof CategoryProductSearchParamsSchema>;
+export const CountCategoryProductsSchema = z
+  .object({
+    shop_no: z.number().int().optional().default(1).describe("Shop number"),
+    category_no: z.number().int().describe("Category number"),
+    display_group: z
+      .number()
+      .int()
+      .min(1)
+      .max(3)
+      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
+  })
+  .strict();
+
+export const AddCategoryProductsSchema = z
+  .object({
+    shop_no: z.number().int().optional().default(1).describe("Shop number"),
+    category_no: z.number().int().describe("Category number"),
+    display_group: z
+      .number()
+      .int()
+      .min(1)
+      .max(3)
+      .optional()
+      .default(1)
+      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
+    product_no: z.array(z.number().int()).min(1).describe("List of product numbers to add"),
+  })
+  .strict();
+
+export const UpdateCategoryProductSchema = z
+  .object({
+    shop_no: z.number().int().optional().default(1).describe("Shop number"),
+    category_no: z.number().int().describe("Category number"),
+    display_group: z
+      .number()
+      .int()
+      .min(1)
+      .max(3)
+      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
+    product_no: z.number().int().describe("Product number"),
+    sequence: z.number().int().min(1).max(999999).optional().describe("Display sequence"),
+    auto_sort: z.enum(["T", "F"]).optional().describe("Auto sort enabled (T: Use, F: Do not use)"),
+    fixed_sort: z
+      .enum(["T", "F"])
+      .optional()
+      .describe("Fixed sort enabled (T: Use, F: Do not use)"),
+  })
+  .strict();
+
+export const RemoveCategoryProductSchema = z
+  .object({
+    shop_no: z.number().int().optional().default(1).describe("Shop number"),
+    category_no: z.number().int().describe("Category number"),
+    product_no: z.number().int().describe("Product number"),
+    display_group: z
+      .number()
+      .int()
+      .min(1)
+      .max(3)
+      .optional()
+      .default(1)
+      .describe("Display group (1: Normal, 2: Recommendation, 3: New)"),
+  })
+  .strict();

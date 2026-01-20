@@ -32,7 +32,8 @@ async function cafe24_get_app() {
 
     // Handle different possible response structures
     // API returns: { app: { version, version_expiration_date, initial_version, previous_version, extension_type } }
-    const app = data.app || data;
+    const responseData = data as { app?: Record<string, unknown> } | Record<string, unknown>;
+    const app = (responseData.app || responseData) as Record<string, unknown> | null;
 
     // Check if app has expected properties
     if (!app || typeof app !== "object") {

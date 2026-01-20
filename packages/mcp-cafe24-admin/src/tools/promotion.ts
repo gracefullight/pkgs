@@ -7,8 +7,8 @@ import {
   type PromotionSearchParams,
   PromotionSearchParamsSchema,
 } from "@/schemas/promotion.js";
+import type { Promotion } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { Promotion } from "../types.js";
 
 async function cafe24_list_promotions(params: PromotionSearchParams) {
   try {
@@ -62,7 +62,8 @@ async function cafe24_get_promotion(params: PromotionDetailParams) {
       `/admin/promotions/${params.promotion_no}`,
       "GET",
     );
-    const promotion = data.promotion || {};
+    const responseData = data as { promotion?: Promotion };
+    const promotion = responseData.promotion || ({} as Promotion);
 
     return {
       content: [
@@ -88,7 +89,8 @@ async function cafe24_create_promotion(params: PromotionCreateParams) {
       "POST",
       params,
     );
-    const promotion = data.promotion || {};
+    const responseData = data as { promotion?: Promotion };
+    const promotion = responseData.promotion || ({} as Promotion);
 
     return {
       content: [

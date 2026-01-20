@@ -1,51 +1,20 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import {
+  type AddMainProductsParams,
+  AddMainProductsParamsSchema,
+  type CountMainProductsParams,
+  CountMainProductsParamsSchema,
+  type DeleteMainProductParams,
+  DeleteMainProductParamsSchema,
+  type ListMainProductsParams,
+  ListMainProductsParamsSchema,
+  type UpdateMainProductsParams,
+  UpdateMainProductsParamsSchema,
+} from "@/schemas/mainproducts.js";
+import type { MainProduct, MainProductOperationResult } from "@/types/index.js";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { MainProduct, MainProductOperationResult } from "../types.js";
 
-const ListMainProductsParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    display_group: z.number().int().describe("Main display group number"),
-  })
-  .strict();
-
-const CountMainProductsParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    display_group: z.number().int().describe("Main display group number"),
-  })
-  .strict();
-
-const AddMainProductsParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    display_group: z.number().int().describe("Main display group number"),
-    product_no: z.array(z.number().int()).min(1).describe("List of product numbers to add"),
-  })
-  .strict();
-
-const UpdateMainProductsParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    display_group: z.number().int().describe("Main display group number"),
-    product_no: z.array(z.number().int()).min(1).describe("Ordered list of product numbers to set"),
-    fix_product_no: z
-      .array(z.number().int())
-      .optional()
-      .describe("List of product numbers to fix in the display order"),
-  })
-  .strict();
-
-const DeleteMainProductParamsSchema = z
-  .object({
-    shop_no: z.number().int().min(1).optional().describe("Multi-shop number (default: 1)"),
-    display_group: z.number().int().describe("Main display group number"),
-    product_no: z.number().int().describe("Product number to remove"),
-  })
-  .strict();
-
-async function cafe24_list_main_products(params: z.infer<typeof ListMainProductsParamsSchema>) {
+async function cafe24_list_main_products(params: ListMainProductsParams) {
   try {
     const queryParams: Record<string, any> = {};
     if (params.shop_no) {
@@ -59,7 +28,8 @@ async function cafe24_list_main_products(params: z.infer<typeof ListMainProducts
       queryParams,
     );
 
-    const products: MainProduct[] = data.products || [];
+    const responseData = data as { products?: MainProduct[] } | { products?: MainProduct[] };
+    const products: MainProduct[] = responseData.products || [];
 
     return {
       content: [
@@ -84,7 +54,7 @@ async function cafe24_list_main_products(params: z.infer<typeof ListMainProducts
   }
 }
 
-async function cafe24_count_main_products(params: z.infer<typeof CountMainProductsParamsSchema>) {
+async function cafe24_count_main_products(params: CountMainProductsParams) {
   try {
     const queryParams: Record<string, any> = {};
     if (params.shop_no) {
@@ -104,17 +74,20 @@ async function cafe24_count_main_products(params: z.infer<typeof CountMainProduc
           type: "text" as const,
           text: `Main Product Count (Group: ${params.display_group}, Shop: ${
             params.shop_no || 1
-          }): ${data.count ?? 0}`,
+          }): ${(data as { count: number }).count ?? 0}`,
         },
       ],
-      structuredContent: { count: data.count } as unknown as Record<string, unknown>,
+      structuredContent: { count: (data as { count: number }).count } as unknown as Record<
+        string,
+        unknown
+      >,
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
   }
 }
 
-async function cafe24_add_main_products(params: z.infer<typeof AddMainProductsParamsSchema>) {
+async function cafe24_add_main_products(params: AddMainProductsParams) {
   try {
     const requestBody = {
       shop_no: params.shop_no || 1,
@@ -129,7 +102,10 @@ async function cafe24_add_main_products(params: z.infer<typeof AddMainProductsPa
       requestBody,
     );
 
-    const result: MainProductOperationResult = data.product || data;
+    const responseData = data as
+      | { product?: MainProductOperationResult }
+      | MainProductOperationResult;
+    const result: MainProductOperationResult = (responseData as any).product || responseData;
 
     return {
       content: [
@@ -145,7 +121,7 @@ async function cafe24_add_main_products(params: z.infer<typeof AddMainProductsPa
   }
 }
 
-async function cafe24_update_main_products(params: z.infer<typeof UpdateMainProductsParamsSchema>) {
+async function cafe24_update_main_products(params: UpdateMainProductsParams) {
   try {
     const requestBody = {
       shop_no: params.shop_no || 1,
@@ -161,7 +137,10 @@ async function cafe24_update_main_products(params: z.infer<typeof UpdateMainProd
       requestBody,
     );
 
-    const result: MainProductOperationResult = data.product || data;
+    const responseData = data as
+      | { product?: MainProductOperationResult }
+      | MainProductOperationResult;
+    const result: MainProductOperationResult = (responseData as any).product || responseData;
 
     return {
       content: [
@@ -177,7 +156,7 @@ async function cafe24_update_main_products(params: z.infer<typeof UpdateMainProd
   }
 }
 
-async function cafe24_delete_main_product(params: z.infer<typeof DeleteMainProductParamsSchema>) {
+async function cafe24_delete_main_product(params: DeleteMainProductParams) {
   try {
     // Note: DELETE body is ignored by many clients but Cafe24 example implies "product_no" in path BUT shows JSON response with product info.
     // However, usually DELETE endpoints in Cafe24 might accept querying params but the example shows a path param for product_no.
@@ -198,7 +177,10 @@ async function cafe24_delete_main_product(params: z.infer<typeof DeleteMainProdu
       queryParams,
     );
 
-    const result: MainProductOperationResult = data.product || data;
+    const responseData = data as
+      | { product?: MainProductOperationResult }
+      | MainProductOperationResult;
+    const result: MainProductOperationResult = (responseData as any).product || responseData;
 
     return {
       content: [

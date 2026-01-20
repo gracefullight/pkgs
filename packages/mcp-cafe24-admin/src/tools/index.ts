@@ -18,7 +18,6 @@ import { registerTools as registerKakaoTools } from "./kakao.js";
 import { registerTools as registerMainTools } from "./main.js";
 import { registerTools as registerMainProductsTools } from "./mainproducts.js";
 import { registerTools as registerMenuTools } from "./menu.js";
-import { registerTools as registerMiscTools } from "./misc.js";
 import { registerTools as registerMobileTools } from "./mobile.js";
 import { registerTools as registerOrderTools } from "./order.js";
 import { registerTools as registerOrderFormTools } from "./orderform.js";
@@ -27,13 +26,18 @@ import { registerTools as registerPaymentTools } from "./payment.js";
 import { registerTools as registerPointsTools } from "./points.js";
 import { registerTools as registerPolicyTools } from "./policy.js";
 import { registerTools as registerPrivacyTools } from "./privacy.js";
-import { registerTools as registerProductTools } from "./product.js";
-import { registerTools as registerProductDisplayTools } from "./productdisplay.js";
-import { registerTools as registerProductPropertiesTools } from "./productproperties.js";
-import { registerTools as registerProductSettingTools } from "./productsetting.js";
+import { registerTools as registerProductAdminTools } from "./product-admin.js";
+import { registerTools as registerProductBasicsTools } from "./product-basics.js";
+import { registerTools as registerProductCategoryTools } from "./product-category.js";
+import { registerTools as registerProductDisplayTools } from "./product-display.js";
+import { registerTools as registerProductImagesTools } from "./product-images.js";
+import { registerTools as registerProductIconsTools } from "./product-marketing.js";
+import { registerTools as registerProductPropertiesTools } from "./product-properties.js";
+import { registerTools as registerProductSettingTools } from "./product-setting.js";
 import { registerTools as registerPromotionTools } from "./promotion.js";
 import { registerTools as registerRedirectTools } from "./redirect.js";
 import { registerTools as registerRestockTools } from "./restock.js";
+import { registerTools as registerSalesTools } from "./sales.js";
 import { registerTools as registerSeoTools } from "./seo.js";
 import { registerTools as registerShippingManagerTools } from "./shippingmanager.js";
 import { registerTools as registerShopTools } from "./shop.js";
@@ -42,7 +46,9 @@ import { registerTools as registerSocialAppleTools } from "./socialapple.js";
 import { registerTools as registerSocialNaverShoppingTools } from "./socialnavershopping.js";
 import { registerTools as registerStoreTools } from "./store.js";
 import { registerTools as registerSubscriptionTools } from "./subscription.js";
+import { registerTools as registerSupplierTools } from "./supplier.js";
 import { registerTools as registerTaxManagerTools } from "./taxmanager.js";
+import { registerTools as registerThemeTools } from "./theme.js";
 
 /**
  * Register all Cafe24 Admin tools with the MCP server
@@ -67,7 +73,6 @@ export function registerAllTools(server: McpServer): void {
   registerMainProductsTools(server);
   registerMenuTools(server);
   registerMobileTools(server);
-  registerMiscTools(server);
   registerOrderTools(server);
   registerOrderFormTools(server);
   registerOrderSettingTools(server);
@@ -75,13 +80,18 @@ export function registerAllTools(server: McpServer): void {
   registerPointsTools(server);
   registerPolicyTools(server);
   registerPrivacyTools(server);
-  registerProductTools(server);
+  registerProductBasicsTools(server);
+  registerProductImagesTools(server);
+  registerProductAdminTools(server);
+  registerProductCategoryTools(server);
+  registerProductIconsTools(server);
   registerProductDisplayTools(server);
   registerProductPropertiesTools(server);
   registerProductSettingTools(server);
   registerPromotionTools(server);
   registerRedirectTools(server);
   registerRestockTools(server);
+  registerSalesTools(server);
   registerSeoTools(server);
   registerShippingManagerTools(server);
   registerShopTools(server);
@@ -90,6 +100,8 @@ export function registerAllTools(server: McpServer): void {
   registerSocialNaverShoppingTools(server);
   registerStoreTools(server);
   registerSubscriptionTools(server);
+  registerSupplierTools(server);
   registerTaxManagerTools(server);
+  registerThemeTools(server);
   registerBundleProductTools(server);
 }
