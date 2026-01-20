@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { handleApiError, makeApiRequest } from "../services/api-client.js";
-import type { Category, Product } from "../types.js";
+import type { Category, Product, ProductDiscountPrice } from "../types.js";
 
 const ProductsSearchParamsSchema = z
   .object({
@@ -1185,6 +1185,50 @@ async function cafe24_delete_decoration_image(
   }
 }
 
+const ProductDiscountPriceParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).optional().default(1).describe("Multi-shop number"),
+    product_no: z.number().describe("Product number (required)"),
+  })
+  .strict();
+
+async function cafe24_get_product_discount_price(
+  params: z.infer<typeof ProductDiscountPriceParamsSchema>,
+) {
+  try {
+    const { shop_no, product_no } = params;
+    const requestHeaders = shop_no ? { "X-Cafe24-Shop-No": shop_no.toString() } : undefined;
+
+    const data = await makeApiRequest<{
+      discountprice: ProductDiscountPrice;
+    }>(
+      `/admin/products/${product_no}/discountprice`,
+      "GET",
+      undefined,
+      { shop_no },
+      requestHeaders,
+    );
+
+    const result = data.discountprice || ({} as ProductDiscountPrice);
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `Discount prices for product ${product_no}\n` +
+            `- PC: ${result.pc_discount_price}\n` +
+            `- Mobile: ${result.mobile_discount_price}\n` +
+            `- App: ${result.app_discount_price}`,
+        },
+      ],
+      structuredContent: result as unknown as Record<string, unknown>,
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 const CategoriesSearchParamsSchema = z
   .object({
     limit: z
@@ -1561,6 +1605,22 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_delete_decoration_image,
+  );
+
+  server.registerTool(
+    "cafe24_get_product_discount_price",
+    {
+      title: "Get Product Discount Price",
+      description: "Retrieve discount price information for a product (PC, Mobile, App).",
+      inputSchema: ProductDiscountPriceParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_product_discount_price,
   );
 
   server.registerTool(

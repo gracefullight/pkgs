@@ -263,6 +263,12 @@ export interface Product {
   selling_date_end?: string;
 }
 
+export interface ProductDiscountPrice {
+  pc_discount_price: string;
+  mobile_discount_price: string;
+  app_discount_price: string;
+}
+
 export interface Category {
   category_no: number;
   category_name: string;
