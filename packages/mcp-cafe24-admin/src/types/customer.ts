@@ -115,3 +115,22 @@ export interface CustomerPrivacyParams {
   member_id?: string;
   cellphone?: string;
 }
+
+export interface CustomerAutoUpdate {
+  shop_no: number;
+  member_id: string;
+  next_grade: string | null;
+  total_purchase_amount: number;
+  total_purchase_count: number;
+  required_purchase_amount: number;
+  required_purchase_count: number;
+}
+
+export type CustomerAutoUpdateResponse = {
+  autoupdate: CustomerAutoUpdate;
+};
+
+export interface CustomerAutoUpdateParams {
+  shop_no?: number;
+  member_id: string;
+}

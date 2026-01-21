@@ -2,11 +2,14 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { z } from "zod";
 import type {
   Customer,
+  CustomerAutoUpdateParams,
+  CustomerAutoUpdateResponse,
   CustomerPrivacyParams,
   CustomerPrivacyResponse,
   CustomerSetting,
 } from "@/types/index.js";
 import {
+  CustomerAutoUpdateParamsSchema,
   CustomerDetailParamsSchema,
   CustomerPrivacyParamsSchema,
   CustomerSettingParamsSchema,
@@ -273,6 +276,36 @@ async function cafe24_list_customers_privacy(params: CustomerPrivacyParams) {
   }
 }
 
+async function cafe24_get_customer_auto_update(params: CustomerAutoUpdateParams) {
+  try {
+    const { member_id, ...queryParams } = params;
+    const data = await makeApiRequest<CustomerAutoUpdateResponse>(
+      `/admin/customers/${member_id}/autoupdate`,
+      "GET",
+      undefined,
+      queryParams,
+    );
+    const s = data.autoupdate;
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `# Customer Tier Auto-Update Status: ${s.member_id}\n\n` +
+            `- **Shop No**: ${s.shop_no}\n` +
+            `- **Next Tier**: ${s.next_grade || "N/A"}\n` +
+            `- **Current Total Purchase**: ${s.total_purchase_amount.toLocaleString()} amt / ${s.total_purchase_count} count\n` +
+            `- **Required for Next Tier**: ${s.required_purchase_amount.toLocaleString()} amt / ${s.required_purchase_count} count\n`,
+        },
+      ],
+      structuredContent: data,
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 export function registerTools(server: McpServer): void {
   server.registerTool(
     "cafe24_list_customers",
@@ -357,5 +390,21 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_list_customers_privacy,
+  );
+
+  server.registerTool(
+    "cafe24_get_customer_auto_update",
+    {
+      title: "Get Cafe24 Customer Tier Auto-Update Status",
+      description: "Retrieve a customer's progress toward the next tier (grade).",
+      inputSchema: CustomerAutoUpdateParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_get_customer_auto_update,
   );
 }

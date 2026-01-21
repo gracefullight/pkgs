@@ -62,3 +62,10 @@ export const CustomerPrivacyParamsSchema = z
     message: "Either member_id or cellphone must be provided",
     path: ["member_id"],
   });
+
+export const CustomerAutoUpdateParamsSchema = z
+  .object({
+    shop_no: z.number().int().min(1).default(1).describe("Shop Number (default: 1)"),
+    member_id: z.string().max(20).describe("Member ID"),
+  })
+  .strict();
