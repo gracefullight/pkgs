@@ -30,6 +30,10 @@
     "packages/mcp-cafe24-admin": {
       "release-type": "node",
       "component": "@gracefullight/mcp-cafe24-admin"
+    },
+    "packages/biome-plugin": {
+      "release-type": "node",
+      "component": "@gracefullight/biome-plugin"
     }
   }
 }
