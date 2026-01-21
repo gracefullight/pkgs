@@ -1,50 +1,34 @@
 or {
-  JsImport() as $import where {
-    $import <: contains `"./$_"` as $path,
-    register_diagnostic(span=$path, message="Avoid relative import path. Use a path alias instead.")
+  `import $_ from $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative import path. Use a path alias instead.")
   },
-  JsImport() as $import where {
-    $import <: contains `'./$_'` as $path,
-    register_diagnostic(span=$path, message="Avoid relative import path. Use a path alias instead.")
+  `import type $_ from $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative import path. Use a path alias instead.")
   },
-  JsImport() as $import where {
-    $import <: contains `"../$_"` as $path,
-    register_diagnostic(span=$path, message="Avoid relative import path. Use a path alias instead.")
+  `import $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative import path. Use a path alias instead.")
   },
-  JsImport() as $import where {
-    $import <: contains `'../$_'` as $path,
-    register_diagnostic(span=$path, message="Avoid relative import path. Use a path alias instead.")
-  },
-  JsImportCallExpression() as $import where {
-    $import <: contains `"./$_"` as $path,
+  `import($_)` as $call where {
+    $call <: contains r"^['\"]\.\.?/.*" as $path,
     register_diagnostic(span=$path, message="Avoid relative dynamic import path. Use a path alias instead.", severity="warn")
   },
-  JsImportCallExpression() as $import where {
-    $import <: contains `'./$_'` as $path,
-    register_diagnostic(span=$path, message="Avoid relative dynamic import path. Use a path alias instead.", severity="warn")
+  `export { $... } from $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative export path. Use a path alias instead.")
   },
-  JsImportCallExpression() as $import where {
-    $import <: contains `"../$_"` as $path,
-    register_diagnostic(span=$path, message="Avoid relative dynamic import path. Use a path alias instead.", severity="warn")
+  `export type { $... } from $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative export path. Use a path alias instead.")
   },
-  JsImportCallExpression() as $import where {
-    $import <: contains `'../$_'` as $path,
-    register_diagnostic(span=$path, message="Avoid relative dynamic import path. Use a path alias instead.", severity="warn")
+  `export * from $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative export path. Use a path alias instead.")
   },
-  JsExport() as $export where {
-    $export <: contains `"./$_"` as $path,
-    register_diagnostic(span=$path, message="Avoid relative export path. Use a path alias instead.")
-  },
-  JsExport() as $export where {
-    $export <: contains `'./$_'` as $path,
-    register_diagnostic(span=$path, message="Avoid relative export path. Use a path alias instead.")
-  },
-  JsExport() as $export where {
-    $export <: contains `"../$_"` as $path,
-    register_diagnostic(span=$path, message="Avoid relative export path. Use a path alias instead.")
-  },
-  JsExport() as $export where {
-    $export <: contains `'../$_'` as $path,
-    register_diagnostic(span=$path, message="Avoid relative export path. Use a path alias instead.")
+  `export * as $_ from $source` where {
+    $source <: r"^['\"]\.\.?/.*",
+    register_diagnostic(span=$source, message="Avoid relative export path. Use a path alias instead.")
   }
 }
