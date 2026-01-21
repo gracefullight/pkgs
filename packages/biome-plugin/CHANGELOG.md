@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.0.1...@gracefullight/biome-plugin@0.0.2) (2026-01-21)
+## [0.1.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.0.1...@gracefullight/biome-plugin@0.1.0) (2026-01-21)
 
 
 ### Features
