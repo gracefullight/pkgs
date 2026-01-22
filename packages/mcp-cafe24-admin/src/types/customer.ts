@@ -134,3 +134,34 @@ export interface CustomerAutoUpdateParams {
   shop_no?: number;
   member_id: string;
 }
+
+export interface CustomerWishlistItem {
+  shop_no: number;
+  wishlist_no: number;
+  product_no: number;
+  variant_code: string;
+  additional_option: Array<{
+    option_name: string;
+    option_value: string;
+  }> | null;
+  attached_file_option: Array<{
+    file_path: string;
+  }> | null;
+  price: string;
+  product_bundle: string;
+  created_date: string;
+  price_content: string | null;
+}
+
+export interface CustomerWishlistResponse extends Record<string, unknown> {
+  wishlist: CustomerWishlistItem[];
+}
+
+export interface CustomerWishlistCountResponse extends Record<string, unknown> {
+  count: number;
+}
+
+export interface CustomerWishlistParams {
+  member_id: string;
+  shop_no?: number;
+}

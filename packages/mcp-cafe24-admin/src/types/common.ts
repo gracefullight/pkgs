@@ -26,3 +26,9 @@ export interface PaginatedResponse<T> {
   has_more: boolean;
   next_offset?: number;
 }
+export type Cafe24Enum = "T" | "F";
+
+export interface Cafe24PagingLinks {
+  rel: "prev" | "next" | "self";
+  href: string;
+}

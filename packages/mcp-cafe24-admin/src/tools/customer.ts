@@ -7,6 +7,7 @@ import {
   CustomerSettingParamsSchema,
   CustomerSettingUpdateParamsSchema,
   CustomersSearchParamsSchema,
+  CustomerWishlistParamsSchema,
 } from "@/schemas/customer.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type {
@@ -16,6 +17,8 @@ import type {
   CustomerPrivacyParams,
   CustomerPrivacyResponse,
   CustomerSetting,
+  CustomerWishlistCountResponse,
+  CustomerWishlistResponse,
 } from "@/types/index.js";
 
 async function cafe24_list_customers(params: z.infer<typeof CustomersSearchParamsSchema>) {
@@ -306,6 +309,70 @@ async function cafe24_get_customer_auto_update(params: CustomerAutoUpdateParams)
   }
 }
 
+async function cafe24_list_customer_wishlist(params: z.infer<typeof CustomerWishlistParamsSchema>) {
+  try {
+    const { member_id, ...queryParams } = params;
+    const data = await makeApiRequest<CustomerWishlistResponse>(
+      `/admin/customers/${member_id}/wishlist`,
+      "GET",
+      undefined,
+      queryParams,
+    );
+    const wishlist = data.wishlist || [];
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text:
+            `# Wishlist for ${member_id}\n\n` +
+            wishlist
+              .map(
+                (item) =>
+                  `## Product #${item.product_no} (Wishlist #${item.wishlist_no})\n` +
+                  `- **Variant**: ${item.variant_code}\n` +
+                  `- **Price**: ${item.price}\n` +
+                  `- **Added Date**: ${item.created_date}\n` +
+                  (item.additional_option
+                    ? `- **Additional Options**: ${item.additional_option.map((o) => `${o.option_name}: ${o.option_value}`).join(", ")}\n`
+                    : ""),
+              )
+              .join("\n"),
+        },
+      ],
+      structuredContent: data,
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
+async function cafe24_count_customer_wishlist(
+  params: z.infer<typeof CustomerWishlistParamsSchema>,
+) {
+  try {
+    const { member_id, ...queryParams } = params;
+    const data = await makeApiRequest<CustomerWishlistCountResponse>(
+      `/admin/customers/${member_id}/wishlist/count`,
+      "GET",
+      undefined,
+      queryParams,
+    );
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Customer ${member_id} has **${data.count}** items in their wishlist.`,
+        },
+      ],
+      structuredContent: data,
+    };
+  } catch (error) {
+    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
+  }
+}
+
 export function registerTools(server: McpServer): void {
   server.registerTool(
     "cafe24_list_customers",
@@ -406,5 +473,37 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_get_customer_auto_update,
+  );
+
+  server.registerTool(
+    "cafe24_list_customer_wishlist",
+    {
+      title: "List Cafe24 Customer Wishlist",
+      description: "Retrieve a list of products in a customer's wishlist by member ID.",
+      inputSchema: CustomerWishlistParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_list_customer_wishlist,
+  );
+
+  server.registerTool(
+    "cafe24_count_customer_wishlist",
+    {
+      title: "Count Cafe24 Customer Wishlist",
+      description: "Retrieve the number of products in a customer's wishlist by member ID.",
+      inputSchema: CustomerWishlistParamsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    cafe24_count_customer_wishlist,
   );
 }

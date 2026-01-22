@@ -69,3 +69,10 @@ export const CustomerAutoUpdateParamsSchema = z
     member_id: z.string().max(20).describe("Member ID"),
   })
   .strict();
+
+export const CustomerWishlistParamsSchema = z
+  .object({
+    member_id: z.string().describe("Member ID"),
+    shop_no: z.number().int().min(1).optional().describe("Shop Number (default: 1)"),
+  })
+  .strict();
