@@ -68,6 +68,24 @@ describe("evolution", () => {
       expect(suggestion?.name).toBe("quick-read-file");
     });
 
+    it("does not suggest shortcut for builtin tools", () => {
+      const builtinTools = ["bash", "read", "write", "edit", "grep", "glob"];
+      builtinTools.forEach((toolName) => {
+        const pattern = {
+          id: "1",
+          type: "tool" as const,
+          description: toolName,
+          count: 10,
+          firstSeen: 0,
+          lastSeen: 0,
+          surfaced: false,
+          examples: [],
+        };
+        const suggestion = suggestEvolution(pattern, makeCtx());
+        expect(suggestion).toBeNull();
+      });
+    });
+
     it("suggests hook for file modifications", () => {
       const pattern = {
         id: "2",

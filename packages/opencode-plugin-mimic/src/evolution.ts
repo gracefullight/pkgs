@@ -6,6 +6,46 @@ import { formatCapabilityType } from "@/i18n";
 import type { StateManager } from "@/state";
 import type { CapabilityType, EvolvedCapability, Pattern } from "@/types";
 
+const BUILTIN_TOOLS = new Set([
+  "read",
+  "write",
+  "edit",
+  "bash",
+  "grep",
+  "glob",
+  "serena_list_dir",
+  "serena_find_file",
+  "serena_search_for_pattern",
+  "serena_get_symbols_overview",
+  "serena_find_symbol",
+  "serena_find_referencing_symbols",
+  "serena_replace_symbol_body",
+  "serena_insert_after_symbol",
+  "serena_insert_before_symbol",
+  "serena_replace_content",
+  "serena_rename_symbol",
+  "lsp_diagnostics",
+  "lsp_goto_definition",
+  "lsp_find_references",
+  "lsp_prepare_rename",
+  "lsp_rename",
+  "lsp_symbols",
+  "delegate_task",
+  "task",
+  "question",
+  "background_cancel",
+  "background_output",
+  "skill",
+  "slashcommand",
+  "use_skill",
+  "find_skills",
+  "session_list",
+  "session_read",
+  "session_search",
+  "session_info",
+  "mimic:",
+]);
+
 interface EvolutionSuggestion {
   type: CapabilityType;
   name: string;
@@ -251,6 +291,10 @@ export function suggestEvolution(pattern: Pattern, ctx: MimicContext): Evolution
   switch (pattern.type) {
     case "tool":
       if (pattern.count >= 10) {
+        const toolName = pattern.description;
+        if (BUILTIN_TOOLS.has(toolName)) {
+          return null;
+        }
         return {
           type: "shortcut",
           name: `quick-${pattern.description.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
