@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   type SocialNaverShoppingParams,
   SocialNaverShoppingParamsSchema,
-} from "@/schemas/socialnavershopping.js";
+} from "@/schemas/social-naver-shopping.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { SocialNaverShoppingSetting } from "@/types/index.js";
 

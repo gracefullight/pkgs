@@ -6,7 +6,7 @@ import {
   ListCategoryPropertiesSchema,
   type UpdateCategoryProperties,
   UpdateCategoryPropertiesSchema,
-} from "@/schemas/categoryproperty.js";
+} from "@/schemas/category-property.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 
 async function cafe24_list_category_properties(params: ListCategoryProperties) {

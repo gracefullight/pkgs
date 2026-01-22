@@ -3,7 +3,7 @@ import type { z } from "zod";
 import {
   ProductDisplaySettingParamsSchema,
   ProductDisplaySettingUpdateParamsSchema,
-} from "@/schemas/productdisplay.js";
+} from "@/schemas/product-display.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 
 async function cafe24_get_product_display_setting(

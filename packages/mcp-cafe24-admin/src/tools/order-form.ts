@@ -3,7 +3,7 @@ import type { z } from "zod";
 import {
   OrderFormSettingsParamsSchema,
   UpdateOrderFormSettingsParamsSchema,
-} from "@/schemas/orderform.js";
+} from "@/schemas/order-form.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 
 interface OrderFormSettings {

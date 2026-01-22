@@ -1,5 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { type TaxManagerParams, TaxManagerParamsSchema } from "@/schemas/taxmanager.js";
+import { type TaxManagerParams, TaxManagerParamsSchema } from "@/schemas/tax-manager.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { TaxManagerSetting } from "@/types/index.js";
 

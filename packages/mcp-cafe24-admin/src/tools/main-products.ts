@@ -10,7 +10,7 @@ import {
   ListMainProductsParamsSchema,
   type UpdateMainProductsParams,
   UpdateMainProductsParamsSchema,
-} from "@/schemas/mainproducts.js";
+} from "@/schemas/main-products.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { MainProduct, MainProductOperationResult } from "@/types/index.js";
 

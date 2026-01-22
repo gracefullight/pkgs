@@ -4,7 +4,7 @@ import {
   SocialAppleParamsSchema,
   type SocialAppleUpdateParams,
   SocialAppleUpdateParamsSchema,
-} from "@/schemas/socialapple.js";
+} from "@/schemas/social-apple.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { SocialAppleSetting } from "@/types/index.js";
 

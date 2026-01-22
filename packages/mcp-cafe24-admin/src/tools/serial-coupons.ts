@@ -6,7 +6,7 @@ import {
   SerialCouponDeleteParamsSchema,
   type SerialCouponsSearchParams,
   SerialCouponsSearchParamsSchema,
-} from "@/schemas/serialcoupons.js";
+} from "@/schemas/serial-coupons.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type {
   SerialCouponCreateRequest,

@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   type ShippingManagerParams,
   ShippingManagerParamsSchema,
-} from "@/schemas/shippingmanager.js";
+} from "@/schemas/shipping-manager.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { ShippingManagerStatus } from "@/types/index.js";
 

@@ -6,7 +6,7 @@ import {
   ListCategoryProductsSchema,
   RemoveCategoryProductSchema,
   UpdateCategoryProductSchema,
-} from "@/schemas/categoryproduct.js";
+} from "@/schemas/category-product.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { CategoryProduct } from "@/types/index.js";
 

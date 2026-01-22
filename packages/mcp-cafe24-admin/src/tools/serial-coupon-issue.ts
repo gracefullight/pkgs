@@ -4,7 +4,7 @@ import {
   SerialCouponIssueCreateParamsSchema,
   type SerialCouponIssuesSearchParams,
   SerialCouponIssuesSearchParamsSchema,
-} from "@/schemas/serialcoupon-issue.js";
+} from "@/schemas/serial-coupon-issue.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type {
   SerialCouponIssueCreateRequest,

@@ -5,7 +5,7 @@ import {
   OrderformPropertyCreateParamsSchema,
   OrderformPropertyDeleteParamsSchema,
   OrderformPropertyUpdateParamsSchema,
-} from "@/schemas/orderform-properties.js";
+} from "@/schemas/order-form-properties.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type {
   CreateOrderformPropertiesResponse,

@@ -5,7 +5,7 @@ import {
   CustomPropertiesListParamsSchema,
   CustomPropertyDeleteParamsSchema,
   CustomPropertyUpdateParamsSchema,
-} from "@/schemas/product-customproperties.js";
+} from "@/schemas/product-custom-properties.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 
 interface CustomProperty {

@@ -5,7 +5,7 @@ import {
   BundleProductSearchParamsSchema,
   type CreateBundleProduct,
   CreateBundleProductSchema,
-} from "@/schemas/bundleproduct.js";
+} from "@/schemas/bundle-product.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { BundleProduct } from "@/types/index.js";
 

@@ -6,7 +6,7 @@ import {
   AutomessageSettingParamsSchema,
   type AutomessageSettingUpdateParams,
   AutomessageSettingUpdateParamsSchema,
-} from "@/schemas/automessage.js";
+} from "@/schemas/auto-message.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
 import type { AutomessageArgument, AutomessageSetting } from "@/types/index.js";
 
