@@ -1,4 +1,4 @@
-export interface CustomerCoupon {
+export interface CustomerCoupon extends Record<string, unknown> {
   shop_no: number;
   coupon_no: string;
   issue_no: string;

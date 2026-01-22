@@ -9,13 +9,13 @@ export type SerialCouponGenerateMethod = "A" | "M";
 export type SerialCouponCodeType = "R" | "S";
 
 export interface SerialCouponDiscountAmount {
-  benefit_price: string | null;
+  benefit_price?: string | null;
 }
 
 export interface SerialCouponDiscountRate {
-  benefit_percentage: string | null;
-  benefit_percentage_round_unit: string | null;
-  benefit_percentage_max_price: string | null;
+  benefit_percentage?: string | null;
+  benefit_percentage_round_unit?: string | null;
+  benefit_percentage_max_price?: string | null;
 }
 
 export interface SerialCouponGenerateAuto {
@@ -23,7 +23,7 @@ export interface SerialCouponGenerateAuto {
   serial_code_length?: number;
 }
 
-export interface SerialCoupon {
+export interface SerialCoupon extends Record<string, unknown> {
   shop_no: number;
   coupon_no: string;
   serial_no?: string;
@@ -99,15 +99,15 @@ export interface SerialCoupon {
   discount_rate?: SerialCouponDiscountRate | null;
 }
 
-export interface SerialCouponsListResponse {
+export interface SerialCouponsListResponse extends Record<string, unknown> {
   serialcoupons: SerialCoupon[];
 }
 
-export interface SerialCouponsCreateResponse {
+export interface SerialCouponsCreateResponse extends Record<string, unknown> {
   serialcoupons: SerialCoupon;
 }
 
-export interface SerialCouponDeleteResponse {
+export interface SerialCouponDeleteResponse extends Record<string, unknown> {
   serialcoupon: {
     coupon_no: string;
   };

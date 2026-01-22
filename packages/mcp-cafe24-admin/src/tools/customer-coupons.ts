@@ -88,7 +88,8 @@ async function cafe24_count_customer_coupons(params: CustomerCouponsCountParams)
 
 async function cafe24_delete_customer_coupon(params: CustomerCouponDeleteParams) {
   try {
-    const { member_id, coupon_no, issue_no, ...queryParams } = params;
+    const { shop_no, member_id, coupon_no, issue_no } = params;
+    const queryParams: Record<string, unknown> = { shop_no };
     if (issue_no) {
       queryParams.issue_no = issue_no;
     }
