@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { MimicContext } from "@/context";
 import {
   analyzeTimeSinceLastSession,
   formatDuration,
-  formatJourney,
   formatGrowAnalysis,
+  formatJourney,
 } from "@/format";
-import type { MimicContext } from "@/context";
 import { createI18n } from "@/i18n";
 import { createDefaultState } from "@/state";
 import type { State } from "@/types";
@@ -18,8 +18,12 @@ const mockState = (): State => {
   state.project.stack = ["TypeScript"];
   state.project.focus = "Refactoring";
   state.journey.sessionCount = 10;
-  state.journey.observations = [{ observation: "Observed something", timestamp: new Date().toISOString() }];
-  state.journey.milestones = [{ milestone: "Achieved something", timestamp: new Date().toISOString() }];
+  state.journey.observations = [
+    { observation: "Observed something", timestamp: new Date().toISOString() },
+  ];
+  state.journey.milestones = [
+    { milestone: "Achieved something", timestamp: new Date().toISOString() },
+  ];
   state.patterns = [
     {
       id: "1",
@@ -44,7 +48,7 @@ const mockState = (): State => {
   state.statistics.totalSessions = 10;
   state.statistics.totalToolCalls = 100;
   state.statistics.filesModified = { "src/index.ts": 10, "src/utils.ts": 5 };
-  
+
   return state;
 };
 
@@ -122,7 +126,7 @@ describe("format", () => {
       expect(result).toContain("read_file");
       expect(result).toContain("Hunting Grounds");
       expect(result).toContain("src/");
-      expect(result).toContain("./"); 
+      expect(result).toContain("./");
     });
   });
 });

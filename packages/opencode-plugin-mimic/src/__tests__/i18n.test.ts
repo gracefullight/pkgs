@@ -1,16 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { 
-  createI18n, 
-  resolveLanguage, 
-  loadMimicConfig,
-  formatCapabilityType,
-  formatLevelLabel,
-  formatGreetingStyle,
-  formatDetailLevel,
-  formatPatternType
-} from "@/i18n";
-import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  createI18n,
+  formatCapabilityType,
+  formatDetailLevel,
+  formatGreetingStyle,
+  formatLevelLabel,
+  formatPatternType,
+  loadMimicConfig,
+  resolveLanguage,
+} from "@/i18n";
 
 vi.mock("node:fs", () => ({
   existsSync: vi.fn(),
@@ -88,7 +88,7 @@ describe("i18n", () => {
 
     it("falls back to default language if key missing in target", () => {
       const i18n = createI18n("ko-KR");
-      // Assuming 'some.missing.key' is not in ko-KR but might be in en-US? 
+      // Assuming 'some.missing.key' is not in ko-KR but might be in en-US?
       // Actually the current implementation falls back to en-US dictionary if key missing in target.
       expect(i18n.t("non.existent.key")).toBe("non.existent.key");
     });
@@ -96,26 +96,26 @@ describe("i18n", () => {
 
   describe("format helpers", () => {
     const i18n = createI18n("en-US");
-    
+
     it("formats capability type", () => {
       expect(formatCapabilityType(i18n, "tool")).toBe("evolution.type.tool"); // fallback
       expect(formatCapabilityType(i18n, "agent")).toBe("agent");
     });
 
     it("formats level label", () => {
-        expect(formatLevelLabel(i18n, "technical")).toBe("technical");
+      expect(formatLevelLabel(i18n, "technical")).toBe("technical");
     });
 
     it("formats greeting style", () => {
-        expect(formatGreetingStyle(i18n, "minimal")).toBe("minimal");
+      expect(formatGreetingStyle(i18n, "minimal")).toBe("minimal");
     });
 
     it("formats detail level", () => {
-        expect(formatDetailLevel(i18n, "high")).toBe("high");
+      expect(formatDetailLevel(i18n, "high")).toBe("high");
     });
 
     it("formats pattern type", () => {
-        expect(formatPatternType(i18n, "tool")).toBe("Tool");
+      expect(formatPatternType(i18n, "tool")).toBe("Tool");
     });
   });
 });

@@ -39,7 +39,7 @@ describe("evolution", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (StateManager as unknown as ReturnType<typeof vi.fn>).mockImplementation(function () {
+    (StateManager as unknown as ReturnType<typeof vi.fn>).mockImplementation(function StateManager() {
       return {
         read: vi.fn(),
         save: vi.fn(),
@@ -139,23 +139,25 @@ describe("evolution", () => {
         surfaced: false,
         examples: [],
       };
-      expect(suggestEvolution(pattern, i18n)).toBeNull();
+      expect(suggestEvolution(pattern, makeCtx())).toBeNull();
     });
   });
 
   describe("evolveCapability", () => {
     it("creates shortcut capability and saves file", async () => {
       const state = createDefaultState("test");
-      state.patterns = [{
-        id: "p1",
-        type: "tool",
-        description: "my-tool",
-        count: 10,
-        firstSeen: 0,
-        lastSeen: 0,
-        surfaced: false,
-        examples: [],
-      }];
+      state.patterns = [
+        {
+          id: "p1",
+          type: "tool",
+          description: "my-tool",
+          count: 10,
+          firstSeen: 0,
+          lastSeen: 0,
+          surfaced: false,
+          examples: [],
+        },
+      ];
       vi.mocked(manager.read).mockResolvedValue(state);
 
       const suggestion = {
@@ -171,7 +173,7 @@ describe("evolution", () => {
       expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining("my-shortcut.js"),
         expect.stringContaining("export const my_shortcut"),
-        "utf-8"
+        "utf-8",
       );
       expect(manager.save).toHaveBeenCalled();
       expect(state.evolution.capabilities).toHaveLength(1);
@@ -204,7 +206,7 @@ describe("evolution", () => {
       expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining("my-agent.md"),
         expect.stringContaining("mode: subagent"),
-        "utf-8"
+        "utf-8",
       );
     });
 
@@ -236,7 +238,7 @@ describe("evolution", () => {
       expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining("opencode.json"),
         expect.stringContaining("my-mcp"),
-        "utf-8"
+        "utf-8",
       );
     });
 
@@ -268,7 +270,7 @@ describe("evolution", () => {
       expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining("opencode.json"),
         expect.stringContaining("my-mcp"),
-        "utf-8"
+        "utf-8",
       );
     });
   });
@@ -299,7 +301,7 @@ describe("evolution", () => {
   describe("formatEvolutionResult", () => {
     it("formats all types", () => {
       const types = ["command", "hook", "skill", "agent", "mcp", "shortcut"] as const;
-      types.forEach(type => {
+      types.forEach((type) => {
         const cap = {
           id: "1",
           type,
