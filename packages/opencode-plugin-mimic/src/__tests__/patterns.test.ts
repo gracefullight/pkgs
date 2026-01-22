@@ -20,13 +20,19 @@ vi.mock("@/state", async () => {
 describe("patterns", () => {
   const i18n = createI18n("en-US");
   let manager: StateManager;
+  // biome-ignore lint/suspicious/noExplicitAny: Test mock - client not used in these tests
+  const mockClient = {} as any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (StateManager as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-      read: vi.fn(),
-      save: vi.fn(),
-    }));
+    (StateManager as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      function StateManager() {
+        return {
+          read: vi.fn(),
+          save: vi.fn(),
+        };
+      },
+    );
     manager = new StateManager("/tmp/test");
   });
 
@@ -42,6 +48,7 @@ describe("patterns", () => {
         stateManager: manager,
         directory: "/tmp/test",
         i18n,
+        client: mockClient,
       });
 
       expect(newPatterns).toHaveLength(1);
@@ -71,6 +78,7 @@ describe("patterns", () => {
         stateManager: manager,
         directory: "/tmp/test",
         i18n,
+        client: mockClient,
       });
       expect(newPatterns).toHaveLength(0);
     });
@@ -86,6 +94,7 @@ describe("patterns", () => {
         stateManager: manager,
         directory: "/tmp/test",
         i18n,
+        client: mockClient,
       });
 
       expect(newPatterns).toHaveLength(1);
@@ -155,6 +164,7 @@ describe("patterns", () => {
         stateManager: manager,
         directory: "/tmp/test",
         i18n,
+        client: mockClient,
       });
       expect(suggestions).toHaveLength(4); // tool, sequence, commit, file
       expect(suggestions.join("")).toContain("my-tool");
@@ -181,6 +191,7 @@ describe("patterns", () => {
         stateManager: manager,
         directory: "/tmp/test",
         i18n,
+        client: mockClient,
       });
       expect(suggestions).toHaveLength(0);
     });
