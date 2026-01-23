@@ -8,7 +8,7 @@ export type Language = "en-US" | "ko-KR";
 export interface MimicUserConfig {
   language?: string;
   observer?: {
-    /** Model ID for LLM-based pattern analysis (e.g., "opencode/glm-4.7-free") */
+    /** Model ID for LLM-based pattern analysis (e.g., "glm-4.7") */
     model?: string;
     /** Provider ID (e.g., "opencode") */
     provider?: string;

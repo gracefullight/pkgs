@@ -8,7 +8,7 @@ import { generateDeterministicId } from "@/utils/id";
 const MAX_INSTINCTS_PER_RUN = 5;
 const OBSERVER_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
 
-const DEFAULT_OBSERVER_MODEL = "opencode/glm-4.7-free";
+const DEFAULT_OBSERVER_MODEL = "glm-4.7";
 const DEFAULT_OBSERVER_PROVIDER = "opencode";
 
 interface ObserverInput {
