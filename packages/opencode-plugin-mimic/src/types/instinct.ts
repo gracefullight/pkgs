@@ -1,15 +1,4 @@
-// Domain constants for clustering
-export const DOMAINS = [
-  "code-style",
-  "testing",
-  "git",
-  "debugging",
-  "file-organization",
-  "tooling",
-  "refactoring",
-  "documentation",
-  "other",
-] as const;
+import type { DOMAINS } from "@/constants/domain";
 
 export type Domain = (typeof DOMAINS)[number];
 

@@ -1,6 +1,6 @@
+import { DOMAINS } from "@/constants/domain";
 import type { MimicContext } from "@/core/context";
 import type { Domain, Instinct, Pattern } from "@/types";
-import { DOMAINS } from "@/types";
 
 const MIN_CONFIDENCE = 0.6;
 const MIN_INSTINCTS_FOR_EVOLUTION = 5;

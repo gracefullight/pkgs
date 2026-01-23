@@ -2,6 +2,21 @@ import type { Language } from "@/lib/i18n";
 import type { Domain } from "@/types";
 
 /**
+ * Domain constants for clustering
+ */
+export const DOMAINS = [
+  "code-style",
+  "testing",
+  "git",
+  "debugging",
+  "file-organization",
+  "tooling",
+  "refactoring",
+  "documentation",
+  "other",
+] as const;
+
+/**
  * Domain keywords for pattern detection.
  * English keywords are always matched (base).
  * Korean keywords are additionally matched when language is ko-KR.
