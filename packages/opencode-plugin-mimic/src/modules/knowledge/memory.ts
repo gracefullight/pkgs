@@ -150,16 +150,33 @@ export class SessionMemoryManager {
   /**
    * Analyze cross-session patterns
    */
+  /**
+   * Analyze cross-session patterns
+   */
   async analyzeCrossSessionPatterns(): Promise<CrossSessionPattern[]> {
     const memories = await this.getRecentMemories();
     if (memories.length < 3) {
       return [];
     }
 
-    const patterns: CrossSessionPattern[] = [];
+    const lastSeen = memories[memories.length - 1].endTime;
+    const patterns: CrossSessionPattern[] = [
+      ...this.detectWorkflowPatterns(memories, lastSeen),
+      ...this.detectTimeBasedPatterns(memories, lastSeen),
+      ...this.detectFocusPatterns(memories, lastSeen),
+      ...this.detectToolCombinationPatterns(memories, lastSeen),
+    ];
 
-    // Detect workflow patterns (repeated sequences of domains)
+    return patterns.sort((a, b) => b.confidence - a.confidence).slice(0, 10);
+  }
+
+  private detectWorkflowPatterns(
+    memories: SessionMemory[],
+    lastSeen: string,
+  ): CrossSessionPattern[] {
+    const patterns: CrossSessionPattern[] = [];
     const domainSequences = new Map<string, { count: number; sessions: string[] }>();
+
     for (const memory of memories) {
       const key = memory.summary.dominantDomains.join(" → ");
       if (key) {
@@ -179,13 +196,21 @@ export class SessionMemoryManager {
           frequency: data.count,
           confidence: Math.min(0.9, 0.5 + data.count * 0.1),
           sessionIds: data.sessions,
-          lastSeen: memories[memories.length - 1].endTime,
+          lastSeen,
         });
       }
     }
 
-    // Detect time-based patterns (sessions at similar times)
+    return patterns;
+  }
+
+  private detectTimeBasedPatterns(
+    memories: SessionMemory[],
+    lastSeen: string,
+  ): CrossSessionPattern[] {
+    const patterns: CrossSessionPattern[] = [];
     const hourCounts = new Map<number, { count: number; sessions: string[] }>();
+
     for (const memory of memories) {
       const hour = new Date(memory.startTime).getHours();
       const bucket = Math.floor(hour / 3) * 3; // 3-hour buckets
@@ -205,13 +230,18 @@ export class SessionMemoryManager {
           frequency: data.count,
           confidence: Math.min(0.8, data.count / memories.length),
           sessionIds: data.sessions,
-          lastSeen: memories[memories.length - 1].endTime,
+          lastSeen,
         });
       }
     }
 
-    // Detect focus patterns (repeated focus areas)
+    return patterns;
+  }
+
+  private detectFocusPatterns(memories: SessionMemory[], lastSeen: string): CrossSessionPattern[] {
+    const patterns: CrossSessionPattern[] = [];
     const focusCounts = new Map<string, { count: number; sessions: string[] }>();
+
     for (const memory of memories) {
       if (memory.context.focus) {
         const existing = focusCounts.get(memory.context.focus) || { count: 0, sessions: [] };
@@ -230,13 +260,21 @@ export class SessionMemoryManager {
           frequency: data.count,
           confidence: Math.min(0.85, 0.5 + data.count * 0.15),
           sessionIds: data.sessions,
-          lastSeen: memories[memories.length - 1].endTime,
+          lastSeen,
         });
       }
     }
 
-    // Detect tool combination patterns
+    return patterns;
+  }
+
+  private detectToolCombinationPatterns(
+    memories: SessionMemory[],
+    lastSeen: string,
+  ): CrossSessionPattern[] {
+    const patterns: CrossSessionPattern[] = [];
     const toolCombos = new Map<string, { count: number; sessions: string[] }>();
+
     for (const memory of memories) {
       if (memory.summary.patterns.length >= 2) {
         const key = memory.summary.patterns.slice(0, 3).join("+");
@@ -256,12 +294,12 @@ export class SessionMemoryManager {
           frequency: data.count,
           confidence: Math.min(0.8, 0.5 + data.count * 0.1),
           sessionIds: data.sessions,
-          lastSeen: memories[memories.length - 1].endTime,
+          lastSeen,
         });
       }
     }
 
-    return patterns.sort((a, b) => b.confidence - a.confidence).slice(0, 10);
+    return patterns;
   }
 
   /**

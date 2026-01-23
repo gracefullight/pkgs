@@ -51,7 +51,7 @@ describe("StateManager", () => {
   describe("ensureGitIgnore", () => {
     it("creates .gitignore with state.json line if file does not exist", async () => {
       vi.mocked(existsSync).mockReturnValue(false);
-      await (manager as any).ensureGitIgnore();
+      await manager["ensureGitIgnore"]();
 
       expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining(".gitignore"),
@@ -63,7 +63,7 @@ describe("StateManager", () => {
     it("appends state.json line to existing .gitignore if not present", async () => {
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(readFile).mockResolvedValue("node_modules/\n.env\n");
-      await (manager as any).ensureGitIgnore();
+      await manager["ensureGitIgnore"]();
 
       expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining(".gitignore"),
@@ -75,7 +75,7 @@ describe("StateManager", () => {
     it("does not append if state.json line already exists", async () => {
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(readFile).mockResolvedValue(".opencode/mimic/state.json\n");
-      await (manager as any).ensureGitIgnore();
+      await manager["ensureGitIgnore"]();
 
       expect(writeFile).not.toHaveBeenCalled();
     });
@@ -83,7 +83,7 @@ describe("StateManager", () => {
     it("ignores whitespace when checking for existing entry", async () => {
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(readFile).mockResolvedValue("  .opencode/mimic/state.json  \n");
-      await (manager as any).ensureGitIgnore();
+      await manager["ensureGitIgnore"]();
 
       expect(writeFile).not.toHaveBeenCalled();
     });

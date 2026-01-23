@@ -1,14 +1,9 @@
 import type { MimicContext } from "@/core/context";
 import type { Domain, Instinct, Pattern } from "@/types";
 import { DOMAINS } from "@/types";
-import { generateDeterministicId } from "@/utils/id";
 
 const MIN_CONFIDENCE = 0.6;
 const MIN_INSTINCTS_FOR_EVOLUTION = 5;
-
-export function generateInstinctId(domain: string, title: string): string {
-  return generateDeterministicId(domain, title);
-}
 
 export function normalizeDomain(rawDomain: string): Domain {
   const lower = rawDomain.toLowerCase().trim();

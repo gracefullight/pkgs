@@ -1,8 +1,9 @@
 import type { MimicContext } from "@/core/context";
 import { loadMimicConfig, type MimicUserConfig } from "@/lib/i18n";
-import { generateInstinctId, normalizeDomain } from "@/modules/knowledge/instincts";
+import { normalizeDomain } from "@/modules/knowledge/instincts";
 import { ObservationLog } from "@/modules/observation/log";
 import type { Instinct, Pattern, SessionData } from "@/types";
+import { generateDeterministicId } from "@/utils/id";
 
 const MAX_INSTINCTS_PER_RUN = 5;
 const OBSERVER_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
@@ -146,95 +147,124 @@ function parseInstinctsFromResponse(response: string): RawInstinct[] {
 /**
  * Heuristic-based pattern analysis (fallback when LLM not available)
  */
+/**
+ * Heuristic-based pattern analysis (fallback when LLM not available)
+ */
 function analyzePatterns(input: ObserverInput): RawInstinct[] {
-  const instincts: RawInstinct[] = [];
+  const instincts: RawInstinct[] = [
+    ...extractToolInstincts(input.patterns),
+    ...extractFileInstincts(input.patterns),
+    ...extractCommitInstincts(input.patterns),
+    ...extractSequenceInstincts(input.patterns),
+    ...extractHotspotInstincts(input.statistics.topFiles),
+  ];
 
-  const toolPatterns = input.patterns.filter((p) => p.type === "tool" && p.count >= 5);
-  if (toolPatterns.length >= 3) {
-    const topTools = toolPatterns
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-      .map((p) => p.description);
+  return instincts.slice(0, MAX_INSTINCTS_PER_RUN);
+}
 
-    instincts.push({
+function extractToolInstincts(patterns: Pattern[]): RawInstinct[] {
+  const toolPatterns = patterns.filter((p) => p.type === "tool" && p.count >= 5);
+  if (toolPatterns.length < 3) return [];
+
+  const topTools = toolPatterns
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map((p) => p.description);
+
+  return [
+    {
       title: `Preferred tools: ${topTools.slice(0, 3).join(", ")}`,
       description: `Frequently uses ${topTools.join(", ")} based on ${toolPatterns.reduce((sum, p) => sum + p.count, 0)} observations`,
       domain: "tooling",
       confidence: Math.min(0.9, 0.5 + toolPatterns.length * 0.1),
       patternIDs: toolPatterns.map((p) => p.id),
-    });
+    },
+  ];
+}
+
+function extractFileInstincts(patterns: Pattern[]): RawInstinct[] {
+  const filePatterns = patterns.filter((p) => p.type === "file" && p.count >= 5);
+  if (filePatterns.length < 2) return [];
+
+  const extensions = new Set<string>();
+  for (const p of filePatterns) {
+    const ext = p.description.split(".").pop();
+    if (ext) extensions.add(ext);
   }
 
-  const filePatterns = input.patterns.filter((p) => p.type === "file" && p.count >= 5);
-  if (filePatterns.length >= 2) {
-    const extensions = new Set<string>();
-    for (const p of filePatterns) {
-      const ext = p.description.split(".").pop();
-      if (ext) extensions.add(ext);
-    }
-
-    instincts.push({
+  return [
+    {
       title: `Focus on ${Array.from(extensions).slice(0, 3).join(", ")} files`,
       description: `Frequently modifies files with extensions: ${Array.from(extensions).join(", ")}`,
       domain: "file-organization",
       confidence: Math.min(0.85, 0.5 + filePatterns.length * 0.08),
       patternIDs: filePatterns.map((p) => p.id),
+    },
+  ];
+}
+
+function extractCommitInstincts(patterns: Pattern[]): RawInstinct[] {
+  const commitPatterns = patterns.filter((p) => p.type === "commit" && p.count >= 3);
+  if (commitPatterns.length < 2) return [];
+
+  const prefixes = commitPatterns
+    .map((p) => p.description.split(":")[0] || p.description.split(" ")[0])
+    .filter(Boolean);
+
+  const uniquePrefixes = [...new Set(prefixes)];
+  if (uniquePrefixes.length === 0) return [];
+
+  return [
+    {
+      title: `Commit style: ${uniquePrefixes.slice(0, 3).join(", ")}`,
+      description: `Uses commit message patterns like: ${uniquePrefixes.join(", ")}`,
+      domain: "git",
+      confidence: Math.min(0.8, 0.5 + commitPatterns.length * 0.1),
+      patternIDs: commitPatterns.map((p) => p.id),
+    },
+  ];
+}
+
+function extractSequenceInstincts(patterns: Pattern[]): RawInstinct[] {
+  const sequencePatterns = patterns.filter((p) => p.type === "sequence" && p.count >= 3);
+  const instincts: RawInstinct[] = [];
+
+  for (const seq of sequencePatterns.slice(0, 2)) {
+    let domain = "tooling";
+    const desc = seq.description.toLowerCase();
+    if (desc.includes("test")) domain = "testing";
+    else if (desc.includes("debug") || desc.includes("error")) domain = "debugging";
+    else if (desc.includes("refactor")) domain = "refactoring";
+
+    instincts.push({
+      title: `Workflow: ${seq.description}`,
+      description: `Repeats sequence "${seq.description}" (${seq.count}x observed)`,
+      domain,
+      confidence: Math.min(0.85, 0.5 + seq.count * 0.05),
+      patternIDs: [seq.id],
     });
   }
 
-  const commitPatterns = input.patterns.filter((p) => p.type === "commit" && p.count >= 3);
-  if (commitPatterns.length >= 2) {
-    const prefixes = commitPatterns
-      .map((p) => p.description.split(":")[0] || p.description.split(" ")[0])
-      .filter(Boolean);
+  return instincts;
+}
 
-    const uniquePrefixes = [...new Set(prefixes)];
-    if (uniquePrefixes.length > 0) {
-      instincts.push({
-        title: `Commit style: ${uniquePrefixes.slice(0, 3).join(", ")}`,
-        description: `Uses commit message patterns like: ${uniquePrefixes.join(", ")}`,
-        domain: "git",
-        confidence: Math.min(0.8, 0.5 + commitPatterns.length * 0.1),
-        patternIDs: commitPatterns.map((p) => p.id),
-      });
-    }
-  }
+function extractHotspotInstincts(topFiles: [string, number][]): RawInstinct[] {
+  if (topFiles.length < 3) return [];
 
-  const sequencePatterns = input.patterns.filter((p) => p.type === "sequence" && p.count >= 3);
-  if (sequencePatterns.length >= 1) {
-    for (const seq of sequencePatterns.slice(0, 2)) {
-      let domain = "tooling";
-      const desc = seq.description.toLowerCase();
-      if (desc.includes("test")) domain = "testing";
-      else if (desc.includes("debug") || desc.includes("error")) domain = "debugging";
-      else if (desc.includes("refactor")) domain = "refactoring";
+  const hotspots = topFiles.slice(0, 5);
+  const totalMods = hotspots.reduce((sum, [, count]) => sum + count, 0);
 
-      instincts.push({
-        title: `Workflow: ${seq.description}`,
-        description: `Repeats sequence "${seq.description}" (${seq.count}x observed)`,
-        domain,
-        confidence: Math.min(0.85, 0.5 + seq.count * 0.05),
-        patternIDs: [seq.id],
-      });
-    }
-  }
+  if (totalMods < 10) return [];
 
-  if (input.statistics.topFiles.length >= 3) {
-    const hotspots = input.statistics.topFiles.slice(0, 5);
-    const totalMods = hotspots.reduce((sum, [, count]) => sum + count, 0);
-
-    if (totalMods >= 10) {
-      instincts.push({
-        title: "Hotspot files identified",
-        description: `Frequently modified files: ${hotspots.map(([f]) => f.split("/").pop()).join(", ")}`,
-        domain: "file-organization",
-        confidence: Math.min(0.75, 0.4 + totalMods * 0.02),
-        patternIDs: [],
-      });
-    }
-  }
-
-  return instincts.slice(0, MAX_INSTINCTS_PER_RUN);
+  return [
+    {
+      title: "Hotspot files identified",
+      description: `Frequently modified files: ${hotspots.map(([f]) => f.split("/").pop()).join(", ")}`,
+      domain: "file-organization",
+      confidence: Math.min(0.75, 0.4 + totalMods * 0.02),
+      patternIDs: [],
+    },
+  ];
 }
 
 /**
@@ -369,7 +399,7 @@ export async function runObserver(ctx: MimicContext): Promise<Instinct[]> {
 
   for (const raw of rawInstincts) {
     const domain = normalizeDomain(raw.domain);
-    const id = generateInstinctId(domain, raw.title);
+    const id = generateDeterministicId(domain, raw.title);
 
     if (await ctx.stateManager.hasInstinct(id)) {
       continue;

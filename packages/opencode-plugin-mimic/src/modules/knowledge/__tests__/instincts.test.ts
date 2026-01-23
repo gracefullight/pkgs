@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  generateInstinctId,
   getEligibleDomains,
   groupByDomain,
   normalizeDomain,
@@ -9,21 +8,6 @@ import {
 import type { Instinct } from "@/types";
 
 describe("instincts", () => {
-  describe("generateInstinctId", () => {
-    it("generates consistent hash from domain and title", () => {
-      const id1 = generateInstinctId("testing", "Always run tests");
-      const id2 = generateInstinctId("testing", "Always run tests");
-      expect(id1).toBe(id2);
-      expect(id1).toHaveLength(12);
-    });
-
-    it("generates different hash for different inputs", () => {
-      const id1 = generateInstinctId("testing", "Always run tests");
-      const id2 = generateInstinctId("git", "Always run tests");
-      expect(id1).not.toBe(id2);
-    });
-  });
-
   describe("normalizeDomain", () => {
     it("normalizes known synonyms", () => {
       expect(normalizeDomain("test")).toBe("testing");

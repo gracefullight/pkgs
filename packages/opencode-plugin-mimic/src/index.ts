@@ -13,7 +13,7 @@ import { ObservationLog } from "@/modules/observation/log";
 import { runObserver, shouldRunObserver } from "@/modules/observation/observer";
 import { detectPatterns, surfacePatterns } from "@/modules/observation/patterns";
 import { createTools } from "@/tools";
-import type { ToolCall } from "@/types";
+import type { Domain, EvolvedCapability, ToolCall } from "@/types";
 import { analyzeTimeSinceLastSession, formatDuration } from "@/utils/format";
 import { generateId } from "@/utils/id";
 
@@ -92,6 +92,57 @@ export const mimic: Plugin = async ({ directory, client }) => {
     });
   };
 
+  const notifyEvolution = async (domain: Domain, capability: EvolvedCapability) => {
+    try {
+      const skill = await skillGenerator.fromCapability(ctx, capability);
+      if (skill) {
+        await client.tui.showToast({
+          body: {
+            title: "[Mimic] 📚",
+            message: i18n.t("observer.skill_generated", { name: skill.name }),
+            variant: "success",
+          },
+        });
+      }
+    } catch {
+      // Skill generation is optional
+    }
+
+    await client.tui.showToast({
+      body: {
+        title: "[Mimic] ✨",
+        message: i18n.t("observer.evolved", {
+          name: capability.name,
+          domain,
+        }),
+        variant: "success",
+      },
+    });
+  };
+
+  const processEvolution = async () => {
+    if (!(await shouldRunObserver(ctx))) return;
+
+    const newInstincts = await runObserver(ctx);
+    if (newInstincts.length > 0) {
+      await client.tui.showToast({
+        body: {
+          title: "[Mimic]",
+          message: i18n.t("observer.new_instincts", { count: newInstincts.length }),
+          variant: "info",
+        },
+      });
+    }
+
+    const triggeredDomains = await clusterDomainsAndTriggerEvolution(ctx);
+    for (const domain of triggeredDomains) {
+      const result = await evolveDomain(ctx, domain);
+      if (result) {
+        await notifyEvolution(domain, result.capability);
+      }
+    }
+  };
+
   const handleSessionIdle = async () => {
     const newPatterns = await detectPatterns(ctx);
     if (newPatterns.length > 0) {
@@ -100,53 +151,8 @@ export const mimic: Plugin = async ({ directory, client }) => {
       await stateManager.save(state);
     }
 
-    // Run background observer to generate instincts
-    if (await shouldRunObserver(ctx)) {
-      const newInstincts = await runObserver(ctx);
-      if (newInstincts.length > 0) {
-        await client.tui.showToast({
-          body: {
-            title: "[Mimic]",
-            message: i18n.t("observer.new_instincts", { count: newInstincts.length }),
-            variant: "info",
-          },
-        });
-      }
-
-      // Check for domain clustering and trigger evolution
-      const triggeredDomains = await clusterDomainsAndTriggerEvolution(ctx);
-      for (const domain of triggeredDomains) {
-        const result = await evolveDomain(ctx, domain);
-        if (result) {
-          // Also generate a declarative skill
-          try {
-            const skill = await skillGenerator.fromCapability(ctx, result.capability);
-            if (skill) {
-              await client.tui.showToast({
-                body: {
-                  title: "[Mimic] 📚",
-                  message: i18n.t("observer.skill_generated", { name: skill.name }),
-                  variant: "success",
-                },
-              });
-            }
-          } catch {
-            // Skill generation is optional, don't fail
-          }
-
-          await client.tui.showToast({
-            body: {
-              title: "[Mimic] ✨",
-              message: i18n.t("observer.evolved", {
-                name: result.capability.name,
-                domain,
-              }),
-              variant: "success",
-            },
-          });
-        }
-      }
-    }
+    // Run background observer to generate instincts and trigger evolution
+    await processEvolution();
 
     const suggestions = await surfacePatterns(ctx);
     for (const suggestion of suggestions) {
