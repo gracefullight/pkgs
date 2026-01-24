@@ -62,12 +62,12 @@ Mimic은 `~/.config/opencode/mimic.json`을 읽어 사용자 설정을 적용합
 
 기본값은 `en-US`입니다.
 
-프로젝트 설정은 `.opencode/mimic/state.json`에 저장되며 `mimic:configure`로 변경할 수 있습니다.
+프로젝트 설정은 `.opencode/mimic/state.json`에 저장되며 `mimic-configure`로 변경할 수 있습니다.
 
 ```
-mimic:configure({ learningEnabled: false })
-mimic:configure({ suggestionEnabled: false })
-mimic:configure({ minPatternCount: 5 })
+mimic-configure({ learningEnabled: false })
+mimic-configure({ suggestionEnabled: false })
+mimic-configure({ minPatternCount: 5 })
 ```
 
 ## 기능 흐름도 (draw.io)
@@ -81,113 +81,113 @@ mimic:configure({ minPatternCount: 5 })
 
 Mimic은 다음 도구들을 제공합니다:
 
-#### `mimic:init`
+#### `mimic-init`
 
 프로젝트를 위해 Mimic을 초기화하거나 깨웁니다. 세션 통계, 최근 관찰 사항, 그리고 잠재적인 연속성 힌트가 포함된 환영 메시지를 표시합니다.
 
-#### `mimic:status`
+#### `mimic-status`
 
 세션 수, 패턴 통계, 최근 수정된 파일, 활성 제안 등을 포함한 현재 상태를 확인합니다.
 
-#### `mimic:journey`
+#### `mimic-journey`
 
 마일스톤, 최근 관찰 사항, git 활동을 포함하여 프로젝트 진화의 내러티브 이야기를 확인합니다.
 
-#### `mimic:patterns`
+#### `mimic-patterns`
 
 유형 및 빈도별로 정리된 모든 감지된 패턴(도구, 파일, 커밋 등)을 확인합니다.
 
-#### `mimic:instincts`
+#### `mimic-instincts`
 
 학습된 행동 본능을 확인합니다. 본능은 사용자의 작업 스타일로부터 Mimic이 배운 "프로젝트별 규칙"입니다.
 
-#### `mimic:apply`
+#### `mimic-apply`
 
 최근 도구, 수정된 파일 등을 기반으로 현재 컨텍스트에 어떤 본능이 적용되는지 수동으로 확인합니다.
 
-#### `mimic:identity`
+#### `mimic-identity`
 
 성격 유형, "각성" 날짜 및 학습 통계를 포함한 Mimic의 프로젝트 아이덴티티를 확인합니다.
 
-#### `mimic:sequences`
+#### `mimic-sequences`
 
 자주 사용되는 도구 시퀀스를 확인하여 일반적인 워크플로 패턴을 파악합니다.
 
-#### `mimic:observations`
+#### `mimic-observations`
 
 현재 프로젝트의 하위 수준 관찰 로그(도구, 파일, 세션)를 확인합니다.
 
-#### `mimic:observe`
+#### `mimic-observe`
 
 수동으로 관찰 사항 추가:
 
 ```
-mimic:observe({ observation: "보안 강화를 위해 인증 모듈 리팩터링 완료" })
+mimic-observe({ observation: "보안 강화를 위해 인증 모듈 리팩터링 완료" })
 ```
 
-#### `mimic:milestone`
+#### `mimic-milestone`
 
 프로젝트 마일스톤 기록:
 
 ```
-mimic:milestone({ milestone: "v1.0.0 릴리스" })
+mimic-milestone({ milestone: "v1.0.0 릴리스" })
 ```
 
-#### `mimic:stats`
+#### `mimic-stats`
 
 상세 통계 확인: 총 세션, 도구 호출, 패턴/마일스톤 수, 학습 상태 등.
 
-#### `mimic:configure`
+#### `mimic-configure`
 
 Mimic의 행동 조정:
 
 ```
-mimic:configure({ learningEnabled: false })     # 학습 중지
-mimic:configure({ suggestionEnabled: false })   # 제안 중지
-mimic:configure({ minPatternCount: 5 })         # 최소 반복 횟수를 5회로 설정
+mimic-configure({ learningEnabled: false })     # 학습 중지
+mimic-configure({ suggestionEnabled: false })   # 제안 중지
+mimic-configure({ minPatternCount: 5 })         # 최소 반복 횟수를 5회로 설정
 ```
 
-#### `mimic:surface`
+#### `mimic-surface`
 
 패턴을 인지됨/표면화됨 상태로 표시합니다.
 
-#### `mimic:reset`
+#### `mimic-reset`
 
 현재 프로젝트의 모든 학습된 데이터를 삭제합니다.
 
-#### `mimic:grow`
+#### `mimic-grow`
 
 활동 로그를 기반으로 프로젝트의 방향성과 성장 기회를 분석합니다.
 
-#### `mimic:evolve`
+#### `mimic-evolve`
 
 반복된 패턴을 기반으로 새로운 기능(Shortcuts, Hooks, Commands, Agents, MCP) 진화를 제안하고 생성합니다.
 
-#### `mimic:generate-skills`
+#### `mimic-generate-skills`
 
 프로젝트 컨텍스트를 분석하고 향후 세션의 정확도를 높이기 위한 `.agent/skills`를 자동으로 생성합니다.
 
-#### `mimic:export` / `mimic:import`
+#### `mimic-export` / `mimic-import`
 
 학습된 본능을 JSON 파일로 내보내거나 다른 프로젝트에서 가져옵니다.
 
-#### `mimic:session-context`
+#### `mimic-session-context`
 
 세션 간 컨텍스트 요약 및 연속성 힌트를 확인합니다.
 
-#### `mimic:level`
+#### `mimic-level`
 
 숙련도 수준(technical, semi-technical, non-technical, chaotic)을 설정하여 Mimic의 피드백을 개인화합니다.
 
-#### `mimic:focus`
+#### `mimic-focus`
 
 현재 프로젝트의 집중 분야 또는 기술 스택을 설정합니다.
 
-#### `mimic:mcp-search` / `mimic:mcp`
+#### `mimic-mcp-search` / `mimic-mcp`
 
 MCP 서버를 검색하고 프로젝트 설정에 추가합니다.
 
-#### `mimic:capabilities`
+#### `mimic-capabilities`
 
 진화된 모든 기능 목록을 확인합니다.
 

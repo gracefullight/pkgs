@@ -14,7 +14,7 @@ export const createSettingsTools: ToolFactory = (ctx) => {
   const { stateManager, i18n, i18nPromise } = ctx;
 
   return {
-    "mimic:stats": tool({
+    "mimic-stats": tool({
       description: i18n.t("tool.stats.description"),
       args: {},
       async execute() {
@@ -37,7 +37,7 @@ export const createSettingsTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:configure": tool({
+    "mimic-configure": tool({
       description: i18n.t("tool.configure.description"),
       args: {
         learningEnabled: tool.schema
@@ -72,7 +72,7 @@ export const createSettingsTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:reset": tool({
+    "mimic-reset": tool({
       description: i18n.t("tool.reset.description"),
       args: {
         confirm: tool.schema.boolean().describe(i18n.t("tool.reset.args.confirm")),
@@ -91,7 +91,7 @@ export const createSettingsTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:level": tool({
+    "mimic-level": tool({
       description: i18n.t("tool.level.description"),
       args: {
         level: tool.schema
@@ -113,7 +113,7 @@ export const createSettingsTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:focus": tool({
+    "mimic-focus": tool({
       description: i18n.t("tool.focus.description"),
       args: {
         focus: tool.schema.string().optional().describe(i18n.t("tool.focus.args.focus")),

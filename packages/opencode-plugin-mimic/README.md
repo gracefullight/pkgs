@@ -63,12 +63,12 @@ Mimic reads `~/.config/opencode/mimic.json` for user-level settings.
 
 Default language is `en-US`.
 
-Project preferences live in `.opencode/mimic/state.json` and can be adjusted via `mimic:configure`:
+Project preferences live in `.opencode/mimic/state.json` and can be adjusted via `mimic-configure`:
 
 ```
-mimic:configure({ learningEnabled: false })
-mimic:configure({ suggestionEnabled: false })
-mimic:configure({ minPatternCount: 5 })
+mimic-configure({ learningEnabled: false })
+mimic-configure({ suggestionEnabled: false })
+mimic-configure({ minPatternCount: 5 })
 ```
 
 ## Flow Diagram (draw.io)
@@ -82,113 +82,113 @@ mimic:configure({ minPatternCount: 5 })
 
 Mimic adds the following tools to OpenCode:
 
-#### `mimic:init`
+#### `mimic-init`
 
 Initialize or wake up Mimic for this project. Shows welcome message with session stats, recent observations, and potential continuity hints.
 
-#### `mimic:status`
+#### `mimic-status`
 
 Check current status including session count, pattern stats, recently modified files, and active suggestions.
 
-#### `mimic:journey`
+#### `mimic-journey`
 
 View the narrative story of your project's evolution, including milestones, recent observations, and git activity.
 
-#### `mimic:patterns`
+#### `mimic-patterns`
 
 View all detected patterns (Tool, File, Commit, etc.) organized by type and frequency.
 
-#### `mimic:instincts`
+#### `mimic-instincts`
 
 View learned behavioral instincts. Instincts are "rules of thumb" that Mimic has learned from your work style.
 
-#### `mimic:apply`
+#### `mimic-apply`
 
 Manually check which instincts apply to the current context (recent tools, modified files, etc.).
 
-#### `mimic:identity`
+#### `mimic-identity`
 
 Check Mimic's project identity, including its personality trait, "awakened" date, and learning stats.
 
-#### `mimic:sequences`
+#### `mimic-sequences`
 
 View frequently used tool sequences to understand your common cross-tool workflows.
 
-#### `mimic:observations`
+#### `mimic-observations`
 
 View low-level observation logs (tools, files, sessions) for the current project.
 
-#### `mimic:observe`
+#### `mimic-observe`
 
 Manually add an observation:
 
 ```
-mimic:observe({ observation: "Refactored auth module for better security" })
+mimic-observe({ observation: "Refactored auth module for better security" })
 ```
 
-#### `mimic:milestone`
+#### `mimic-milestone`
 
 Record a project milestone:
 
 ```
-mimic:milestone({ milestone: "v1.0.0 released" })
+mimic-milestone({ milestone: "v1.0.0 released" })
 ```
 
-#### `mimic:stats`
+#### `mimic-stats`
 
 View detailed statistics: total sessions, tool calls, pattern/milestone counts, and learning status.
 
-#### `mimic:configure`
+#### `mimic-configure`
 
 Adjust Mimic's behavior:
 
 ```
-mimic:configure({ learningEnabled: false })     # Stop learning
-mimic:configure({ suggestionEnabled: false })   # Stop suggestions
-mimic:configure({ minPatternCount: 5 })         # Require 5 repetitions
+mimic-configure({ learningEnabled: false })     # Stop learning
+mimic-configure({ suggestionEnabled: false })   # Stop suggestions
+mimic-configure({ minPatternCount: 5 })         # Require 5 repetitions
 ```
 
-#### `mimic:surface`
+#### `mimic-surface`
 
 Mark a pattern as acknowledged/surfaced.
 
-#### `mimic:reset`
+#### `mimic-reset`
 
 Clear all learned data for the current project.
 
-#### `mimic:grow`
+#### `mimic-grow`
 
 Analyze project direction and growth opportunities based on activity logs.
 
-#### `mimic:evolve`
+#### `mimic-evolve`
 
 Suggest and create new capabilities (Shortcuts, Hooks, Commands, Agents, MCP) based on repeated patterns.
 
-#### `mimic:generate-skills`
+#### `mimic-generate-skills`
 
 Analyze project context and automatically generate `.agent/skills` to improve accuracy for future sessions.
 
-#### `mimic:export` / `mimic:import`
+#### `mimic-export` / `mimic-import`
 
 Export your learned instincts to a JSON file or import them from another project.
 
-#### `mimic:session-context`
+#### `mimic-session-context`
 
 View cross-session context summary and continuity hints.
 
-#### `mimic:level`
+#### `mimic-level`
 
 Set your technical level (technical, semi-technical, non-technical, chaotic) to personalize Mimic's feedback.
 
-#### `mimic:focus`
+#### `mimic-focus`
 
 Set current project focus or tech stack.
 
-#### `mimic:mcp-search` / `mimic:mcp`
+#### `mimic-mcp-search` / `mimic-mcp`
 
 Search for MCP servers and add them to project configuration.
 
-#### `mimic:capabilities`
+#### `mimic-capabilities`
 
 List all evolved capabilities.
 

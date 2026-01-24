@@ -15,7 +15,7 @@ export const createEvolutionTools: ToolFactory = (ctx) => {
   const { stateManager, directory, i18n, i18nPromise } = ctx;
 
   return {
-    "mimic:evolve": tool({
+    "mimic-evolve": tool({
       description: i18n.t("tool.evolve.description"),
       args: {
         accept: tool.schema.string().optional().describe(i18n.t("tool.evolve.args.accept")),
@@ -58,7 +58,7 @@ export const createEvolutionTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:capabilities": tool({
+    "mimic-capabilities": tool({
       description: i18n.t("tool.capabilities.description"),
       args: {},
       async execute() {

@@ -18,7 +18,7 @@ export const createInstinctTools: ToolFactory = (ctx) => {
   const { stateManager, directory, toolCalls, i18n, i18nPromise } = ctx;
 
   return {
-    "mimic:instincts": tool({
+    "mimic-instincts": tool({
       description: i18n.t("tool.instincts.description"),
       args: {
         domain: tool.schema.string().optional().describe(i18n.t("tool.instincts.args.domain")),
@@ -58,7 +58,7 @@ export const createInstinctTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:export": tool({
+    "mimic-export": tool({
       description: i18n.t("tool.export.description"),
       args: {},
       async execute() {
@@ -85,7 +85,7 @@ export const createInstinctTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:import": tool({
+    "mimic-import": tool({
       description: i18n.t("tool.import.description"),
       args: {
         path: tool.schema.string().describe(i18n.t("tool.import.args.path")),
@@ -121,7 +121,7 @@ export const createInstinctTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:apply": tool({
+    "mimic-apply": tool({
       description: i18n.t("tool.apply.description"),
       args: {},
       async execute() {
@@ -146,7 +146,7 @@ export const createInstinctTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:identity": tool({
+    "mimic-identity": tool({
       description: i18n.t("tool.identity.description"),
       args: {},
       async execute() {
@@ -180,7 +180,7 @@ export const createInstinctTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:sequences": tool({
+    "mimic-sequences": tool({
       description: i18n.t("tool.sequences.description"),
       args: {},
       async execute() {

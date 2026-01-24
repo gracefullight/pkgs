@@ -16,7 +16,7 @@ export const createAutomationTools: ToolFactory = (ctx) => {
   const skillGenerator = new SkillGenerator(directory);
 
   return {
-    "mimic:observations": tool({
+    "mimic-observations": tool({
       description: i18n.t("tool.observations.description"),
       args: {
         limit: tool.schema.number().optional().describe(i18n.t("tool.observations.args.limit")),
@@ -59,7 +59,7 @@ export const createAutomationTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:session-context": tool({
+    "mimic-session-context": tool({
       description: i18n.t("tool.session_context.description"),
       args: {},
       async execute() {
@@ -102,7 +102,7 @@ export const createAutomationTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:generate-skills": tool({
+    "mimic-generate-skills": tool({
       description: i18n.t("tool.generate_skills.description"),
       args: {},
       async execute() {

@@ -11,7 +11,7 @@ export const createMcpTools: ToolFactory = (ctx) => {
   const { stateManager, directory, i18n, i18nPromise } = ctx;
 
   return {
-    "mimic:mcp-search": tool({
+    "mimic-mcp-search": tool({
       description: i18n.t("tool.mcp_search.description"),
       args: {
         query: tool.schema.string().describe(i18n.t("tool.mcp_search.args.query")),
@@ -52,7 +52,7 @@ export const createMcpTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:mcp": tool({
+    "mimic-mcp": tool({
       description: i18n.t("tool.mcp.description"),
       args: {
         name: tool.schema.string().describe(i18n.t("tool.mcp.args.name")),

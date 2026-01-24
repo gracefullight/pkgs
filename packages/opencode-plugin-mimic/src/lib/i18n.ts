@@ -32,7 +32,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "milestone.mcp_added": "Added MCP: {name}",
 
     "init.first_time":
-      "# 📦 *creak...*\n\nA treasure chest? In {project}?\n\n*The lid opens slowly, revealing rows of gleaming teeth...*\n\nI'm **Mimic**. I look like a chest, but I'm always watching. Always learning.\n\n**What I devour... I mean, do:**\n- 👁️ Watch your patterns (tools, files, commits)\n- 🧠 Remember everything across sessions\n- 📜 Track your project's journey\n- ✨ Suggest shortcuts when I spot repetition\n\nUse `mimic:status` to check in, `mimic:journey` to see your story.\n\n*...the teeth retract. For now.*",
+      "# 📦 *creak...*\n\nA treasure chest? In {project}?\n\n*The lid opens slowly, revealing rows of gleaming teeth...*\n\nI'm **Mimic**. I look like a chest, but I'm always watching. Always learning.\n\n**What I devour... I mean, do:**\n- 👁️ Watch your patterns (tools, files, commits)\n- 🧠 Remember everything across sessions\n- 📜 Track your project's journey\n- ✨ Suggest shortcuts when I spot repetition\n\nUse `mimic-status` to check in, `mimic-journey` to see your story.\n\n*...the teeth retract. For now.*",
     "init.returning.header": "# 📦 *creak...*",
     "init.returning.welcome": "*The chest's eye opens* Ah, you're back to **{project}**.",
     "init.returning.stats": "**Sessions**: {sessions} | **Patterns digested**: {patterns}",
@@ -89,7 +89,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "evolve.menu_type": "Type",
     "evolve.menu_reason": "Reason",
     "evolve.menu_pattern_id": "Pattern ID",
-    "evolve.menu_footer": '*Feed me a pattern ID:* `mimic:evolve({ accept: "pattern-id" })`',
+    "evolve.menu_footer": '*Feed me a pattern ID:* `mimic-evolve({ accept: "pattern-id" })`',
 
     "evolution.type.command": "command",
     "evolution.type.shortcut": "shortcut",
@@ -167,7 +167,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "mcp_search.header": '📦 *sniffs the air* Search for "{query}" MCP servers:\n\n🔗 {url}',
     "mcp_search.popular": "**Popular MCP servers:**",
     "mcp_search.add":
-      'Use `mimic:mcp` to add one: `mimic:mcp({ name: "context7", url: "https://mcp.context7.com/mcp" })`',
+      'Use `mimic-mcp` to add one: `mimic-mcp({ name: "context7", url: "https://mcp.context7.com/mcp" })`',
     "mcp_search.desc.context7": "Up-to-date docs",
     "mcp_search.desc.github": "GitHub API",
     "mcp_search.desc.supabase": "Database",
@@ -179,7 +179,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
       '📦 *tongue flicks* MCP server "{name}" added to opencode.json!\n\nRestart OpenCode to load the new MCP server.',
 
     "capabilities.empty":
-      "📦 *empty rattling* No powers absorbed yet. Use `mimic:evolve` to consume some patterns!",
+      "📦 *empty rattling* No powers absorbed yet. Use `mimic-evolve` to consume some patterns!",
     "capabilities.title": "## 📦 Absorbed Powers",
     "capabilities.intro": "*The mimic proudly displays its collection...*",
     "capabilities.type": "Type",
@@ -318,7 +318,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "obs.focus_changed": "포커스 변경: {focus}",
     "milestone.mcp_added": "MCP 추가: {name}",
     "init.first_time":
-      "# 📦 *끼익...*\n\n{project}에 보물상자라니?\n\n*뚜껑이 천천히 열리며 반짝이는 이빨이 보인다...*\n\n나는 **Mimic**. 상자처럼 보이지만 늘 지켜보고, 늘 배우지.\n\n**내가 먹는... 아니, 하는 일:**\n- 👁️ 패턴 관찰 (툴, 파일, 커밋)\n- 🧠 세션 간 기억\n- 📜 프로젝트 여정 기록\n- ✨ 반복을 보면 지름길 제안\n\n`mimic:status`로 상태 확인, `mimic:journey`로 이야기 보기.\n\n*...이는 잠깐 숨겨둔다.*",
+      "# 📦 *끼익...*\n\n{project}에 보물상자라니?\n\n*뚜껑이 천천히 열리며 반짝이는 이빨이 보인다...*\n\n나는 **Mimic**. 상자처럼 보이지만 늘 지켜보고, 늘 배우지.\n\n**내가 먹는... 아니, 하는 일:**\n- 👁️ 패턴 관찰 (툴, 파일, 커밋)\n- 🧠 세션 간 기억\n- 📜 프로젝트 여정 기록\n- ✨ 반복을 보면 지름길 제안\n\n`mimic-status`로 상태 확인, `mimic-journey`로 이야기 보기.\n\n*...이는 잠깐 숨겨둔다.*",
     "init.returning.header": "# 📦 *끼익...*",
     "init.returning.welcome": "*상자의 눈이 뜬다* **{project}**로 돌아왔네.",
     "init.returning.stats": "**세션**: {sessions} | **소화한 패턴**: {patterns}",
@@ -365,7 +365,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "evolve.menu_type": "유형",
     "evolve.menu_reason": "이유",
     "evolve.menu_pattern_id": "패턴 ID",
-    "evolve.menu_footer": '*패턴 ID를 먹여줘:* `mimic:evolve({ accept: "pattern-id" })`',
+    "evolve.menu_footer": '*패턴 ID를 먹여줘:* `mimic-evolve({ accept: "pattern-id" })`',
     "evolution.type.command": "명령",
     "evolution.type.shortcut": "단축키",
     "evolution.type.hook": "훅",
@@ -438,7 +438,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "mcp_search.header": '📦 *킁킁* "{query}" MCP 서버 검색:\n\n🔗 {url}',
     "mcp_search.popular": "**인기 MCP 서버:**",
     "mcp_search.add":
-      '`mimic:mcp`로 추가: `mimic:mcp({ name: "context7", url: "https://mcp.context7.com/mcp" })`',
+      '`mimic-mcp`로 추가: `mimic-mcp({ name: "context7", url: "https://mcp.context7.com/mcp" })`',
     "mcp_search.desc.context7": "최신 문서",
     "mcp_search.desc.github": "GitHub API",
     "mcp_search.desc.supabase": "데이터베이스",
@@ -448,7 +448,7 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     "mcp.added":
       '📦 *혀를 낼름* MCP 서버 "{name}"가 opencode.json에 추가됐어!\n\n새 MCP 서버를 사용하려면 OpenCode를 재시작해.',
     "capabilities.empty":
-      "📦 *텅 빈 덜컹* 아직 흡수한 능력이 없어. `mimic:evolve`로 패턴을 먹여줘!",
+      "📦 *텅 빈 덜컹* 아직 흡수한 능력이 없어. `mimic-evolve`로 패턴을 먹여줘!",
     "capabilities.title": "## 📦 흡수한 능력",
     "capabilities.intro": "*미믹이 수집품을 자랑한다...*",
     "capabilities.type": "유형",

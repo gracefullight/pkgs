@@ -35,5 +35,5 @@ export const BUILTIN_TOOLS = new Set([
   "session_read",
   "session_search",
   "session_info",
-  "mimic:",
+  "mimic-",
 ]);

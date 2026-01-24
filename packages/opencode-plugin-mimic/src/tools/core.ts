@@ -13,7 +13,7 @@ export const createCoreTools: ToolFactory = (ctx) => {
   const { stateManager, directory, toolCalls, i18n, i18nPromise } = ctx;
 
   return {
-    "mimic:init": tool({
+    "mimic-init": tool({
       description: i18n.t("tool.init.description"),
       args: {},
       async execute() {
@@ -50,7 +50,7 @@ export const createCoreTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:status": tool({
+    "mimic-status": tool({
       description: i18n.t("tool.status.description"),
       args: {},
       async execute() {
@@ -95,7 +95,7 @@ export const createCoreTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:journey": tool({
+    "mimic-journey": tool({
       description: i18n.t("tool.journey.description"),
       args: {},
       async execute() {
@@ -107,7 +107,7 @@ export const createCoreTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:patterns": tool({
+    "mimic-patterns": tool({
       description: i18n.t("tool.patterns.description"),
       args: {},
       async execute() {
@@ -143,7 +143,7 @@ export const createCoreTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:grow": tool({
+    "mimic-grow": tool({
       description: i18n.t("tool.grow.description"),
       args: {},
       async execute() {

@@ -8,7 +8,7 @@ export const createObservationTools: ToolFactory = (ctx) => {
   const { stateManager, i18n, i18nPromise } = ctx;
 
   return {
-    "mimic:observe": tool({
+    "mimic-observe": tool({
       description: i18n.t("tool.observe.description"),
       args: {
         observation: tool.schema.string().describe(i18n.t("tool.observe.args.observation")),
@@ -20,7 +20,7 @@ export const createObservationTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:milestone": tool({
+    "mimic-milestone": tool({
       description: i18n.t("tool.milestone.description"),
       args: {
         milestone: tool.schema.string().describe(i18n.t("tool.milestone.args.milestone")),
@@ -32,7 +32,7 @@ export const createObservationTools: ToolFactory = (ctx) => {
       },
     }),
 
-    "mimic:surface": tool({
+    "mimic-surface": tool({
       description: i18n.t("tool.surface.description"),
       args: {
         patternId: tool.schema.string().describe(i18n.t("tool.surface.args.patternId")),
