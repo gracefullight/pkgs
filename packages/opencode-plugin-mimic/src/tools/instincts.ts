@@ -5,6 +5,11 @@ import { tool } from "@opencode-ai/plugin";
 import { format } from "date-fns";
 import { getRecentlyModifiedFiles } from "@/lib/git";
 import {
+  type CurrentContext,
+  formatContextSummary,
+  getRelevantInstincts,
+} from "@/modules/knowledge/context-aware";
+import {
   formatInstinctSuggestion,
   getApplicableInstincts,
 } from "@/modules/knowledge/instinct-apply";
@@ -198,6 +203,32 @@ export const createInstinctTools: ToolFactory = (ctx) => {
         }
 
         return output;
+      },
+    }),
+
+    "mimic-context": tool({
+      description: i18n.t("tool.context.description"),
+      args: {
+        currentFile: tool.schema.string().optional().describe(i18n.t("context.current_file")),
+        currentBranch: tool.schema.string().optional().describe(i18n.t("context.current_branch")),
+      },
+      async execute(args) {
+        const i18n = await i18nPromise;
+        const innerCtx = { stateManager, directory, i18n };
+
+        const recentTools = toolCalls.slice(-10).map((t) => t.tool);
+        const recentFiles = getRecentlyModifiedFiles(directory).slice(0, 10);
+
+        const context: CurrentContext = {
+          currentFile: args.currentFile,
+          currentBranch: args.currentBranch,
+          recentTools,
+          recentFiles,
+        };
+
+        const relevantInstincts = await getRelevantInstincts(innerCtx, context);
+
+        return formatContextSummary(context, relevantInstincts, i18n);
       },
     }),
   };

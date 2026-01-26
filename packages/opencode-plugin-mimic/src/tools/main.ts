@@ -3,7 +3,9 @@ import type { StateManager } from "@/core/state";
 import { createI18n, type I18n, loadMimicConfig, resolveLanguage } from "@/lib/i18n";
 import { createAutomationTools } from "@/tools/automation";
 import { createCoreTools } from "@/tools/core";
+import { createErrorLearningTools } from "@/tools/error-learning";
 import { createEvolutionTools } from "@/tools/evolution";
+import { createGitTools } from "@/tools/git";
 import { createInstinctTools } from "@/tools/instincts";
 import { createMcpTools } from "@/tools/mcp";
 import { createObservationTools } from "@/tools/observation";
@@ -22,7 +24,9 @@ function createDefaultRegistry(): ToolRegistry {
     .register(createInstinctTools)
     .register(createObservationTools)
     .register(createMcpTools)
-    .register(createAutomationTools);
+    .register(createAutomationTools)
+    .register(createErrorLearningTools)
+    .register(createGitTools);
 }
 
 /**

@@ -27,7 +27,7 @@ describe("StateManager", () => {
       vi.mocked(existsSync).mockReturnValue(false);
       await manager.initialize();
 
-      expect(mkdir).toHaveBeenCalledTimes(3); // mimic, sessions, instincts
+      expect(mkdir).toHaveBeenCalledTimes(6); // mimic, sessions, instincts, errorPatterns, macros, save ensure
       expect(writeFile).toHaveBeenCalledTimes(2);
 
       const gitIgnoreCall = vi.mocked(writeFile).mock.calls[0];

@@ -104,16 +104,37 @@ export async function getApplicableInstincts(
   return filterRelevantInstincts(instincts, currentDomains);
 }
 
+export interface BuildInstinctContextOptions {
+  currentFile?: string;
+  currentBranch?: string;
+  recentTools?: string[];
+  recentFiles?: string[];
+}
+
 /**
  * Build a context string from approved instincts for auto-injection.
  * This simulates Homunculus's instinct-apply skill behavior.
+ * Optionally accepts context information for context-aware filtering.
  */
-export async function buildInstinctContext(ctx: MimicContext): Promise<string | null> {
+export async function buildInstinctContext(
+  ctx: MimicContext,
+  options?: BuildInstinctContextOptions,
+): Promise<string | null> {
   const instincts = await ctx.stateManager.listInstincts();
-  const approvedInstincts = instincts.filter((i) => i.status === "approved" && i.confidence >= 0.6);
+  let approvedInstincts = instincts.filter((i) => i.status === "approved" && i.confidence >= 0.6);
 
   if (approvedInstincts.length === 0) {
     return null;
+  }
+
+  if (options) {
+    const contextDomains = detectContextDomains(options, ctx.i18n.language);
+    if (contextDomains.length > 0) {
+      const contextFiltered = approvedInstincts.filter((i) => contextDomains.includes(i.domain));
+      if (contextFiltered.length > 0) {
+        approvedInstincts = contextFiltered;
+      }
+    }
   }
 
   // Group by domain for organized presentation
@@ -143,6 +164,96 @@ export async function buildInstinctContext(ctx: MimicContext): Promise<string | 
   );
 
   return sections.join("\n");
+}
+
+function detectContextDomains(options: BuildInstinctContextOptions, language: Language): Domain[] {
+  const domains: Domain[] = [];
+
+  if (options.currentFile) {
+    const fileDomain = inferDomainFromFilePath(options.currentFile);
+    if (fileDomain && !domains.includes(fileDomain)) {
+      domains.push(fileDomain);
+    }
+  }
+
+  if (options.currentBranch) {
+    const branchDomain = inferDomainFromBranchName(options.currentBranch);
+    if (branchDomain && !domains.includes(branchDomain)) {
+      domains.push(branchDomain);
+    }
+  }
+
+  if (options.recentFiles) {
+    for (const file of options.recentFiles) {
+      const fileDomain = inferDomainFromFilePath(file);
+      if (fileDomain && !domains.includes(fileDomain)) {
+        domains.push(fileDomain);
+      }
+    }
+  }
+
+  if (options.recentTools) {
+    const toolDomains = detectCurrentDomain(options.recentTools, options.recentFiles || [], language);
+    for (const d of toolDomains) {
+      if (!domains.includes(d)) {
+        domains.push(d);
+      }
+    }
+  }
+
+  return domains;
+}
+
+function inferDomainFromFilePath(filePath: string): Domain | null {
+  const lowerPath = filePath.toLowerCase();
+
+  if (
+    lowerPath.includes("/test/") ||
+    lowerPath.includes("/__tests__/") ||
+    /\.(test|spec)\.[jt]sx?$/.test(lowerPath)
+  ) {
+    return "testing";
+  }
+
+  if (lowerPath.includes("/docs/") || lowerPath.includes("/documentation/")) {
+    return "documentation";
+  }
+
+  if (/\.config\.[jt]s$/.test(lowerPath) || /\.config\.json$/.test(lowerPath)) {
+    return "tooling";
+  }
+
+  if (lowerPath.includes("/.git/") || lowerPath.includes("/git/")) {
+    return "git";
+  }
+
+  return null;
+}
+
+function inferDomainFromBranchName(branch: string): Domain | null {
+  const lowerBranch = branch.toLowerCase();
+
+  if (lowerBranch.startsWith("feature/test") || lowerBranch.startsWith("test/")) {
+    return "testing";
+  }
+
+  if (lowerBranch.startsWith("fix/") || lowerBranch.startsWith("bugfix/") || lowerBranch.startsWith("hotfix/")) {
+    return "debugging";
+  }
+
+  if (lowerBranch.startsWith("docs/") || lowerBranch.startsWith("documentation/")) {
+    return "documentation";
+  }
+
+  if (lowerBranch.startsWith("refactor/") || lowerBranch.startsWith("refactoring/")) {
+    return "refactoring";
+  }
+
+  if (lowerBranch.startsWith("chore/") || lowerBranch.startsWith("tooling/")) {
+    return "tooling";
+  }
+
+  return null;
 }
 
 /**

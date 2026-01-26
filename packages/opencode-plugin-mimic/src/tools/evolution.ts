@@ -6,7 +6,9 @@ import {
   formatEvolutionResult,
   getEvolutionSuggestions,
 } from "@/modules/evolution/engine";
+import { groupByDomain } from "@/modules/knowledge/instincts";
 import type { ToolFactory } from "@/tools/registry";
+import type { Domain, Instinct } from "@/types";
 
 /**
  * Evolution tools: evolve, capabilities
@@ -39,6 +41,9 @@ export const createEvolutionTools: ToolFactory = (ctx) => {
         }
 
         const suggestions = await getEvolutionSuggestions(innerCtx);
+        const instincts = await stateManager.listInstincts();
+        const domainMap = groupByDomain(instincts);
+
         if (suggestions.length === 0) {
           return i18n.t("evolve.empty");
         }
@@ -46,11 +51,26 @@ export const createEvolutionTools: ToolFactory = (ctx) => {
         let output = `${i18n.t("evolve.menu_title")}\n\n`;
         output += `${i18n.t("evolve.menu_intro")}\n\n`;
 
+        const formatRelatedInstincts = (domain: Domain): string => {
+          const related = domainMap.get(domain) || [];
+          if (related.length === 0) return "";
+          return related
+            .slice(0, 3)
+            .map((inst: Instinct) => `\`${inst.trigger}\``)
+            .join(", ");
+        };
+
         for (const s of suggestions) {
           output += `### ✨ ${s.name}\n`;
           output += `- **${i18n.t("evolve.menu_type")}**: ${formatCapabilityType(i18n, s.type)}\n`;
           output += `- **${i18n.t("evolve.menu_reason")}**: ${s.reason}\n`;
-          output += `- **${i18n.t("evolve.menu_pattern_id")}**: \`${s.pattern.id}\`\n\n`;
+          output += `- **${i18n.t("evolve.menu_pattern_id")}**: \`${s.pattern.id}\`\n`;
+
+          const relatedStr = formatRelatedInstincts(s.pattern.type as Domain);
+          if (relatedStr) {
+            output += `- **${i18n.t("evolve.menu_instincts")}**: ${relatedStr}\n`;
+          }
+          output += "\n";
         }
 
         output += `\n${i18n.t("evolve.menu_footer")}`;
@@ -83,6 +103,40 @@ export const createEvolutionTools: ToolFactory = (ctx) => {
             "yyyy-MM-dd",
           )}\n\n`;
         }
+        return output;
+      },
+    }),
+
+    "mimic-evolution-ready": tool({
+      description: i18n.t("tool.evolution_ready.description"),
+      args: {},
+      async execute() {
+        const i18n = await i18nPromise;
+        const state = await stateManager.read();
+        const instincts = await stateManager.listInstincts();
+        const domainMap = groupByDomain(instincts);
+
+        const pendingDomains = state.evolution.pendingSuggestions || [];
+        if (pendingDomains.length === 0) {
+          return i18n.t("evolution_ready.none");
+        }
+
+        let output = "";
+        for (const domain of pendingDomains) {
+          const domainInstincts = domainMap.get(domain as Domain) || [];
+          output += `${i18n.t("evolve.domain_title")}\n\n`;
+          output += `${i18n.t("evolve.domain_intro", { domain })}\n\n`;
+          output += `${i18n.t("evolve.domain_instincts_header", { count: domainInstincts.length })}\n\n`;
+
+          for (const inst of domainInstincts.slice(0, 10)) {
+            const confidence = Math.round(inst.confidence * 100);
+            output += `- **${inst.trigger}** (${confidence}% confidence)\n`;
+            output += `  - Action: ${inst.action}\n`;
+          }
+          output += "\n";
+        }
+
+        output += `*${i18n.t("evolution_ready.hint")}*`;
         return output;
       },
     }),

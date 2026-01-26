@@ -22,7 +22,8 @@ export const createCoreTools: ToolFactory = (ctx) => {
         const isFirstTime = state.journey.sessionCount <= 1;
 
         if (isFirstTime) {
-          return i18n.t("init.first_time", { project: state.project.name });
+          const ascii = i18n.t("init.ascii_art");
+          return i18n.t("init.first_time", { project: state.project.name, ascii });
         }
 
         const timeSince = analyzeTimeSinceLastSession(state.journey.lastSession);

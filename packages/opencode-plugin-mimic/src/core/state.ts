@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Domain, Instinct, State } from "@/types";
+import type { Domain, ErrorPattern, Instinct, Macro, State } from "@/types";
 
 const STATE_JSON_GITIGNORE_LINE = ".opencode/mimic/";
 
@@ -49,6 +49,8 @@ export class StateManager {
   private readonly statePath: string;
   private readonly sessionsDir: string;
   private readonly instinctsDir: string;
+  private readonly errorPatternsDir: string;
+  private readonly macrosDir: string;
   private readonly projectName: string;
 
   constructor(directory: string) {
@@ -56,6 +58,8 @@ export class StateManager {
     this.statePath = join(this.mimicDir, "state.json");
     this.sessionsDir = join(this.mimicDir, "sessions");
     this.instinctsDir = join(this.mimicDir, "instincts");
+    this.errorPatternsDir = join(this.mimicDir, "error-patterns");
+    this.macrosDir = join(this.mimicDir, "macros");
     this.projectName = directory.split("/").pop() || "unknown";
   }
 
@@ -88,16 +92,28 @@ export class StateManager {
     if (!existsSync(this.instinctsDir)) {
       await mkdir(this.instinctsDir, { recursive: true });
     }
+    if (!existsSync(this.errorPatternsDir)) {
+      await mkdir(this.errorPatternsDir, { recursive: true });
+    }
+    if (!existsSync(this.macrosDir)) {
+      await mkdir(this.macrosDir, { recursive: true });
+    }
     if (!existsSync(this.statePath)) {
       await this.save(createDefaultState(this.projectName));
     }
   }
 
   async read(): Promise<State> {
+    if (!existsSync(this.statePath)) {
+      await this.initialize();
+    }
     return JSON.parse(await readFile(this.statePath, "utf-8"));
   }
 
   async save(state: State): Promise<void> {
+    if (!existsSync(this.mimicDir)) {
+      await mkdir(this.mimicDir, { recursive: true });
+    }
     await writeFile(this.statePath, JSON.stringify(state, null, 2));
   }
 
@@ -297,5 +313,94 @@ export class StateManager {
       .map(([domain]) => domain) as Domain[];
 
     await this.save(state);
+  }
+
+  async listErrorPatterns(): Promise<ErrorPattern[]> {
+    const files = await readdir(this.errorPatternsDir).catch(() => []);
+    const patterns: ErrorPattern[] = [];
+
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue;
+      try {
+        const content = await readFile(join(this.errorPatternsDir, file), "utf-8");
+        patterns.push(JSON.parse(content));
+      } catch {
+        // Skip invalid files
+      }
+    }
+
+    return patterns;
+  }
+
+  async writeErrorPattern(pattern: ErrorPattern): Promise<void> {
+    const filePath = join(this.errorPatternsDir, `${pattern.id}.json`);
+    await writeFile(filePath, JSON.stringify(pattern, null, 2));
+  }
+
+  async getErrorPattern(id: string): Promise<ErrorPattern | null> {
+    const filePath = join(this.errorPatternsDir, `${id}.json`);
+    if (!existsSync(filePath)) return null;
+
+    try {
+      const content = await readFile(filePath, "utf-8");
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  }
+
+  getMacrosDir(): string {
+    return this.macrosDir;
+  }
+
+  async listMacros(): Promise<Macro[]> {
+    const files = await readdir(this.macrosDir).catch(() => []);
+    const macros: Macro[] = [];
+
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue;
+      try {
+        const content = await readFile(join(this.macrosDir, file), "utf-8");
+        macros.push(JSON.parse(content));
+      } catch {
+        // Skip invalid files
+      }
+    }
+
+    return macros.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }
+
+  async writeMacro(macro: Macro): Promise<void> {
+    if (!existsSync(this.macrosDir)) {
+      await mkdir(this.macrosDir, { recursive: true });
+    }
+    const filePath = join(this.macrosDir, `${macro.id}.json`);
+    await writeFile(filePath, JSON.stringify(macro, null, 2));
+  }
+
+  async getMacro(id: string): Promise<Macro | null> {
+    const filePath = join(this.macrosDir, `${id}.json`);
+    if (!existsSync(filePath)) return null;
+
+    try {
+      const content = await readFile(filePath, "utf-8");
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  }
+
+  async deleteMacro(id: string): Promise<boolean> {
+    const filePath = join(this.macrosDir, `${id}.json`);
+    if (!existsSync(filePath)) return false;
+
+    try {
+      await unlink(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

@@ -50,3 +50,38 @@ export function detectCommitPatterns(messages: string[]): Map<string, number> {
   }
   return patterns;
 }
+
+export function getGitDiff(directory: string): string {
+  try {
+    const stagedDiff = execSync("git diff --cached", {
+      cwd: directory,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    if (stagedDiff.length > 0) {
+      return stagedDiff;
+    }
+
+    return execSync("git diff", {
+      cwd: directory,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+export function getStagedFiles(directory: string): string[] {
+  try {
+    const result = execSync("git diff --cached --name-only", {
+      cwd: directory,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return result.trim().split("\n").filter(Boolean);
+  } catch {
+    return [];
+  }
+}

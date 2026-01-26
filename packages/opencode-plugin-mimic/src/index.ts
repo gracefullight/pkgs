@@ -5,14 +5,16 @@ import type { MimicContext } from "@/core/context";
 import { StateManager } from "@/core/state";
 import { createI18n, loadMimicConfig, resolveLanguage } from "@/lib/i18n";
 import { evolveDomain } from "@/modules/evolution/engine";
+import { type CurrentContext, getRelevantInstincts } from "@/modules/knowledge/context-aware";
 import { buildInstinctContext } from "@/modules/knowledge/instinct-apply";
 import { clusterDomainsAndTriggerEvolution } from "@/modules/knowledge/instincts";
 import { detectDomainsFromTools, SessionMemoryManager } from "@/modules/knowledge/memory";
 import { SkillGenerator } from "@/modules/knowledge/skills";
+import { recordError } from "@/modules/learning/error-patterns";
 import { ObservationLog } from "@/modules/observation/log";
 import { runObserver, shouldRunObserver } from "@/modules/observation/observer";
 import { detectPatterns, surfacePatterns } from "@/modules/observation/patterns";
-import { createTools } from "@/tools";
+import { createTools, recordMacroStep } from "@/tools";
 import type { Domain, EvolvedCapability, ToolCall } from "@/types";
 import { analyzeTimeSinceLastSession, formatDuration } from "@/utils/format";
 import { generateId } from "@/utils/id";
@@ -69,7 +71,14 @@ export const mimic: Plugin = async ({ directory, client }) => {
     const hintMessage = hints.length > 0 ? `\n${hints[0]}` : "";
 
     // Auto-apply instincts at session start (like Homunculus instinct-apply skill)
-    const instinctContext = await buildInstinctContext(ctx);
+    // Pass context for context-aware filtering
+    const recentTools = toolCalls.slice(-10).map((t) => t.tool);
+    const recentFiles = Array.from(filesEdited).slice(-10);
+    const instinctContext = await buildInstinctContext(ctx, {
+      currentBranch,
+      recentTools,
+      recentFiles,
+    });
     if (instinctContext) {
       await client.tui.showToast({
         body: {
@@ -180,6 +189,25 @@ export const mimic: Plugin = async ({ directory, client }) => {
     const state = await stateManager.read();
     state.statistics.filesModified[file] = (state.statistics.filesModified[file] || 0) + 1;
     await stateManager.save(state);
+
+    // Show context-aware instincts based on current file
+    const context: CurrentContext = {
+      currentFile: file,
+      currentBranch,
+      recentTools: toolCalls.slice(-10).map((t) => t.tool),
+      recentFiles: Array.from(filesEdited).slice(-10),
+    };
+    const relevantInstincts = await getRelevantInstincts(ctx, context);
+    if (relevantInstincts.length > 0) {
+      const topInstinct = relevantInstincts[0];
+      await client.tui.showToast({
+        body: {
+          title: `[Mimic] 💡 ${topInstinct.domain}`,
+          message: topInstinct.title,
+          variant: "info",
+        },
+      });
+    }
   };
 
   const handleVcsBranchUpdated = async (event: Event) => {
@@ -281,6 +309,9 @@ export const mimic: Plugin = async ({ directory, client }) => {
       // Log to observation log
       await observationLog.logToolCall(input.tool, input.callID, sessionId);
 
+      // Record to macro if recording
+      recordMacroStep(input.tool);
+
       const toolPattern = input.tool;
       const existing = state.patterns.find(
         (p) => p.type === "tool" && p.description === toolPattern,
@@ -307,6 +338,11 @@ export const mimic: Plugin = async ({ directory, client }) => {
       if (toolCalls.length >= 2) {
         const recentTools = toolCalls.slice(-3).map((t) => t.tool);
         await stateManager.recordToolSequence(recentTools);
+      }
+
+      // Detect error patterns in tool output
+      if (_output.output && containsError(_output.output)) {
+        await recordError(ctx, _output.output, sessionId);
       }
     },
 
@@ -371,5 +407,24 @@ export const mimic: Plugin = async ({ directory, client }) => {
     tool: createTools(stateManager, directory, toolCalls, i18n),
   };
 };
+
+const ERROR_PATTERNS = [
+  /error:/i,
+  /Error:/,
+  /ERR!/,
+  /failed/i,
+  /exception/i,
+  /cannot find/i,
+  /not found/i,
+  /undefined is not/i,
+  /is not a function/i,
+  /syntax error/i,
+  /type error/i,
+  /compilation failed/i,
+];
+
+function containsError(output: string): boolean {
+  return ERROR_PATTERNS.some((pattern) => pattern.test(output));
+}
 
 export default mimic;
