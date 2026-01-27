@@ -2,35 +2,35 @@
 
 ## Environment Setup
 ```bash
-# Install Node.js 24, pnpm 10 via mise
+# Install Node.js 24, bun 10 via mise
 mise install
 
 # Install dependencies
-pnpm install
+bun install
 ```
 
 ## Root Level Commands
 ```bash
 # Build all packages
-pnpm build
+bun build
 
 # Lint check
-pnpm lint
+bun lint
 
 # Lint auto-fix
-pnpm lint:fix
+bun lint:fix
 
 # Format
-pnpm format
+bun format
 
 # Create changeset
-pnpm changeset
+bun changeset
 
 # Update versions
-pnpm version
+bun version
 
 # Publish packages
-pnpm release
+bun release
 ```
 
 ## Package-specific Commands
@@ -39,36 +39,36 @@ pnpm release
 ```bash
 cd packages/saju
 
-pnpm build          # Build with tsc + tsc-alias
-pnpm dev            # Run with tsx
-pnpm test           # Run vitest
-pnpm test:ui        # Vitest UI mode
-pnpm test:coverage  # Coverage report
-pnpm lint           # Biome lint
-pnpm lint:fix       # Biome lint auto-fix
-pnpm format         # Biome format
+bun build          # Build with tsc + tsc-alias
+bun dev            # Run with tsx
+bun test           # Run vitest
+bun test:ui        # Vitest UI mode
+bun test:coverage  # Coverage report
+bun lint           # Biome lint
+bun lint:fix       # Biome lint auto-fix
+bun format         # Biome format
 ```
 
 ### packages/validate-branch
 ```bash
 cd packages/validate-branch
 
-pnpm build       # Build with tsup
-pnpm dev         # Run CLI with tsx
-pnpm test        # Run vitest
-pnpm lint        # Biome lint
-pnpm lint:fix    # Biome lint auto-fix
-pnpm format      # Biome format
+bun build       # Build with tsup
+bun dev         # Run CLI with tsx
+bun test        # Run vitest
+bun lint        # Biome lint
+bun lint:fix    # Biome lint auto-fix
+bun format      # Biome format
 ```
 
 ### apps/saju-example
 ```bash
 cd apps/saju-example
 
-pnpm dev         # Next.js dev server (Turbopack)
-pnpm build       # Next.js build
-pnpm start       # Production server
-pnpm lint        # Next.js lint
+bun dev         # Next.js dev server (Turbopack)
+bun build       # Next.js build
+bun start       # Production server
+bun lint        # Next.js lint
 ```
 
 ## Git Commands

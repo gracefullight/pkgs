@@ -24,7 +24,7 @@ npx create-fullstack-starter my-project
 # Or use package manager's create command
 npm create fullstack-starter my-project
 yarn create fullstack-starter my-project
-pnpm create fullstack-starter my-project
+bun create fullstack-starter my-project
 
 # Run interactively
 npx create-fullstack-starter

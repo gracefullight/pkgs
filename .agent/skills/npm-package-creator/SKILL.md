@@ -1,6 +1,6 @@
 ---
 name: npm-package-creator
-description: Guide for creating new npm packages in Gracefullight's TypeScript package monorepo. Use when creating new packages in pnpm workspace environment using TypeScript, Biome, tsup, and Vitest with standardized package structure.
+description: Guide for creating new npm packages in Gracefullight's TypeScript package monorepo. Use when creating new packages in bun workspace environment using TypeScript, Biome, tsup, and Vitest with standardized package structure.
 license: MIT
 ---
 
@@ -11,8 +11,8 @@ This skill provides guidance for creating new TypeScript npm packages in the Gra
 ## Overview
 
 Create standardized npm packages that follow existing project structure:
-- **Monorepo**: pnpm workspace
-- **Runtime**: Node.js 24, pnpm 10
+- **Monorepo**: bun workspace
+- **Runtime**: Node.js 24, bun 10
 - **Language**: TypeScript (ES2023)
 - **Linter/Formatter**: Biome
 - **Build**: tsup (ESM output)
@@ -123,7 +123,7 @@ See [README template](#reference-templates).
 
 ```bash
 cd ../../
-pnpm install
+bun install
 ```
 
 ## Phase 8: Build and Test
@@ -132,21 +132,21 @@ pnpm install
 cd packages/your-package
 
 # Build
-pnpm build
+bun build
 
 # Test
-pnpm test
+bun test
 
 # Lint
-pnpm lint
+bun lint
 
 # Type check
-pnpm typecheck
+bun typecheck
 ```
 
 ## Phase 9: Verify Workspace Registration
 
-`pnpm-workspace.yaml` has `packages/*` pattern, so automatic inclusion. No manual action required.
+`package.json` has `packages/*` pattern, so automatic inclusion. No manual action required.
 
 ---
 
@@ -220,12 +220,12 @@ Verify all items before publishing:
 - [ ] Test files written (optional)
 
 ## Build and Test
-- [ ] `pnpm build` succeeds
+- [ ] `bun build` succeeds
 - [ ] `dist/` directory created
 - [ ] `.d.ts` type definitions generated
-- [ ] `pnpm test` passes
-- [ ] `pnpm lint` passes
-- [ ] `pnpm typecheck` passes
+- [ ] `bun test` passes
+- [ ] `bun lint` passes
+- [ ] `bun typecheck` passes
 
 ## Documentation
 - [ ] `README.md` exists
@@ -241,39 +241,39 @@ Verify all items before publishing:
 
 ```bash
 # Build all packages
-pnpm -r build
+bun -r build
 
 # Test all packages
-pnpm -r test
+bun -r test
 
 # Lint all packages
-pnpm lint
+bun lint
 
 # Install dependencies
-pnpm install
+bun install
 ```
 
 ## Package-Specific Commands
 
 ```bash
 # Build specific package
-pnpm --filter @gracefullight/your-package build
+bun --filter @gracefullight/your-package build
 
 # Dev mode for specific package
-pnpm --filter @gracefullight/your-package dev
+bun --filter @gracefullight/your-package dev
 
 # Test specific package
-pnpm --filter @gracefullight/your-package test
+bun --filter @gracefullight/your-package test
 ```
 
 ## Pre-Publish Checks
 
 ```bash
 # Dry run to test publishing
-pnpm publish --dry-run
+bun publish --dry-run
 
 # Actual publish
-pnpm publish
+bun publish
 ```
 
 ---

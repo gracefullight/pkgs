@@ -30,8 +30,8 @@
 ## 설치
 
 ```bash
-# pnpm 사용
-pnpm add @gracefullight/validate-branch
+# bun 사용
+bun add @gracefullight/validate-branch
 
 # npm 사용
 npm install @gracefullight/validate-branch
@@ -411,19 +411,19 @@ git clone https://github.com/gracefullight/saju.git
 cd packages/validate-branch
 
 # 의존성 설치
-pnpm install
+bun install
 
 # 빌드
-pnpm build
+bun build
 
 # 테스트
-pnpm test
+bun test
 
 # 린트
-pnpm lint
+bun lint
 
 # 포맷
-pnpm lint:fix
+bun lint:fix
 ```
 
 ### 로컬에서 CLI 테스트

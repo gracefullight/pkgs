@@ -9,8 +9,8 @@ description: when working for linting and formatting.
 
 ```bash
 # Lint the code
-pnpm lint
+bun lint
 
 # Type check the code 
-pnpm typecheck
+bun typecheck
 ```

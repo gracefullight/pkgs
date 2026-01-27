@@ -4,7 +4,7 @@
 Gracefullight's TypeScript package monorepo. A workspace for managing and publishing multiple npm packages.
 
 ## Tech Stack
-- **Runtime**: Node.js 24, pnpm 10
+- **Runtime**: Node.js 24, bun 10
 - **Language**: TypeScript
 - **Linter/Formatter**: Biome
 - **Versioning**: Changesets
@@ -21,7 +21,7 @@ ts-workspace/
 │   └── saju-example/    # Next.js saju example app (private)
 ├── .changeset/          # Changesets config
 ├── biome.json           # Biome linter/formatter config
-├── pnpm-workspace.yaml  # pnpm workspace config
+├── package.json  # bun workspace config
 └── package.json         # Root package.json
 ```
 

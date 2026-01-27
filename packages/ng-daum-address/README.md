@@ -7,7 +7,7 @@ Daum (Kakao) Address Search Component for Angular 21+
 ## Installation
 
 ```bash
-pnpm add @gracefullight/ng-daum-address
+bun add @gracefullight/ng-daum-address
 ```
 
 ## Usage

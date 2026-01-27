@@ -219,9 +219,9 @@ List all evolved capabilities.
 ## Development
 
 ```bash
-pnpm install
-pnpm run build
-pnpm run dev  # watch mode
+bun install
+bun run build
+bun run dev  # watch mode
 ```
 
 ## Inspiration

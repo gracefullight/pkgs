@@ -38,8 +38,8 @@ This library calculates these pillars using:
 ## Installation
 
 ```bash
-# Using pnpm
-pnpm add @gracefullight/saju
+# Using bun
+bun add @gracefullight/saju
 
 # Using npm
 npm install @gracefullight/saju
@@ -54,10 +54,10 @@ Choose one based on your preference:
 
 ```bash
 # Option 1: Luxon (recommended for modern apps)
-pnpm add luxon @types/luxon
+bun add luxon @types/luxon
 
 # Option 2: date-fns (lightweight alternative)
-pnpm add date-fns date-fns-tz
+bun add date-fns date-fns-tz
 ```
 
 ## Quick Start
@@ -803,22 +803,22 @@ git clone https://github.com/gracefullight/saju.git
 cd saju
 
 # Install dependencies
-pnpm install
+bun install
 
 # Run tests
-pnpm test
+bun test
 
 # Run tests with coverage
-pnpm test:coverage
+bun test:coverage
 
 # Build
-pnpm build
+bun build
 
 # Lint
-pnpm lint
+bun lint
 
 # Format
-pnpm lint:fix
+bun lint:fix
 ```
 
 ### Project Structure
@@ -851,13 +851,13 @@ packages/saju/
 
 ```bash
 # Run all tests
-pnpm test
+bun test
 
 # Run tests in watch mode
-pnpm test:watch
+bun test:watch
 
 # Generate coverage report
-pnpm test:coverage
+bun test:coverage
 ```
 
 Coverage results:

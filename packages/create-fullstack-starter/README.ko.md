@@ -24,7 +24,7 @@ npx create-fullstack-starter my-project
 # 또는 패키지 매니저의 create 명령어 사용
 npm create fullstack-starter my-project
 yarn create fullstack-starter my-project
-pnpm create fullstack-starter my-project
+bun create fullstack-starter my-project
 
 # 대화형으로 실행
 npx create-fullstack-starter

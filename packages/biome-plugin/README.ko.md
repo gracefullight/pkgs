@@ -5,7 +5,7 @@
 ## 설치
 
 ```bash
-pnpm add -D @gracefullight/biome-plugin
+bun add -D @gracefullight/biome-plugin
 ```
 
 ## 사용법

@@ -26,8 +26,8 @@ Follow these steps when implementing new tools based on a user's `curl` request 
    - Import `registerTools` as `register{Feature}Tools`.
    - Call `register{Feature}Tools(server)` in `registerAllTools`.
 6. **Verify**:
-   - Run `pnpm lint && pnpm typecheck`.
-   - Use `pnpm biome check src --write` to fix linting errors.
+   - Run `bun lint && bun typecheck`.
+   - Use `bun biome check src --write` to fix linting errors.
 
 ## Implementation Details
 

@@ -4,21 +4,21 @@
 
 ### 1. Lint Check
 ```bash
-pnpm lint
+bun lint
 ```
-If errors, run `pnpm lint:fix` for auto-fix
+If errors, run `bun lint:fix` for auto-fix
 
 ### 2. Type Check
 In the relevant package:
 ```bash
-pnpm build
+bun build
 ```
 Should have no build errors
 
 ### 3. Run Tests
 In the relevant package:
 ```bash
-pnpm test
+bun test
 ```
 All tests must pass
 
@@ -26,26 +26,26 @@ All tests must pass
 
 ### 1. Create Changeset
 ```bash
-pnpm changeset
+bun changeset
 ```
 - Select change type (major/minor/patch)
 - Write change description
 
 ### 2. Update Versions
 ```bash
-pnpm version
+bun version
 ```
 
 ### 3. Build and Publish
 ```bash
-pnpm release
+bun release
 ```
 
 ## Before Commit
 
-1. `pnpm lint` - Lint passes
-2. `pnpm build` - Build succeeds
-3. `pnpm test` (in relevant package) - Tests pass
+1. `bun lint` - Lint passes
+2. `bun build` - Build succeeds
+3. `bun test` (in relevant package) - Tests pass
 
 ## Important Notes
 - Never use `as any`, `@ts-ignore`, `@ts-expect-error`

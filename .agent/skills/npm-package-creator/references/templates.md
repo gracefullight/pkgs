@@ -157,7 +157,7 @@ export default defineConfig({
 ## Installation
 
 \`\`\`bash
-pnpm add @gracefullight/your-package
+bun add @gracefullight/your-package
 npm install @gracefullight/your-package
 yarn add @gracefullight/your-package
 \`\`\`
@@ -201,19 +201,19 @@ function function1(param: string): void
 
 \`\`\`bash
 # Install dependencies
-pnpm install
+bun install
 
 # Build
-pnpm build
+bun build
 
 # Test
-pnpm test
+bun test
 
 # Lint
-pnpm lint
+bun lint
 
 # Format
-pnpm lint:fix
+bun lint:fix
 \`\`\`
 
 ## License

@@ -5,7 +5,7 @@ Biome GritQL plugins for code quality.
 ## Installation
 
 ```bash
-pnpm add -D @gracefullight/biome-plugin
+bun add -D @gracefullight/biome-plugin
 ```
 
 ## Usage

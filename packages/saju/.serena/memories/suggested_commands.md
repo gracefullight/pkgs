@@ -1,6 +1,6 @@
 # Suggested Commands
-- Test: `pnpm test`
-- Build: `pnpm build`
-- Lint: `pnpm lint`
-- Format: `pnpm format`
-- Dev (Run): `pnpm dev`
+- Test: `bun test`
+- Build: `bun build`
+- Lint: `bun lint`
+- Format: `bun format`
+- Dev (Run): `bun dev`

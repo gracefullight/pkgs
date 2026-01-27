@@ -30,8 +30,8 @@ By default, the following branch names are allowed:
 ## Installation
 
 ```bash
-# Using pnpm
-pnpm add @gracefullight/validate-branch
+# Using bun
+bun add @gracefullight/validate-branch
 
 # Using npm
 npm install @gracefullight/validate-branch
@@ -411,19 +411,19 @@ git clone https://github.com/gracefullight/saju.git
 cd packages/validate-branch
 
 # Install dependencies
-pnpm install
+bun install
 
 # Build
-pnpm build
+bun build
 
 # Test
-pnpm test
+bun test
 
 # Lint
-pnpm lint
+bun lint
 
 # Format
-pnpm lint:fix
+bun lint:fix
 ```
 
 ### Test CLI Locally

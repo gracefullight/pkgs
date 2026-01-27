@@ -7,7 +7,7 @@ Angular 21+를 위한 다음(카카오) 주소 검색 컴포넌트
 ## 설치
 
 ```bash
-pnpm add @gracefullight/ng-daum-address
+bun add @gracefullight/ng-daum-address
 ```
 
 ## 사용법

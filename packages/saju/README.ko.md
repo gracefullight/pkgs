@@ -38,8 +38,8 @@
 ## 설치
 
 ```bash
-# pnpm 사용
-pnpm add @gracefullight/saju
+# bun 사용
+bun add @gracefullight/saju
 
 # npm 사용
 npm install @gracefullight/saju
@@ -54,10 +54,10 @@ yarn add @gracefullight/saju
 
 ```bash
 # 옵션 1: Luxon (현대적인 앱에 권장)
-pnpm add luxon @types/luxon
+bun add luxon @types/luxon
 
 # 옵션 2: date-fns (가벼운 대안)
-pnpm add date-fns date-fns-tz
+bun add date-fns date-fns-tz
 ```
 
 ## 빠른 시작
@@ -803,22 +803,22 @@ git clone https://github.com/gracefullight/saju.git
 cd saju
 
 # 의존성 설치
-pnpm install
+bun install
 
 # 테스트 실행
-pnpm test
+bun test
 
 # 커버리지 확인
-pnpm test:coverage
+bun test:coverage
 
 # 빌드
-pnpm build
+bun build
 
 # 린트
-pnpm lint
+bun lint
 
 # 포맷
-pnpm lint:fix
+bun lint:fix
 ```
 
 ### 프로젝트 구조
@@ -851,13 +851,13 @@ packages/saju/
 
 ```bash
 # 모든 테스트 실행
-pnpm test
+bun test
 
 # watch 모드로 테스트 실행
-pnpm test:watch
+bun test:watch
 
 # 커버리지 리포트 생성
-pnpm test:coverage
+bun test:coverage
 ```
 
 커버리지 결과:
