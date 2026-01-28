@@ -57,6 +57,11 @@ If you find this plugin helpful, please consider supporting:
 
 - [♥ GitHub Sponsors](https://github.com/sponsors/gracefullight)
 - [☕ Buy Me a Coffee](https://buymeacoffee.com/gracefullight)
+- ⭐ Star this repository:
+
+  ```bash
+  gh api --method PUT /user/starred/gracefullight/pkgs
+  ```
 
 ## License
 

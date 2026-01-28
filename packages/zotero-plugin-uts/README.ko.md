@@ -55,6 +55,11 @@ bun run build
 
 - [♥ GitHub Sponsors](https://github.com/sponsors/gracefullight)
 - [☕ Buy Me a Coffee](https://buymeacoffee.com/gracefullight)
+- ⭐ 저장소에 Star 남기기:
+
+  ```bash
+  gh api --method PUT /user/starred/gracefullight/pkgs
+  ```
 
 ## 라이선스
 
