@@ -1,82 +1,76 @@
-# Development Commands
+# Suggested Commands for pkgs
 
-## Environment Setup
+## Development
 ```bash
-# Install Node.js 24, bun 10 via mise
-mise install
-
 # Install dependencies
 bun install
-```
 
-## Root Level Commands
-```bash
 # Build all packages
-bun build
+bun run build
 
-# Lint check
-bun lint
-
-# Lint auto-fix
-bun lint:fix
-
-# Format
-bun format
-
-# Create changeset
-bun changeset
-
-# Update versions
-bun version
-
-# Publish packages
-bun release
+# Type check all packages
+bun run typecheck
 ```
 
-## Package-specific Commands
-
-### packages/saju
+## Linting & Formatting
 ```bash
-cd packages/saju
+# Check linting
+bun run lint
 
-bun build          # Build with tsc + tsc-alias
-bun dev            # Run with tsx
-bun test           # Run vitest
-bun test:ui        # Vitest UI mode
-bun test:coverage  # Coverage report
-bun lint           # Biome lint
-bun lint:fix       # Biome lint auto-fix
-bun format         # Biome format
+# Fix linting issues
+bun run lint:fix
+
+# Format code
+bun run format
 ```
 
-### packages/validate-branch
+## Testing
 ```bash
-cd packages/validate-branch
+# Test all packages
+bun run --filter './packages/*' test
 
-bun build       # Build with tsup
-bun dev         # Run CLI with tsx
-bun test        # Run vitest
-bun lint        # Biome lint
-bun lint:fix    # Biome lint auto-fix
-bun format      # Biome format
+# Test specific package
+bun run --filter '@gracefullight/saju' test
 ```
 
-### apps/saju-example
+## Package Management
 ```bash
-cd apps/saju-example
+# Add dependency to specific package
+bun add <package> --filter '@gracefullight/<package-name>'
 
-bun dev         # Next.js dev server (Turbopack)
-bun build       # Next.js build
-bun start       # Production server
-bun lint        # Next.js lint
+# Add dev dependency to root
+bun add -d <package>
 ```
 
-## Git Commands
+## Release
 ```bash
+# Release please (triggered via CI, but can check locally)
+# See .github/workflows/release.yml
+```
+
+## Git
+```bash
+# Current branch
+git branch --show-current
+
+# Recent commits
+git log -20 --oneline
+
+# Check status
 git status
-git diff
-git log --oneline -10
-git add .
-git commit -m "message"
-git push
+```
+
+## Utility (Darwin/macOS)
+```bash
+# List directory
+ls -la
+
+# Find files
+find . -name "*.ts" -not -path "*/node_modules/*"
+
+# Search in files
+grep -r "pattern" --include="*.ts" .
+
+# Check mise tools
+mise list
 ```

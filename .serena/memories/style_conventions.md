@@ -1,52 +1,30 @@
-# Code Style and Conventions
+# Style Conventions for pkgs
 
-## Biome Configuration (biome.json)
+## TypeScript/JavaScript
+- **Indentation**: 2 spaces
+- **Line Width**: 100 characters
+- **Quotes**: Double quotes
+- **Trailing Commas**: All (where valid)
+- **Semicolons**: Required (Biome default)
 
-### Formatter
-- Indent: 2 spaces
-- Line width: 100 characters
-- Quote style: double quotes (`"`)
-- Trailing commas: all
+## Import/Export Rules
+- **Strict Type Imports**: Required (`import type { ... }`)
+- **Strict Type Exports**: Required (`export type { ... }`)
+- **No Relative Imports**: Use package names instead (enforced by custom Biome plugin)
 
-### Linter Rules
-- Recommended rules enabled
-- `noExcessiveCognitiveComplexity`: warn
-- `useImportType`: error (must use `import type` for type imports)
-- `useExportType`: error (must use `export type` for type exports)
-
-### Assist
-- `organizeImports`: on (auto-sort imports)
-
-## TypeScript Conventions
-- ESM modules (`"type": "module"`)
-- Provide type definitions (`.d.ts`)
-- Use `type` keyword for type imports/exports
-
-## Package Structure
-```
-packages/{package-name}/
-├── src/
-│   ├── index.ts        # Public API
-│   ├── core/           # Core logic
-│   ├── types/          # Type definitions
-│   └── __tests__/      # Tests
-├── dist/               # Build output
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+## Commit Convention
+- **Format**: Conventional Commits
+- **Types**: feat, fix, chore, docs, style, refactor, test, ci, build, perf
+- **Scope**: Optional, use package name (e.g., `feat(saju): add solar term calculation`)
 
 ## Naming Conventions
-- File names: kebab-case (`four-pillars.ts`)
-- Classes/Types: PascalCase (`DateAdapter`)
-- Functions/Variables: camelCase (`getFourPillars`)
-- Constants: SCREAMING_SNAKE_CASE (`STANDARD_PRESET`)
+- **Files**: kebab-case for utilities, PascalCase for classes/components
+- **Variables**: camelCase
+- **Constants**: UPPER_SNAKE_CASE
+- **Types/Interfaces**: PascalCase
+- **Package Names**: @gracefullight/* for scoped packages
 
-## Testing Conventions
-- Use Vitest
-- Test files: `__tests__/` directory or `.test.ts` suffix
-- Use describe/it pattern
-
-## Documentation
-- README.md: Korean (README.en.md: English)
-- JSDoc comments recommended
+## Code Patterns
+- Prefer explicit types over inference for public APIs
+- Use strict null checks
+- Organize imports (Biome assist action enabled)

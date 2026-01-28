@@ -1,43 +1,50 @@
-# ts-workspace Project Overview
+# Project Overview: pkgs
 
 ## Purpose
-Gracefullight's TypeScript package monorepo. A workspace for managing and publishing multiple npm packages.
+A monorepo containing various open-source packages by gracefullight, including:
+- **Saju (四柱命理)**: Korean/Chinese Four Pillars calculation library (TypeScript & Dart)
+- **Angular Components**: Daum (Kakao) Address Search Component
+- **Git Utilities**: Branch name validation tool
+- **MCP Servers**: Cafe24 Admin API integration
+- **CLI Tools**: Fullstack starter template
+- **Zotero Plugin**: UTS APA 7th citation format plugin
 
 ## Tech Stack
-- **Runtime**: Node.js 24, bun 10
-- **Language**: TypeScript
-- **Linter/Formatter**: Biome
-- **Versioning**: Changesets
-- **Testing**: Vitest
-- **Build**: tsc, tsup (varies by package)
+- **Package Manager**: Bun 1.2.4
+- **Runtime**: Node.js 24
+- **Monorepo**: Bun workspaces (packages/*, apps/*)
+- **Linting/Formatting**: Biome 2.3.11 with custom plugin
+- **Release Management**: release-please
+- **Version Manager**: mise (experimental monorepo root)
+- **Additional**: Dart/Flutter for saju-dart package
 
-## Monorepo Structure
+## Code Style & Conventions
+- **Formatter**: Biome with 2-space indentation, 100 char line width
+- **Quotes**: Double quotes
+- **Trailing Commas**: All
+- **Import/Export**: Strict type imports/exports required (`useImportType`, `useExportType`)
+- **Custom Rule**: No relative imports (via biome-plugin)
+- **Commit Style**: Conventional commits (enforced by commitlint)
+
+## Project Structure
 ```
-ts-workspace/
-├── packages/
-│   ├── saju/            # Four Pillars calculator library (@gracefullight/saju)
-│   └── validate-branch/ # Git branch name validation tool (@gracefullight/validate-branch)
-├── apps/
-│   └── saju-example/    # Next.js saju example app (private)
-├── .changeset/          # Changesets config
-├── biome.json           # Biome linter/formatter config
-├── package.json  # bun workspace config
-└── package.json         # Root package.json
+pkgs/
+├── packages/           # Main packages
+│   ├── saju/          # TypeScript Saju library
+│   ├── saju-dart/     # Dart/Flutter Saju library
+│   ├── ng-daum-address/  # Angular component
+│   ├── validate-branch/  # Git utility
+│   ├── mcp-cafe24-admin/ # MCP server
+│   ├── create-fullstack-starter/  # CLI tool
+│   ├── biome-plugin/  # Custom Biome rules
+│   └── zotero-plugin-uts/  # Zotero plugin
+├── apps/              # Example applications
+├── .github/workflows/ # CI/CD (release.yml, ci.yml, deploy.yml)
+└── biome.json         # Biome configuration
 ```
 
-## Package Descriptions
-
-### @gracefullight/saju
-- Four Pillars (四柱命理) calculator TypeScript library
-- Supports Luxon, date-fns adapter pattern
-- Features: Ten Gods, strength analysis, relations (clashes/combines), major luck, yearly luck, yong-shen analysis
-- Tested with Vitest (91%+ coverage)
-
-### @gracefullight/validate-branch
-- Git branch name validation CLI tool
-- Custom regexp pattern support
-- Built-in presets: gitflow, jira
-
-### @gracefullight/saju-example (private)
-- Next.js 16 based saju example app
-- Uses Tailwind CSS 4, React 19
+## Release Configuration
+- Uses release-please with component-based versioning
+- Tag format: `component@version` (e.g., `@gracefullight/saju@1.0.0`)
+- Separate release for each package
+- Publishes to npm (TypeScript) and pub.dev (Dart)

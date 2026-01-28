@@ -1,53 +1,22 @@
-# Task Completion Checklist
+# Task Completion Checklist for pkgs
 
-## After Code Changes
+## Before Committing
+- [ ] Run `bun run lint` - no errors
+- [ ] Run `bun run typecheck` - no type errors
+- [ ] Run tests if applicable: `bun run --filter '<package>' test`
 
-### 1. Lint Check
-```bash
-bun lint
-```
-If errors, run `bun lint:fix` for auto-fix
+## Committing
+- [ ] Use conventional commit format: `type(scope): message`
+- [ ] Keep commits atomic (one logical change per commit)
+- [ ] Include Co-authored-by trailer for AI assistance
 
-### 2. Type Check
-In the relevant package:
-```bash
-bun build
-```
-Should have no build errors
+## After Changes
+- [ ] Verify Biome formatting: `bun run format`
+- [ ] Check that build passes: `bun run build`
+- [ ] Review changed files: `git diff --staged`
 
-### 3. Run Tests
-In the relevant package:
-```bash
-bun test
-```
-All tests must pass
-
-## Before Release
-
-### 1. Create Changeset
-```bash
-bun changeset
-```
-- Select change type (major/minor/patch)
-- Write change description
-
-### 2. Update Versions
-```bash
-bun version
-```
-
-### 3. Build and Publish
-```bash
-bun release
-```
-
-## Before Commit
-
-1. `bun lint` - Lint passes
-2. `bun build` - Build succeeds
-3. `bun test` (in relevant package) - Tests pass
-
-## Important Notes
-- Never use `as any`, `@ts-ignore`, `@ts-expect-error`
-- Must use `import type` for type imports
-- No empty catch blocks
+## Release Considerations
+- [ ] For new features: use `feat:` commit type
+- [ ] For bug fixes: use `fix:` commit type
+- [ ] For breaking changes: include `BREAKING CHANGE:` in commit body
+- [ ] release-please will automatically create release PR based on commits
