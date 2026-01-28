@@ -11,6 +11,16 @@
               "strict_max_version": "8.*"
             }
           }
+        },
+        {
+          "version": "0.1.2",
+          "update_link": "https://github.com/gracefullight/pkgs/releases/download/zotero-plugin-uts@0.1.2/zotero-plugin-uts@0.1.2.xpi",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "7.0",
+              "strict_max_version": "8.*"
+            }
+          }
         }
       ]
     }
