@@ -38,7 +38,8 @@
     },
     "packages/zotero-plugin-uts": {
       "release-type": "node",
-      "component": "zotero-plugin-uts"
+      "component": "zotero-plugin-uts",
+      "extra-files": ["updates.json", "addon/manifest.json"]
     }
   }
 }
