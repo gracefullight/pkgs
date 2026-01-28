@@ -36,6 +36,8 @@
     "test": "vitest"
   },
   "devDependencies": {
+    "@citation-js/core": "^0.7.21",
+    "@citation-js/plugin-csl": "^0.7.22",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^4.0.17",
