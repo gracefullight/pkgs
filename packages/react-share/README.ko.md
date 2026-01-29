@@ -143,6 +143,23 @@ function CustomShare() {
 />
 ```
 
+## 다른 라이브러리와 비교
+
+| 기능 | 기존 라이브러리 | @gracefullight/react-share |
+|---------|----------------------|---------------------------|
+| **아키텍처** | 컴포넌트 기반 | 헤드리스 (render props) |
+| **UI 제어** | 제한적 (빌트인 버튼/아이콘) | 완전한 제어 (자체 UI 사용) |
+| **번들 크기** | 큼 (SVG 아이콘 포함) | 작음 (아이콘 미포함) |
+| **동적 URL** | 부분 지원 (beforeOnClick) | 완전 지원 (async URL resolver) |
+| **SDK 로딩** | 없음 (팝업 기반) | 지연 로딩 (Kakao, Facebook) |
+| **타입 안전성** | 기본 | Discriminated unions |
+| **커스터마이징** | 스타일 props | 완전한 UI 자유도 |
+| **디자인 시스템** | 통합 어려움 | 원활한 통합 |
+
+## 후원
+
+이 프로젝트가 도움이 되셨다면 [GitHub Sponsors](https://github.com/sponsors/gracefullight)로 후원해 주세요 ❤️
+
 ## 라이선스
 
 MIT

@@ -143,6 +143,23 @@ If you need to fetch a shareable URL only when the user clicks the button:
 />
 ```
 
+## Comparison with Other Libraries
+
+| Feature | Traditional Libraries | @gracefullight/react-share |
+|---------|----------------------|---------------------------|
+| **Architecture** | Component-based | Headless (render props) |
+| **UI Control** | Limited (pre-built buttons/icons) | Full control (bring your own UI) |
+| **Bundle Size** | Larger (includes SVG icons) | Smaller (no icons included) |
+| **Dynamic URLs** | Partial (beforeOnClick) | Full (async URL resolver) |
+| **SDK Loading** | None (popup-based) | Lazy-loaded (Kakao, Facebook) |
+| **Type Safety** | Basic | Discriminated unions |
+| **Customization** | Style props | Complete UI freedom |
+| **Design System** | Hard to integrate | Seamless integration |
+
+## Sponsor
+
+If you find this project helpful, please consider [sponsoring me on GitHub](https://github.com/sponsors/gracefullight) ❤️
+
 ## License
 
 MIT
