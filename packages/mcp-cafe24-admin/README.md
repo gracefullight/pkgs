@@ -253,6 +253,18 @@ Cafe24 Admin API는 OAuth 2.0 Bearer 토큰을 사용합니다. 서버가 모든
 
 MIT
 
+## 후원
+
+이 프로젝트가 도움이 되셨다면 커피 한 잔 부탁드립니다!
+
+<a href="https://www.buymeacoffee.com/gracefullight" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+또는 스타를 눌러주세요:
+
+```bash
+gh api --method PUT /user/starred/gracefullight/pkgs
+```
+
 ## 링크
 
 - [Cafe24 Admin API 문서](https://developers.cafe24.com/docs/en/api/admin/)

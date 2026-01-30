@@ -198,6 +198,18 @@ final traditional = getFourPillars(dt, preset: traditionalPreset);
 
 - 타입스크립트 버전: [@gracefullight/saju](https://www.npmjs.com/package/@gracefullight/saju)
 
+## 후원
+
+이 프로젝트가 도움이 되셨다면 커피 한 잔 부탁드립니다!
+
+<a href="https://www.buymeacoffee.com/gracefullight" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+또는 스타를 눌러주세요:
+
+```bash
+gh api --method PUT /user/starred/gracefullight/pkgs
+```
+
 ## 라이선스
 
 MIT © [gracefullight](https://github.com/gracefullight)
