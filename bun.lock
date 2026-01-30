@@ -57,6 +57,25 @@
         "typescript": "^5",
       },
     },
+    "apps/react-share-example": {
+      "name": "@gracefullight/react-share-example",
+      "version": "0.1.0",
+      "dependencies": {
+        "@gracefullight/react-share": "workspace:*",
+        "lucide-react": "^0.562.0",
+        "next": "^16.1.1",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
+      },
+      "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.18",
+        "@types/node": "^24.10.4",
+        "@types/react": "^19.2.7",
+        "@types/react-dom": "^19.2.3",
+        "tailwindcss": "^4.1.18",
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/saju-example": {
       "name": "@gracefullight/saju-example",
       "version": "0.1.6",
@@ -165,7 +184,7 @@
     },
     "packages/react-share": {
       "name": "@gracefullight/react-share",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@types/facebook-js-sdk": "^3.3.12",
         "@types/kakao-js-sdk": "^1.39.5",
@@ -511,6 +530,8 @@
     "@gracefullight/ng-daum-address": ["@gracefullight/ng-daum-address@workspace:packages/ng-daum-address"],
 
     "@gracefullight/react-share": ["@gracefullight/react-share@workspace:packages/react-share"],
+
+    "@gracefullight/react-share-example": ["@gracefullight/react-share-example@workspace:apps/react-share-example"],
 
     "@gracefullight/saju": ["@gracefullight/saju@workspace:packages/saju"],
 
