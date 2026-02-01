@@ -1,3 +1,4 @@
+import '../types/hidden_stems.dart';
 import '../types/types.dart';
 
 /// Determines the ten god (십신) relationship between the day master and a target stem.
@@ -199,11 +200,13 @@ Map<TenGod, int> countTenGods(FourPillarsTenGods analysis) {
   counts[analysis.hour.stem.tenGod] = counts[analysis.hour.stem.tenGod]! + 1;
 
   // Count branches (main hidden stem only)
-  counts[analysis.year.branch.tenGod] = counts[analysis.year.branch.tenGod]! + 1;
+  counts[analysis.year.branch.tenGod] =
+      counts[analysis.year.branch.tenGod]! + 1;
   counts[analysis.month.branch.tenGod] =
       counts[analysis.month.branch.tenGod]! + 1;
   counts[analysis.day.branch.tenGod] = counts[analysis.day.branch.tenGod]! + 1;
-  counts[analysis.hour.branch.tenGod] = counts[analysis.hour.branch.tenGod]! + 1;
+  counts[analysis.hour.branch.tenGod] =
+      counts[analysis.hour.branch.tenGod]! + 1;
 
   return counts;
 }
@@ -226,4 +229,37 @@ Map<Element, int> countElements(FourPillars pillars) {
   }
 
   return counts;
+}
+
+/// Get the ten god for a specific stem relative to the day master.
+///
+/// This is a convenience function to directly query the ten god relationship
+/// between the day master and any heavenly stem.
+///
+/// Example:
+/// ```dart
+/// final dayMaster = Stem.jia;
+/// final stem = Stem.bing;
+/// final tenGod = getTenGodForStem(dayMaster, stem);
+/// print(tenGod.korean); // "식신"
+/// ```
+TenGod getTenGodForStem(Stem dayMaster, Stem stem) {
+  return getTenGodKey(dayMaster, stem);
+}
+
+/// Get the ten god for a branch based on its primary hidden stem.
+///
+/// Each branch contains one or more hidden stems. This function uses the
+/// primary (본기) hidden stem to determine the ten god relationship.
+///
+/// Example:
+/// ```dart
+/// final dayMaster = Stem.jia;
+/// final branch = Branch.yin;
+/// final tenGod = getTenGodForBranch(dayMaster, branch);
+/// print(tenGod.korean); // "비견" (since 寅's primary hidden stem is 甲)
+/// ```
+TenGod getTenGodForBranch(Stem dayMaster, Branch branch) {
+  final primaryStem = HiddenStems.primaryStem(branch);
+  return getTenGodKey(dayMaster, primaryStem);
 }

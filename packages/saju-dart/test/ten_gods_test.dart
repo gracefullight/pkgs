@@ -21,19 +21,23 @@ void main() {
       expect(result, equals(TenGod.eatingGod));
     });
 
-    test('determines correct ten god for generating element different polarity', () {
+    test('determines correct ten god for generating element different polarity',
+        () {
       // 甲 (Wood) generates 丁 (Fire) different polarity = 상관
       final result = getTenGodKey(Stem.jia, Stem.ding);
       expect(result, equals(TenGod.hurtingOfficer));
     });
 
-    test('determines correct ten god for controlling element same polarity', () {
+    test('determines correct ten god for controlling element same polarity',
+        () {
       // 甲 (Wood) controls 戊 (Earth) same polarity = 편재
       final result = getTenGodKey(Stem.jia, Stem.wu);
       expect(result, equals(TenGod.indirectWealth));
     });
 
-    test('determines correct ten god for controlling element different polarity', () {
+    test(
+        'determines correct ten god for controlling element different polarity',
+        () {
       // 甲 (Wood) controls 己 (Earth) different polarity = 정재
       final result = getTenGodKey(Stem.jia, Stem.ji);
       expect(result, equals(TenGod.directWealth));
@@ -83,6 +87,38 @@ void main() {
     test('primary stem is first in list', () {
       final primary = HiddenStems.primaryStem(Branch.yin);
       expect(primary, equals(Stem.jia));
+    });
+  });
+
+  group('getTenGodForStem', () {
+    test('returns correct ten god for stem', () {
+      // 甲 (day master) -> 甲 (stem) = 비견 (companion)
+      final result1 = getTenGodForStem(Stem.jia, Stem.jia);
+      expect(result1, equals(TenGod.companion));
+
+      // 甲 (day master) -> 乙 (stem) = 겁재 (robWealth)
+      final result2 = getTenGodForStem(Stem.jia, Stem.yi);
+      expect(result2, equals(TenGod.robWealth));
+
+      // 甲 (day master) -> 丙 (stem) = 식신 (eatingGod)
+      final result3 = getTenGodForStem(Stem.jia, Stem.bing);
+      expect(result3, equals(TenGod.eatingGod));
+
+      // 丙 (day master) -> 庚 (stem) = 편재 (indirectWealth)
+      final result4 = getTenGodForStem(Stem.bing, Stem.geng);
+      expect(result4, equals(TenGod.indirectWealth));
+    });
+  });
+
+  group('getTenGodForBranch', () {
+    test('returns correct ten god for branch (primary hidden stem)', () {
+      // 甲 (day master) -> 子 (branch, hidden stem: 癸) = 정인 (directSeal)
+      final result1 = getTenGodForBranch(Stem.jia, Branch.zi);
+      expect(result1, equals(TenGod.directSeal));
+
+      // 甲 (day master) -> 寅 (branch, hidden stem: 甲) = 비견 (companion)
+      final result2 = getTenGodForBranch(Stem.jia, Branch.yin);
+      expect(result2, equals(TenGod.companion));
     });
   });
 }
