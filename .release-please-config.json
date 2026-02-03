@@ -44,6 +44,10 @@
     "packages/react-share": {
       "release-type": "node",
       "component": "@gracefullight/react-share"
+    },
+    "packages/tems-trp-parser": {
+      "release-type": "node",
+      "component": "@gracefullight/tems-trp-parser"
     }
   }
 }
