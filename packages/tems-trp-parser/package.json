@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/tems-trp-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Parse TEMS Pocket TRP (Trace Recording Packet) RF log files",
   "type": "module",
   "main": "./dist/index.js",
