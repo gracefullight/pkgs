@@ -1,0 +1,74 @@
+{
+  "name": "@gracefullight/tems-trp-parser",
+  "version": "0.1.0",
+  "description": "Parse TEMS Pocket TRP (Trace Recording Packet) RF log files",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "tems-trp": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
+    "format": "biome format --write src"
+  },
+  "keywords": [
+    "tems",
+    "trp",
+    "rf",
+    "lte",
+    "5g",
+    "parser",
+    "telecommunications",
+    "cdf",
+    "protobuf",
+    "radio-frequency"
+  ],
+  "author": {
+    "name": "Eunkwang Shin",
+    "email": "gracefullight.dev@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gracefullight/pkgs.git",
+    "directory": "packages/tems-trp-parser"
+  },
+  "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gracefullight"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "fast-xml-parser": "^5.2.3"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/ui": "^4.0.17",
+    "vitest": "^4.0.17"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
