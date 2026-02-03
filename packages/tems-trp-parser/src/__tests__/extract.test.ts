@@ -6,7 +6,7 @@ import {
   parseField,
   readVarint,
   tryReadVarint,
-} from "../extract.js";
+} from "@/extract";
 
 describe("readVarint", () => {
   it("should read single-byte varint", () => {
@@ -76,40 +76,40 @@ describe("parseField", () => {
     const data = new Uint8Array([0x08, 0x96, 0x01]);
     const result = parseField(data, 0);
     expect(result).not.toBeNull();
-    expect(result!.fieldNum).toBe(1);
-    expect(result!.wireType).toBe(0);
-    expect(result!.value).toBe(150);
-    expect(result!.endPos).toBe(3);
+    expect(result?.fieldNum).toBe(1);
+    expect(result?.wireType).toBe(0);
+    expect(result?.value).toBe(150);
+    expect(result?.endPos).toBe(3);
   });
 
   it("should parse length-delimited field (wire type 2)", () => {
     const data = new Uint8Array([0x12, 0x03, 0x61, 0x62, 0x63]);
     const result = parseField(data, 0);
     expect(result).not.toBeNull();
-    expect(result!.fieldNum).toBe(2);
-    expect(result!.wireType).toBe(2);
-    expect(result!.value).toEqual(new Uint8Array([0x61, 0x62, 0x63]));
-    expect(result!.endPos).toBe(5);
+    expect(result?.fieldNum).toBe(2);
+    expect(result?.wireType).toBe(2);
+    expect(result?.value).toEqual(new Uint8Array([0x61, 0x62, 0x63]));
+    expect(result?.endPos).toBe(5);
   });
 
   it("should parse 64-bit field (wire type 1)", () => {
     const data = new Uint8Array([0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f]);
     const result = parseField(data, 0);
     expect(result).not.toBeNull();
-    expect(result!.fieldNum).toBe(1);
-    expect(result!.wireType).toBe(1);
-    expect((result!.value as Uint8Array).length).toBe(8);
-    expect(result!.endPos).toBe(9);
+    expect(result?.fieldNum).toBe(1);
+    expect(result?.wireType).toBe(1);
+    expect((result?.value as Uint8Array).length).toBe(8);
+    expect(result?.endPos).toBe(9);
   });
 
   it("should parse 32-bit field (wire type 5)", () => {
     const data = new Uint8Array([0x0d, 0x00, 0x00, 0x80, 0x3f]);
     const result = parseField(data, 0);
     expect(result).not.toBeNull();
-    expect(result!.fieldNum).toBe(1);
-    expect(result!.wireType).toBe(5);
-    expect((result!.value as Uint8Array).length).toBe(4);
-    expect(result!.endPos).toBe(5);
+    expect(result?.fieldNum).toBe(1);
+    expect(result?.wireType).toBe(5);
+    expect((result?.value as Uint8Array).length).toBe(4);
+    expect(result?.endPos).toBe(5);
   });
 
   it("should return null for empty data", () => {

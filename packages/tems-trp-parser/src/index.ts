@@ -3,7 +3,7 @@ export {
   RF_FIELD_IDS,
   SIGNED_FIELD_IDS,
   SIGNED_KEYWORDS,
-} from "./constants.js";
+} from "@/constants";
 export {
   decodeZigzag,
   extract,
@@ -13,8 +13,8 @@ export {
   parseField,
   readVarint,
   tryReadVarint,
-} from "./extract.js";
-export { parse, TRPParser } from "./trp-parser.js";
+} from "@/extract";
+export { parse, TRPParser } from "@/trp-parser";
 export type {
   ChannelInfo,
   DeviceInfo,
@@ -23,4 +23,4 @@ export type {
   RFRecord,
   TimeInfo,
   TRPMetadata,
-} from "./types.js";
+} from "@/types";

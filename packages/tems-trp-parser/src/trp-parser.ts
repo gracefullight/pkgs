@@ -1,8 +1,8 @@
 import { inflateSync } from "node:zlib";
 import AdmZip from "adm-zip";
 import { XMLParser } from "fast-xml-parser";
-import type { ChannelInfo, TRPMetadata } from "./types.js";
-import { createDefaultChannelInfo, createDefaultTRPMetadata } from "./types.js";
+import type { ChannelInfo, TRPMetadata } from "@/types";
+import { createDefaultChannelInfo, createDefaultTRPMetadata } from "@/types";
 
 export class TRPParser {
   private zip: AdmZip;
@@ -71,7 +71,7 @@ export class TRPParser {
         parts.push(String(val));
       } else if (typeof val === "string") {
         const num = parseInt(val, 10);
-        if (!isNaN(num) && num >= 0) {
+        if (!Number.isNaN(num) && num >= 0) {
           parts.push(val);
         }
       }
@@ -92,7 +92,7 @@ export class TRPParser {
     for (const format of formats) {
       if (format.test(timeStr)) {
         const date = new Date(timeStr);
-        if (!isNaN(date.getTime())) return date;
+        if (!Number.isNaN(date.getTime())) return date;
       }
     }
 
@@ -104,7 +104,7 @@ export class TRPParser {
     if (!root || typeof root !== "object") return;
 
     const doc = root as Record<string, unknown>;
-    const content = doc["tems:ChannelContent"] ?? doc["ChannelContent"];
+    const content = doc["tems:ChannelContent"] ?? doc.ChannelContent;
     if (!content || typeof content !== "object") return;
 
     const c = content as Record<string, unknown>;
@@ -174,7 +174,7 @@ export class TRPParser {
     if (!root || typeof root !== "object") return;
 
     const doc = root as Record<string, unknown>;
-    const sysInfo = doc["tems:SystemInformation"] ?? doc["SystemInformation"];
+    const sysInfo = doc["tems:SystemInformation"] ?? doc.SystemInformation;
     if (!sysInfo || typeof sysInfo !== "object") return;
 
     const s = sysInfo as Record<string, unknown>;
@@ -212,7 +212,7 @@ export class TRPParser {
     if (!root || typeof root !== "object") return;
 
     const doc = root as Record<string, unknown>;
-    const provider = doc["tems:ServiceProvider"] ?? doc["ServiceProvider"];
+    const provider = doc["tems:ServiceProvider"] ?? doc.ServiceProvider;
     if (!provider || typeof provider !== "object") return;
 
     const p = provider as Record<string, unknown>;
@@ -309,7 +309,7 @@ export class TRPParser {
       const root = this.readXml(xmlPath);
       if (root && typeof root === "object") {
         const doc = root as Record<string, unknown>;
-        const channel = doc["tems:ServiceProviderChannel"] ?? doc["ServiceProviderChannel"];
+        const channel = doc["tems:ServiceProviderChannel"] ?? doc.ServiceProviderChannel;
         if (channel && typeof channel === "object") {
           const c = channel as Record<string, unknown>;
           const properties = c["tems:Properties"];

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { extract } from "./extract.js";
-import { TRPParser } from "./trp-parser.js";
-import type { TRPMetadata } from "./types.js";
+import { extract } from "@/extract";
+import { TRPParser } from "@/trp-parser";
+import type { TRPMetadata } from "@/types";
 
 function datetimeSerializer(_key: string, value: unknown): unknown {
   if (value instanceof Date) {
@@ -97,7 +97,7 @@ function printMetadataText(metadata: TRPMetadata, filePath: string): void {
     }
   }
 
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
 }
 
 function printMetadataJson(metadata: TRPMetadata): void {

@@ -2,8 +2,8 @@ import { createWriteStream, existsSync, mkdirSync, statSync, writeFileSync } fro
 import { dirname, extname } from "node:path";
 import { inflateSync } from "node:zlib";
 import AdmZip from "adm-zip";
-import { RF_FIELD_IDS, SIGNED_FIELD_IDS, SIGNED_KEYWORDS } from "./constants.js";
-import type { ExtractOptions, OutputFormat, ParsedField, RFRecord, WireType } from "./types.js";
+import { RF_FIELD_IDS, SIGNED_FIELD_IDS, SIGNED_KEYWORDS } from "@/constants";
+import type { ExtractOptions, OutputFormat, ParsedField, RFRecord, WireType } from "@/types";
 
 const MAX_MESSAGE_LENGTH = 64 * 1024 * 1024;
 
@@ -343,9 +343,9 @@ function parseDataRecord(
       const nested = parseAllFields(val);
       for (const [nfnum, nwtype, nval] of nested) {
         if (nfnum === 1 && nwtype === 0 && typeof nval === "number") {
-          record["timestamp_raw"] = nval;
+          record.timestamp_raw = nval;
         } else if (nfnum === 2 && nwtype === 0 && typeof nval === "number") {
-          record["timestamp_us"] = nval;
+          record.timestamp_us = nval;
         }
       }
     } else if (fnum === 3 && wtype === 2 && val instanceof Uint8Array) {
@@ -451,7 +451,7 @@ export function* iterRecordsFromZip(zip: AdmZip): Generator<RFRecord> {
       (k) => k !== "timestamp_raw" && k !== "timestamp_us",
     );
     if (rfFields.length > 0) {
-      record["_msg_num"] = msgNum;
+      record._msg_num = msgNum;
       yield record;
     }
   }
@@ -502,8 +502,8 @@ export function extract(trpPath: string, options: ExtractOptions = {}): string {
     fmt = format ?? "csv";
     const basename = trpPath
       .split("/")
-      .pop()!
-      .replace(/\.trp$/i, "");
+      .pop()
+      ?.replace(/\.trp$/i, "");
     outputPath = `${output}/${basename}.${fmt}`;
   } else {
     const ext = extname(output).slice(1);
@@ -527,14 +527,14 @@ export function extract(trpPath: string, options: ExtractOptions = {}): string {
   if (fmt === "csv") {
     const fieldnames = computeFieldnamesFromZip(zip);
     const stream = createWriteStream(outputPath);
-    stream.write(fieldnames.join(",") + "\n");
+    stream.write(`${fieldnames.join(",")}\n`);
 
     for (const record of iterRecordsFromZip(zip)) {
       const row = fieldnames.map((f) => {
         const val = record[f];
         return val !== undefined ? escapeCSVField(val) : "";
       });
-      stream.write(row.join(",") + "\n");
+      stream.write(`${row.join(",")}\n`);
       count++;
     }
     stream.end();
@@ -548,7 +548,7 @@ export function extract(trpPath: string, options: ExtractOptions = {}): string {
   } else if (fmt === "jsonl") {
     const stream = createWriteStream(outputPath);
     for (const record of iterRecordsFromZip(zip)) {
-      stream.write(JSON.stringify(record) + "\n");
+      stream.write(`${JSON.stringify(record)}\n`);
       count++;
     }
     stream.end();
