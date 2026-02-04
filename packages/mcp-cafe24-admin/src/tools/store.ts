@@ -1,14 +1,13 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { z } from "zod";
 import {
-  ShopsSearchParamsSchema,
   StoreAccountsParamsSchema,
   StoreDetailParamsSchema,
   UserDetailParamsSchema,
   UsersSearchParamsSchema,
 } from "@/schemas/store.js";
 import { handleApiError, makeApiRequest } from "@/services/api-client.js";
-import type { AdminUser, Shop, Store, StoreAccount } from "@/types/index.js";
+import type { AdminUser, Store, StoreAccount } from "@/types/index.js";
 
 async function cafe24_list_users(params: z.infer<typeof UsersSearchParamsSchema>) {
   try {
@@ -92,57 +91,6 @@ async function cafe24_get_user_detail(params: z.infer<typeof UserDetailParamsSch
         },
       ],
       structuredContent: user as unknown as Record<string, unknown>,
-    };
-  } catch (error) {
-    return { content: [{ type: "text" as const, text: handleApiError(error) }] };
-  }
-}
-
-async function cafe24_list_shops(params: z.infer<typeof ShopsSearchParamsSchema>) {
-  try {
-    const data = await makeApiRequest<{ shops: Shop[]; total: number }>(
-      "/admin/shops",
-      "GET",
-      undefined,
-      {
-        limit: params.limit,
-        offset: params.offset,
-        ...(params.shop_no ? { shop_no: params.shop_no } : {}),
-      },
-    );
-
-    const shops = data.shops || [];
-    const total = data.total || 0;
-
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text:
-            `Found ${total} shops (showing ${shops.length})\n\n` +
-            shops
-              .map(
-                (s) =>
-                  `## ${s.shop_name} (Shop #${s.shop_no})\n- **Currency**: ${s.currency_code}\n- **Locale**: ${s.locale_code}\n`,
-              )
-              .join(""),
-        },
-      ],
-      structuredContent: {
-        total,
-        count: shops.length,
-        offset: params.offset,
-        shops: shops.map((s) => ({
-          id: s.shop_no.toString(),
-          name: s.shop_name,
-          currency: s.currency_code,
-          locale: s.locale_code,
-        })),
-        has_more: total > params.offset + shops.length,
-        ...(total > params.offset + shops.length
-          ? { next_offset: params.offset + shops.length }
-          : {}),
-      },
     };
   } catch (error) {
     return { content: [{ type: "text" as const, text: handleApiError(error) }] };
@@ -257,23 +205,6 @@ export function registerTools(server: McpServer): void {
       },
     },
     cafe24_get_user_detail,
-  );
-
-  server.registerTool(
-    "cafe24_list_shops",
-    {
-      title: "List Cafe24 Shops",
-      description:
-        "Retrieve a list of shops in Cafe24. Returns shop details including shop number, name, currency, and locale. Supports pagination and filtering by shop number.",
-      inputSchema: ShopsSearchParamsSchema,
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: true,
-      },
-    },
-    cafe24_list_shops,
   );
 
   server.registerTool(
