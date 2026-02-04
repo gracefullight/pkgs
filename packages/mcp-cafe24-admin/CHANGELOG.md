@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/mcp-cafe24-admin@0.2.1...@gracefullight/mcp-cafe24-admin@0.2.2) (2026-02-04)
+
+
+### Bug Fixes
+
+* **mcp-cafe24-admin:** remove duplicate cafe24_list_shops registration ([5b7dadc](https://github.com/gracefullight/pkgs/commit/5b7dadca1b5feaac98e8748303edae0024bc91c8)), closes [#42](https://github.com/gracefullight/pkgs/issues/42)
+
 ## [0.2.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/mcp-cafe24-admin@0.2.0...@gracefullight/mcp-cafe24-admin@0.2.1) (2026-01-22)
 
 
