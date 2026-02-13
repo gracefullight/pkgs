@@ -76,8 +76,7 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
-    "@types/facebook-js-sdk": "^3.3.12",
-    "@types/kakao-js-sdk": "^1.39.5"
+    "@types/facebook-js-sdk": "^3.3.12"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.1",

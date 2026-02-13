@@ -3,7 +3,7 @@ import type { ShareStrategy } from "@/types";
 import { ensureKakaoInitialized } from "@/utils/kakao";
 
 export const kakaoStrategy: ShareStrategy = {
-  share: (data, options) => {
+  share: async (data, options) => {
     const kakao = ensureKakaoInitialized(options?.kakao?.jsKey);
     if (!kakao) {
       throw new Error("Kakao SDK not initialized");
@@ -12,9 +12,7 @@ export const kakaoStrategy: ShareStrategy = {
     const { url, title, description, imageUrl } = data;
     const maxLength = options?.textMaxLength ?? 100;
 
-    (
-      kakao as unknown as { Share?: { sendDefault?: (options: unknown) => void } }
-    ).Share?.sendDefault?.({
+    await kakao.Share?.sendDefault({
       buttons: [
         {
           link: {

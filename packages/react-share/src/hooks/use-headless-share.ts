@@ -11,7 +11,7 @@ import { whatsappStrategy } from "@/strategies/whatsapp";
 import type { HeadlessShareOptions, ShareData, SharePlatform, ShareStrategy } from "@/types";
 import { setupFacebookSDK } from "@/utils/facebook";
 
-const KAKAO_SDK_URL = "https://developers.kakao.com/sdk/js/kakao.js";
+const KAKAO_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.9/kakao.min.js";
 const FB_SDK_URL = "https://connect.facebook.net/en_US/sdk.js";
 
 const strategyRegistry = new Map<SharePlatform, ShareStrategy>([
