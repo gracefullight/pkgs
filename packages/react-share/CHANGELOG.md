@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/gracefullight/pkgs/compare/@gracefullight/react-share@0.1.3...@gracefullight/react-share@0.1.4) (2026-02-13)
+
+
+### Features
+
+* make Kakao share strategy asynchronous and update the Kakao SDK URL ([e0b5d3f](https://github.com/gracefullight/pkgs/commit/e0b5d3f5b279e20959d0740b4d12321c03e9b482))
+
 ## [0.1.3](https://github.com/gracefullight/pkgs/compare/@gracefullight/react-share@0.1.2...@gracefullight/react-share@0.1.3) (2026-02-01)
 
 

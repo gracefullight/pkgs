@@ -7,6 +7,6 @@
   "packages/mcp-cafe24-admin": "0.2.2",
   "packages/biome-plugin": "0.2.2",
   "packages/zotero-plugin-uts": "0.1.2",
-  "packages/react-share": "0.1.3",
+  "packages/react-share": "0.1.4",
   "packages/tems-trp-parser": "0.1.1"
 }
