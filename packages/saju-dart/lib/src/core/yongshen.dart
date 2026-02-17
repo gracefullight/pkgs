@@ -69,15 +69,15 @@ const _johuYongshen = {
   StrengthLevel level,
   List<Element> allBranchElements,
 ) {
-  if (level == StrengthLevel.extremelyWeak) {
-    final elementCounts = <Element, int>{};
-    for (final elem in Element.values) {
-      elementCounts[elem] = 0;
-    }
-    for (final elem in allBranchElements) {
-      elementCounts[elem] = elementCounts[elem]! + 1;
-    }
+  final elementCounts = <Element, int>{};
+  for (final elem in Element.values) {
+    elementCounts[elem] = 0;
+  }
+  for (final elem in allBranchElements) {
+    elementCounts[elem] = elementCounts[elem]! + 1;
+  }
 
+  if (level == StrengthLevel.extremelyWeak) {
     Element? dominantElement;
     var maxCount = 0;
     for (final entry in elementCounts.entries) {
@@ -88,7 +88,26 @@ const _johuYongshen = {
     }
 
     if (dominantElement != null && maxCount >= 3) {
-      return (isSpecial: true, type: '종격', followElement: dominantElement);
+      // Determine specific 종격 type
+      var type = '종격';
+      if (dominantElement == dayMasterElement.controls) {
+        type = '종재격'; // Follow Wealth
+      } else if (dominantElement == dayMasterElement.controlledBy) {
+        type = '종살격'; // Follow Killings
+      } else if (dominantElement == dayMasterElement.generates) {
+        type = '종아격'; // Follow Children/Output
+      }
+      return (isSpecial: true, type: type, followElement: dominantElement);
+    }
+  }
+
+  if (level == StrengthLevel.extremelyStrong) {
+    // 종강격: extremely strong with no controllers present
+    final controllerElement = dayMasterElement.controlledBy;
+    final hasController = (elementCounts[controllerElement] ?? 0) > 0;
+
+    if (!hasController) {
+      return (isSpecial: true, type: '종강격', followElement: dayMasterElement);
     }
   }
 
@@ -188,7 +207,7 @@ YongShenResult analyzeYongShen(FourPillars pillars) {
     primaryKey = specialFormation.followElement!;
     secondaryKey = primaryKey.generates;
     methodKey = YongShenMethod.formation;
-    reasoning = '종격 성립. ${primaryKey.korean} 세력을 따름';
+    reasoning = '${specialFormation.type} 성립. ${primaryKey.korean} 세력을 따름';
 
     final yokbu = _getYokbuYongshen(dayMasterElement, strength.level);
     alternativeBalance = AlternativeBalance(

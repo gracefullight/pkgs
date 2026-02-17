@@ -118,6 +118,29 @@ export interface SolarTermInfo {
   nextJieMillis: number;
 }
 
+/**
+ * Approximate ΔT (TT - UT) in seconds.
+ * Based on polynomial expressions from Meeus / USNO.
+ */
+function deltaT(year: number): number {
+  if (year >= 2005 && year < 2050) {
+    const t = year - 2000;
+    return 62.92 + 0.32217 * t + 0.005589 * t * t;
+  }
+  if (year >= 1986 && year < 2005) {
+    const t = year - 2000;
+    return 63.86 + 0.3345 * t - 0.060374 * t * t
+      + 0.0017275 * t * t * t
+      + 0.000651814 * t * t * t * t
+      + 0.00002373599 * t * t * t * t * t;
+  }
+  if (year >= 1900 && year < 1986) {
+    const t = year - 1900;
+    return -0.02 + 0.000297 * t * t;
+  }
+  return 0;
+}
+
 function normDeg(x: number): number {
   x %= 360;
   return x < 0 ? x + 360 : x;
@@ -139,7 +162,10 @@ function sunApparentLongitude<T>(adapter: DateAdapter<T>, dtUtc: T): number {
   const B = 2 - A + Math.floor(A / 4);
   const JD = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
 
-  const T = (JD - 2451545.0) / 36525.0;
+  // Apply ΔT correction for TT
+  const dtSeconds = deltaT(y);
+  const JD_TT = JD + dtSeconds / 86400.0;
+  const T = (JD_TT - 2451545.0) / 36525.0;
 
   const L0 = normDeg(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
   const M = normDeg(357.52911 + 35999.05029 * T - 0.0001537 * T * T);

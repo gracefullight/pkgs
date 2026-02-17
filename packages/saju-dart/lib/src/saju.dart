@@ -76,6 +76,8 @@ class SajuResult {
     required this.majorLuck,
     required this.yearlyLuck,
     required this.twelveStages,
+    required this.nayin,
+    required this.sinsals,
     required this.meta,
   });
 
@@ -108,6 +110,12 @@ class SajuResult {
 
   /// Twelve life stages (십이운성) analysis.
   final TwelveStagesResult twelveStages;
+
+  /// Nayin (납음오행) for each pillar.
+  final FourPillarsNayin nayin;
+
+  /// Sinsals (신살) analysis.
+  final SinsalResult sinsals;
 
   /// Metadata about the calculation.
   final SajuMeta meta;
@@ -175,6 +183,8 @@ SajuResult getSaju(
   final yongShen = analyzeYongShen(pillars);
   final solarTerms = analyzeSolarTerms(dtLocal);
   final twelveStages = analyzeTwelveStages(pillars);
+  final nayin = analyzeFourPillarsNayin(pillars);
+  final sinsals = analyzeSinsals(pillars);
 
   // Calculate luck
   final majorLuck = calculateMajorLuck(
@@ -208,6 +218,8 @@ SajuResult getSaju(
     majorLuck: majorLuck,
     yearlyLuck: yearlyLuck,
     twelveStages: twelveStages,
+    nayin: nayin,
+    sinsals: sinsals,
     meta: SajuMeta(
       solarYearUsed: fourPillarsResult.solarYear,
       sunLonDeg: fourPillarsResult.sunLonDeg,

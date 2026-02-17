@@ -33,10 +33,18 @@ export {
 } from "@/core/luck";
 export { getLunarDate, getSolarDate, type LunarDate } from "@/core/lunar";
 export {
+  analyzeFourPillarsNayin,
+  getNayin,
+  getNayinFromPillar,
+  type FourPillarsNayin,
+  type NayinResult,
+} from "@/core/nayin";
+export {
   analyzeRelations,
   BRANCH_CLASHES,
   BRANCH_DESTRUCTIONS,
   BRANCH_DIRECTIONAL_COMBINATIONS,
+  BRANCH_HALF_COMBINATIONS,
   BRANCH_HARMS,
   BRANCH_PUNISHMENTS,
   BRANCH_SIX_COMBINATIONS,
@@ -44,6 +52,7 @@ export {
   type BranchClash,
   type BranchDestruction,
   type BranchDirectionalCombination,
+  type BranchHalfCombination,
   type BranchHarm,
   type BranchPunishment,
   type BranchSixCombination,
@@ -53,7 +62,9 @@ export {
   findStemCombination,
   type Relation,
   type RelationsResult,
+  STEM_CLASHES,
   STEM_COMBINATIONS,
+  type StemClash,
   type StemCombination,
 } from "@/core/relations";
 export {
@@ -145,6 +156,7 @@ import {
   type YearlyLuckResult,
 } from "@/core/luck";
 import type { LunarDate } from "@/core/lunar";
+import { analyzeFourPillarsNayin, type FourPillarsNayin } from "@/core/nayin";
 import { analyzeRelations, type RelationsResult } from "@/core/relations";
 import { analyzeSinsals, type SinsalResult } from "@/core/sinsals";
 import { analyzeSolarTerms, type SolarTermInfo } from "@/core/solar-terms";
@@ -165,6 +177,7 @@ export interface SajuResult {
   strength: StrengthResult;
   relations: RelationsResult;
   yongShen: YongShenResult;
+  nayin: FourPillarsNayin;
   solarTerms: SolarTermInfo;
   majorLuck: MajorLuckResult;
   yearlyLuck: YearlyLuckResult[];
@@ -203,6 +216,7 @@ export function getSaju<T>(dtLocal: T, options: GetSajuOptions<T>): SajuResult {
   const strength = analyzeStrength(year, month, day, hour);
   const relations = analyzeRelations(year, month, day, hour);
   const yongShen = analyzeYongShen(year, month, day, hour);
+  const nayin = analyzeFourPillarsNayin(year, month, day, hour);
   const solarTerms = analyzeSolarTerms(dtLocal, { adapter });
   const twelveStages = analyzeTwelveStages(year, month, day, hour);
   const sinsals = analyzeSinsals(year, month, day, hour);
@@ -214,6 +228,7 @@ export function getSaju<T>(dtLocal: T, options: GetSajuOptions<T>): SajuResult {
     strength,
     relations,
     yongShen,
+    nayin,
     solarTerms,
     majorLuck: calculateMajorLuck(dtLocal, options.gender, year, month, {
       adapter,

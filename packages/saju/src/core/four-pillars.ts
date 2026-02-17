@@ -19,6 +19,51 @@ export const TRADITIONAL_PRESET = {
 export const presetA = STANDARD_PRESET;
 export const presetB = TRADITIONAL_PRESET;
 
+/**
+ * Korea DST period: 1987-05-10 02:00 ~ 1988-10-08 03:00 (UTC+10)
+ * Returns the effective timezone offset in hours for a Korean datetime.
+ */
+function getEffectiveKSTOffset<T>(adapter: DateAdapter<T>, dtLocal: T): number {
+  const y = adapter.getYear(dtLocal);
+  const m = adapter.getMonth(dtLocal);
+  const d = adapter.getDay(dtLocal);
+  const h = adapter.getHour(dtLocal);
+
+  // KDT start: 1987-05-10 02:00 KST (becomes 03:00 KDT)
+  // KDT end: 1988-10-08 03:00 KDT (becomes 02:00 KST)
+  const afterStart =
+    y > 1987 ||
+    (y === 1987 && (m > 5 || (m === 5 && (d > 10 || (d === 10 && h >= 2)))));
+  const beforeEnd =
+    y < 1988 ||
+    (y === 1988 && (m < 10 || (m === 10 && (d < 8 || (d === 8 && h < 3)))));
+
+  return afterStart && beforeEnd ? 10 : 9;
+}
+
+/**
+ * Approximate ΔT (TT - UT) in seconds.
+ * Based on polynomial expressions from Meeus / USNO.
+ */
+function deltaT(year: number): number {
+  if (year >= 2005 && year < 2050) {
+    const t = year - 2000;
+    return 62.92 + 0.32217 * t + 0.005589 * t * t;
+  }
+  if (year >= 1986 && year < 2005) {
+    const t = year - 2000;
+    return 63.86 + 0.3345 * t - 0.060374 * t * t
+      + 0.0017275 * t * t * t
+      + 0.000651814 * t * t * t * t
+      + 0.00002373599 * t * t * t * t * t;
+  }
+  if (year >= 1900 && year < 1986) {
+    const t = year - 1900;
+    return -0.02 + 0.000297 * t * t;
+  }
+  return 0;
+}
+
 function normDeg(x: number): number {
   x %= 360;
   return x < 0 ? x + 360 : x;
@@ -67,7 +112,10 @@ function sunApparentLongitude<T>(adapter: DateAdapter<T>, dtUtc: T): number {
   const B = 2 - A + Math.floor(A / 4);
   const JD = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
 
-  const T = (JD - 2451545.0) / 36525.0;
+  // Apply ΔT correction for TT
+  const dtSeconds = deltaT(y);
+  const JD_TT = JD + dtSeconds / 86400.0;
+  const T = (JD_TT - 2451545.0) / 36525.0;
 
   const L0 = normDeg(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
   const M = normDeg(357.52911 + 35999.05029 * T - 0.0001537 * T * T);
@@ -300,7 +348,9 @@ export function getFourPillars<T>(
     preset: typeof preset;
   };
 } {
-  const effectiveLongitude = longitudeDeg ?? tzOffsetHours * 15;
+  const effectiveTzOffset =
+    tzOffsetHours === 9 ? getEffectiveKSTOffset(adapter, dtLocal) : tzOffsetHours;
+  const effectiveLongitude = longitudeDeg ?? effectiveTzOffset * 15;
 
   const dayBoundary = preset.dayBoundary ?? "midnight";
   const useMeanSolarTimeForHour = preset.useMeanSolarTimeForHour ?? false;
@@ -313,7 +363,7 @@ export function getFourPillars<T>(
     adapter,
     dayBoundary,
     longitudeDeg: effectiveLongitude,
-    tzOffsetHours,
+    tzOffsetHours: effectiveTzOffset,
     useMeanSolarTimeForBoundary,
   });
   const d = dayPillarFromDate(effDate);
@@ -321,7 +371,7 @@ export function getFourPillars<T>(
   const h = hourPillar(dtLocal, {
     adapter,
     longitudeDeg: effectiveLongitude,
-    tzOffsetHours,
+    tzOffsetHours: effectiveTzOffset,
     useMeanSolarTimeForHour,
     dayBoundary,
     useMeanSolarTimeForBoundary,

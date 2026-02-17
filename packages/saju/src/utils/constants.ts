@@ -62,7 +62,7 @@ export function jdnFromDate(year: number, month: number, day: number): number {
 }
 
 export function dayPillarIndexFromJdn(jdn: number): number {
-  return (((jdn + 49) % 60) + 60) % 60;
+  return (((jdn - 11) % 60) + 60) % 60;
 }
 
 export function isYangStem(stem: Stem | string): boolean {

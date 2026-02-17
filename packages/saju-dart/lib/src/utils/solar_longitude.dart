@@ -1,5 +1,28 @@
 import 'dart:math' as math;
 
+/// Approximate ΔT (TT - UT) in seconds.
+/// Based on polynomial expressions from Meeus / USNO.
+double _deltaT(double year) {
+  if (year >= 2005 && year < 2050) {
+    final t = year - 2000;
+    return 62.92 + 0.32217 * t + 0.005589 * t * t;
+  }
+  if (year >= 1986 && year < 2005) {
+    final t = year - 2000;
+    return 63.86 +
+        0.3345 * t -
+        0.060374 * t * t +
+        0.0017275 * t * t * t +
+        0.000651814 * t * t * t * t +
+        0.00002373599 * t * t * t * t * t;
+  }
+  if (year >= 1900 && year < 1986) {
+    final t = year - 1900;
+    return -0.02 + 0.000297 * t * t;
+  }
+  return 0;
+}
+
 /// Normalize degree to 0-360 range
 double normDeg(double x) {
   x = x % 360;
@@ -26,7 +49,11 @@ double sunApparentLongitude(DateTime dtUtc) {
       b -
       1524.5;
 
-  final t = (jd - 2451545.0) / 36525.0;
+  // Apply ΔT correction for TT (Terrestrial Time)
+  final dtSeconds = _deltaT(y.toDouble());
+  final jdTT = jd + dtSeconds / 86400.0;
+
+  final t = (jdTT - 2451545.0) / 36525.0;
 
   final l0 = normDeg(280.46646 + 36000.76983 * t + 0.0003032 * t * t);
   final mAnomaly = normDeg(357.52911 + 35999.05029 * t - 0.0001537 * t * t);

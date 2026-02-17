@@ -1,4 +1,5 @@
 import '../types/types.dart';
+import 'relations.dart';
 import 'ten_gods.dart';
 
 /// Seasonal element type (includes wet/dry earth distinction)
@@ -201,6 +202,36 @@ StrengthResult analyzeStrength(FourPillars pillars) {
     tonggeun += _calculateRootStrength(dayMaster, branch);
   }
 
+  // 2.5. Clash reduction: if day branch is clashed, reduce root strength
+  var clashReduction = 0.0;
+  for (final branch in pillars.branches) {
+    if (branch != pillars.day.branch) {
+      for (final clash in branchClashes) {
+        if ((pillars.day.branch == clash[0] && branch == clash[1]) ||
+            (pillars.day.branch == clash[1] && branch == clash[0])) {
+          clashReduction += 0.3;
+        }
+      }
+    }
+  }
+  tonggeun = (tonggeun - clashReduction).clamp(0.0, double.infinity);
+
+  // 2.6. Stem combination bonus/penalty
+  var stemComboBonus = 0.0;
+  final otherStemsForCombo = [pillars.year.stem, pillars.month.stem, pillars.hour.stem];
+  for (final stem in otherStemsForCombo) {
+    for (final combo in stemCombinations) {
+      if ((dayMaster == combo.stem1 && stem == combo.stem2) ||
+          (dayMaster == combo.stem2 && stem == combo.stem1)) {
+        if (combo.resultElement == dayMasterElement) {
+          stemComboBonus += 0.2;
+        } else {
+          stemComboBonus -= 0.1;
+        }
+      }
+    }
+  }
+
   // 3. 투간 (transparent bonus) - hidden stems appearing in pillars
   final allStems = pillars.stems;
   final monthHiddenStems = HiddenStems.forBranch(monthBranch);
@@ -257,6 +288,7 @@ StrengthResult analyzeStrength(FourPillars pillars) {
   score += deukse * 8;
   score += helpCount * 5;
   score -= weakenCount * 6;
+  score += stemComboBonus * 10;
   score = (score * 10).round() / 10;
 
   // Determine strength level

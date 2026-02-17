@@ -18,6 +18,14 @@ const stemCombinations = [
   StemCombinationData(Stem.wu, Stem.gui, Element.fire),
 ];
 
+/// Stem clashes (天干沖)
+const stemClashPairs = [
+  [Stem.jia, Stem.geng],
+  [Stem.yi, Stem.xin],
+  [Stem.bing, Stem.ren],
+  [Stem.ding, Stem.gui],
+];
+
 /// Branch six combination data
 class BranchSixCombinationData {
   const BranchSixCombinationData(this.branch1, this.branch2, this.resultElement);
@@ -109,6 +117,27 @@ const branchDestructions = [
   [Branch.wei, Branch.xu],
 ];
 
+/// Half combination data
+class HalfCombinationData {
+  const HalfCombinationData(this.branch1, this.branch2, this.resultElement);
+
+  final Branch branch1;
+  final Branch branch2;
+  final Element resultElement;
+}
+
+/// All branch half combinations (반합)
+const branchHalfCombinations = [
+  HalfCombinationData(Branch.yin, Branch.wu, Element.fire),
+  HalfCombinationData(Branch.wu, Branch.xu, Element.fire),
+  HalfCombinationData(Branch.si, Branch.you, Element.metal),
+  HalfCombinationData(Branch.you, Branch.chou, Element.metal),
+  HalfCombinationData(Branch.shen, Branch.zi, Element.water),
+  HalfCombinationData(Branch.zi, Branch.chen, Element.water),
+  HalfCombinationData(Branch.hai, Branch.mao, Element.wood),
+  HalfCombinationData(Branch.mao, Branch.wei, Element.wood),
+];
+
 /// Stem combination result
 class StemCombination {
   const StemCombination({
@@ -124,6 +153,30 @@ class StemCombination {
   final Element resultElement;
   final TransformationStatus transformStatus;
   final String transformReason;
+}
+
+/// Stem clash result
+class StemClash {
+  const StemClash({
+    required this.pair,
+    required this.positions,
+  });
+
+  final List<Stem> pair;
+  final List<PillarPosition> positions;
+}
+
+/// Branch half combination result
+class BranchHalfCombination {
+  const BranchHalfCombination({
+    required this.pair,
+    required this.positions,
+    required this.resultElement,
+  });
+
+  final List<Branch> pair;
+  final List<PillarPosition> positions;
+  final Element resultElement;
 }
 
 /// Branch six combination result
@@ -217,7 +270,9 @@ class BranchDestruction {
 class RelationsResult {
   const RelationsResult({
     required this.stemCombinations,
+    required this.stemClashes,
     required this.sixCombinations,
+    required this.halfCombinations,
     required this.tripleCombinations,
     required this.clashes,
     required this.harms,
@@ -226,7 +281,9 @@ class RelationsResult {
   });
 
   final List<StemCombination> stemCombinations;
+  final List<StemClash> stemClashes;
   final List<BranchSixCombination> sixCombinations;
+  final List<BranchHalfCombination> halfCombinations;
   final List<BranchTripleCombination> tripleCombinations;
   final List<BranchClash> clashes;
   final List<BranchHarm> harms;
@@ -259,6 +316,26 @@ class RelationsResult {
   return (status: TransformationStatus.notTransformed, reason: '화 조건 불충족');
 }
 
+/// Check stem transformation conditions
+({TransformationStatus status, String reason}) _checkStemTransformationCondition(
+  Element resultElement,
+  Branch monthBranch,
+  List<Stem> allStems,
+) {
+  final monthElement = monthBranch.element;
+  if (monthElement == resultElement) {
+    return (status: TransformationStatus.transformed, reason: '월령이 화오행과 동일');
+  }
+
+  final stemElements = allStems.map((s) => s.element).toList();
+  final resultCount = stemElements.where((e) => e == resultElement).length;
+  if (resultCount >= 2) {
+    return (status: TransformationStatus.transformed, reason: '화오행 기세 충분');
+  }
+
+  return (status: TransformationStatus.notTransformed, reason: '화 조건 불충족');
+}
+
 /// Analyzes all relations (combinations, clashes, harms, punishments, destructions) in four pillars.
 ///
 /// Returns a [RelationsResult] containing all detected stem and branch relations.
@@ -282,15 +359,19 @@ RelationsResult analyzeRelations(FourPillars pillars) {
 
   final allBranches = pillars.branches;
 
+  final allStems = pillars.stems;
+
   final resultStemCombinations = <StemCombination>[];
+  final resultStemClashes = <StemClash>[];
   final resultSixCombinations = <BranchSixCombination>[];
+  final resultHalfCombinations = <BranchHalfCombination>[];
   final resultTripleCombinations = <BranchTripleCombination>[];
   final resultClashes = <BranchClash>[];
   final resultHarms = <BranchHarm>[];
   final resultPunishments = <BranchPunishment>[];
   final resultDestructions = <BranchDestruction>[];
 
-  // Find stem combinations
+  // Find stem combinations and clashes
   for (var i = 0; i < stems.length; i++) {
     for (var j = i + 1; j < stems.length; j++) {
       final s1 = stems[i];
@@ -298,13 +379,29 @@ RelationsResult analyzeRelations(FourPillars pillars) {
       for (final combo in stemCombinations) {
         if ((s1.stem == combo.stem1 && s2.stem == combo.stem2) ||
             (s1.stem == combo.stem2 && s2.stem == combo.stem1)) {
+          final transform = _checkStemTransformationCondition(
+            combo.resultElement,
+            monthBranch,
+            allStems,
+          );
           resultStemCombinations.add(
             StemCombination(
               pair: [s1.stem, s2.stem],
               positions: [s1.position, s2.position],
               resultElement: combo.resultElement,
-              transformStatus: TransformationStatus.combined,
-              transformReason: '천간합',
+              transformStatus: transform.status,
+              transformReason: transform.reason,
+            ),
+          );
+        }
+      }
+      for (final clash in stemClashPairs) {
+        if ((s1.stem == clash[0] && s2.stem == clash[1]) ||
+            (s1.stem == clash[1] && s2.stem == clash[0])) {
+          resultStemClashes.add(
+            StemClash(
+              pair: [s1.stem, s2.stem],
+              positions: [s1.position, s2.position],
             ),
           );
         }
@@ -335,6 +432,20 @@ RelationsResult analyzeRelations(FourPillars pillars) {
               resultElement: combo.resultElement,
               transformStatus: transform.status,
               transformReason: transform.reason,
+            ),
+          );
+        }
+      }
+
+      // Half combinations
+      for (final halfCombo in branchHalfCombinations) {
+        if ((b1.branch == halfCombo.branch1 && b2.branch == halfCombo.branch2) ||
+            (b1.branch == halfCombo.branch2 && b2.branch == halfCombo.branch1)) {
+          resultHalfCombinations.add(
+            BranchHalfCombination(
+              pair: [b1.branch, b2.branch],
+              positions: [b1.position, b2.position],
+              resultElement: halfCombo.resultElement,
             ),
           );
         }
@@ -384,11 +495,24 @@ RelationsResult analyzeRelations(FourPillars pillars) {
   // Find triple combinations
   final branchChars = pillars.branches;
   for (final combo in branchTripleCombinations) {
-    final matched = combo.branches.where((b) => branchChars.contains(b)).toList();
+    final matched = <({Branch branch, PillarPosition position})>[];
+    final usedIndices = <int>{};
+    for (final target in combo.branches) {
+      var foundIdx = -1;
+      for (var k = 0; k < branches.length; k++) {
+        if (branches[k].branch == target && !usedIndices.contains(k)) {
+          foundIdx = k;
+          break;
+        }
+      }
+      if (foundIdx != -1) {
+        usedIndices.add(foundIdx);
+        matched.add((branch: target, position: branches[foundIdx].position));
+      }
+    }
     if (matched.length >= 2) {
-      final positions = matched
-          .map((m) => branches.firstWhere((b) => b.branch == m).position)
-          .toList();
+      final positions = matched.map((m) => m.position).toList();
+      final matchedBranches = matched.map((m) => m.branch).toList();
       final transform = _checkTransformationCondition(
         combo.resultElement,
         monthBranch,
@@ -397,7 +521,7 @@ RelationsResult analyzeRelations(FourPillars pillars) {
       );
       resultTripleCombinations.add(
         BranchTripleCombination(
-          branches: matched,
+          branches: matchedBranches,
           positions: positions,
           resultElement: combo.resultElement,
           isComplete: matched.length == 3,
@@ -411,11 +535,20 @@ RelationsResult analyzeRelations(FourPillars pillars) {
 
   // Find directional combinations
   for (final combo in branchDirectionalCombinations) {
-    final matched = combo.branches.where((b) => branchChars.contains(b)).toList();
+    final matched = <({Branch branch, PillarPosition position})>[];
+    final usedDirIndices = <int>{};
+    for (final target in combo.branches) {
+      for (var k = 0; k < branches.length; k++) {
+        if (branches[k].branch == target && !usedDirIndices.contains(k)) {
+          usedDirIndices.add(k);
+          matched.add((branch: target, position: branches[k].position));
+          break;
+        }
+      }
+    }
     if (matched.length >= 2) {
-      final positions = matched
-          .map((m) => branches.firstWhere((b) => b.branch == m).position)
-          .toList();
+      final positions = matched.map((m) => m.position).toList();
+      final matchedBranches = matched.map((m) => m.branch).toList();
       final transform = _checkTransformationCondition(
         combo.resultElement,
         monthBranch,
@@ -424,7 +557,7 @@ RelationsResult analyzeRelations(FourPillars pillars) {
       );
       resultTripleCombinations.add(
         BranchTripleCombination(
-          branches: matched,
+          branches: matchedBranches,
           positions: positions,
           resultElement: combo.resultElement,
           isComplete: matched.length == 3,
@@ -485,7 +618,9 @@ RelationsResult analyzeRelations(FourPillars pillars) {
 
   return RelationsResult(
     stemCombinations: resultStemCombinations,
+    stemClashes: resultStemClashes,
     sixCombinations: resultSixCombinations,
+    halfCombinations: resultHalfCombinations,
     tripleCombinations: resultTripleCombinations,
     clashes: resultClashes,
     harms: resultHarms,

@@ -180,17 +180,35 @@ Pillar getYearPillar(int year) {
   return Pillar.fromIndex(idx60);
 }
 
+/// Jie (節) solar terms that mark each month boundary (month 1-12)
+const _monthJieTerms = <SolarTerm>[
+  SolarTerm.springBegins,
+  SolarTerm.awakeningInsects,
+  SolarTerm.pureBrightness,
+  SolarTerm.summerBegins,
+  SolarTerm.grainInEar,
+  SolarTerm.minorHeat,
+  SolarTerm.autumnBegins,
+  SolarTerm.whiteDew,
+  SolarTerm.coldDew,
+  SolarTerm.winterBegins,
+  SolarTerm.majorSnow,
+  SolarTerm.minorCold,
+];
+
 /// Monthly luck result
 class MonthlyLuckResult {
   const MonthlyLuckResult({
     required this.year,
     required this.month,
     required this.pillar,
+    required this.solarTerm,
   });
 
   final int year;
   final int month;
   final Pillar pillar;
+  final SolarTerm solarTerm;
 
   Stem get stem => pillar.stem;
   Branch get branch => pillar.branch;
@@ -218,8 +236,15 @@ List<MonthlyLuckResult> calculateMonthlyLuck(
       branch: Branch.values[branchIdx],
     );
 
+    final solarTerm = _monthJieTerms[monthOffset % 12];
+
     results.add(
-      MonthlyLuckResult(year: year, month: month, pillar: pillar),
+      MonthlyLuckResult(
+        year: year,
+        month: month,
+        pillar: pillar,
+        solarTerm: solarTerm,
+      ),
     );
   }
 

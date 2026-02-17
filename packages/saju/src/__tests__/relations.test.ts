@@ -110,6 +110,7 @@ describe("relations", () => {
 
       expect(result.all.length).toBe(
         result.combinations.length +
+          result.stemClashes.length +
           result.clashes.length +
           result.harms.length +
           result.punishments.length +

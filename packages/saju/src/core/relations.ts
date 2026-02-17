@@ -4,7 +4,9 @@ import type { Label } from "@/types";
 
 export const RELATION_TYPE_KEYS = [
   "stemCombination",
+  "stemClash",
   "sixCombination",
+  "halfCombination",
   "tripleCombination",
   "directionalCombination",
   "clash",
@@ -19,7 +21,9 @@ export interface RelationTypeLabel extends Label<RelationTypeKey> {}
 
 const RELATION_TYPE_DATA: Record<RelationTypeKey, { korean: string; hanja: string }> = {
   stemCombination: { korean: "천간합", hanja: "天干合" },
+  stemClash: { korean: "천간충", hanja: "天干沖" },
   sixCombination: { korean: "육합", hanja: "六合" },
+  halfCombination: { korean: "반합", hanja: "半合" },
   tripleCombination: { korean: "삼합", hanja: "三合" },
   directionalCombination: { korean: "방합", hanja: "方合" },
   clash: { korean: "충", hanja: "沖" },
@@ -92,6 +96,13 @@ export const STEM_COMBINATIONS: StemCombinationResult[] = [
   { stems: ["戊", "癸"], resultElement: "fire" },
 ];
 
+export const STEM_CLASHES: [string, string][] = [
+  ["甲", "庚"],
+  ["乙", "辛"],
+  ["丙", "壬"],
+  ["丁", "癸"],
+];
+
 export type BranchCombinationResult = {
   branches: [string, string];
   resultElement: Element;
@@ -104,6 +115,22 @@ export const BRANCH_SIX_COMBINATIONS: BranchCombinationResult[] = [
   { branches: ["辰", "酉"], resultElement: "metal" },
   { branches: ["巳", "申"], resultElement: "water" },
   { branches: ["午", "未"], resultElement: "earth" },
+];
+
+export type HalfCombinationResult = {
+  branches: [string, string];
+  resultElement: Element;
+};
+
+export const BRANCH_HALF_COMBINATIONS: HalfCombinationResult[] = [
+  { branches: ["寅", "午"], resultElement: "fire" },
+  { branches: ["午", "戌"], resultElement: "fire" },
+  { branches: ["巳", "酉"], resultElement: "metal" },
+  { branches: ["酉", "丑"], resultElement: "metal" },
+  { branches: ["申", "子"], resultElement: "water" },
+  { branches: ["子", "辰"], resultElement: "water" },
+  { branches: ["亥", "卯"], resultElement: "wood" },
+  { branches: ["卯", "未"], resultElement: "wood" },
 ];
 
 export type TripleCombinationResult = {
@@ -171,6 +198,12 @@ export interface StemCombination {
   transformReason: string;
 }
 
+export interface StemClash {
+  type: RelationTypeLabel;
+  pair: [string, string];
+  positions: [string, string];
+}
+
 export interface BranchSixCombination {
   type: RelationTypeLabel;
   pair: [string, string];
@@ -178,6 +211,13 @@ export interface BranchSixCombination {
   resultElement: ElementLabel;
   transformStatus: TransformationStatusLabel;
   transformReason: string;
+}
+
+export interface BranchHalfCombination {
+  type: RelationTypeLabel;
+  pair: [string, string];
+  positions: [string, string];
+  resultElement: ElementLabel;
 }
 
 export interface BranchTripleCombination {
@@ -227,7 +267,9 @@ export interface BranchDestruction {
 
 export type Relation =
   | StemCombination
+  | StemClash
   | BranchSixCombination
+  | BranchHalfCombination
   | BranchTripleCombination
   | BranchDirectionalCombination
   | BranchClash
@@ -239,9 +281,11 @@ export interface RelationsResult {
   combinations: (
     | StemCombination
     | BranchSixCombination
+    | BranchHalfCombination
     | BranchTripleCombination
     | BranchDirectionalCombination
   )[];
+  stemClashes: StemClash[];
   clashes: BranchClash[];
   harms: BranchHarm[];
   punishments: BranchPunishment[];
@@ -365,6 +409,7 @@ export function analyzeRelations(
   const allBranchChars = branches.map((b) => b.char);
 
   const combinations: RelationsResult["combinations"] = [];
+  const stemClashes: StemClash[] = [];
   const clashes: BranchClash[] = [];
   const harms: BranchHarm[] = [];
   const punishments: BranchPunishment[] = [];
@@ -394,6 +439,18 @@ export function analyzeRelations(
           });
         }
       }
+      for (const clash of STEM_CLASHES) {
+        if (
+          (s1.char === clash[0] && s2.char === clash[1]) ||
+          (s1.char === clash[1] && s2.char === clash[0])
+        ) {
+          stemClashes.push({
+            type: getRelationTypeLabel("stemClash"),
+            pair: [s1.char, s2.char],
+            positions: [s1.position, s2.position],
+          });
+        }
+      }
     }
   }
 
@@ -420,6 +477,20 @@ export function analyzeRelations(
             resultElement: getElementLabel(combo.resultElement),
             transformStatus: transform.status,
             transformReason: transform.reason,
+          });
+        }
+      }
+
+      for (const halfCombo of BRANCH_HALF_COMBINATIONS) {
+        if (
+          (b1.char === halfCombo.branches[0] && b2.char === halfCombo.branches[1]) ||
+          (b1.char === halfCombo.branches[1] && b2.char === halfCombo.branches[0])
+        ) {
+          combinations.push({
+            type: getRelationTypeLabel("halfCombination"),
+            pair: [b1.char, b2.char],
+            positions: [b1.position, b2.position],
+            resultElement: getElementLabel(halfCombo.resultElement),
           });
         }
       }
@@ -465,12 +536,18 @@ export function analyzeRelations(
     }
   }
 
-  const branchChars = branches.map((b) => b.char);
   for (const combo of BRANCH_TRIPLE_COMBINATIONS) {
-    const matched = combo.branches.filter((b) => branchChars.includes(b));
+    const matched: { char: string; position: PillarPosition }[] = [];
+    const usedIndices = new Set<number>();
+    for (const target of combo.branches) {
+      const idx = branches.findIndex((b, i) => b.char === target && !usedIndices.has(i));
+      if (idx !== -1) {
+        usedIndices.add(idx);
+        matched.push({ char: target, position: branches[idx].position });
+      }
+    }
     if (matched.length >= 2) {
-      // biome-ignore lint/style/noNonNullAssertion: matched is filtered from branchChars, find is guaranteed
-      const positions = matched.map((m) => branches.find((b) => b.char === m)!.position);
+      const positions = matched.map((m) => m.position);
       const isComplete = matched.length === 3;
       const transform = checkTransformationCondition(
         combo.resultElement,
@@ -480,7 +557,7 @@ export function analyzeRelations(
       );
       combinations.push({
         type: getRelationTypeLabel("tripleCombination"),
-        branches: matched,
+        branches: matched.map((m) => m.char),
         positions,
         resultElement: getElementLabel(combo.resultElement),
         isComplete,
@@ -491,10 +568,17 @@ export function analyzeRelations(
   }
 
   for (const combo of BRANCH_DIRECTIONAL_COMBINATIONS) {
-    const matched = combo.branches.filter((b) => branchChars.includes(b));
+    const matched: { char: string; position: PillarPosition }[] = [];
+    const usedIndices = new Set<number>();
+    for (const target of combo.branches) {
+      const idx = branches.findIndex((b, i) => b.char === target && !usedIndices.has(i));
+      if (idx !== -1) {
+        usedIndices.add(idx);
+        matched.push({ char: target, position: branches[idx].position });
+      }
+    }
     if (matched.length >= 2) {
-      // biome-ignore lint/style/noNonNullAssertion: matched is filtered from branchChars, find is guaranteed
-      const positions = matched.map((m) => branches.find((b) => b.char === m)!.position);
+      const positions = matched.map((m) => m.position);
       const isComplete = matched.length === 3;
       const transform = checkTransformationCondition(
         combo.resultElement,
@@ -504,7 +588,7 @@ export function analyzeRelations(
       );
       combinations.push({
         type: getRelationTypeLabel("directionalCombination"),
-        branches: matched,
+        branches: matched.map((m) => m.char),
         positions,
         resultElement: getElementLabel(combo.resultElement),
         isComplete,
@@ -514,6 +598,7 @@ export function analyzeRelations(
     }
   }
 
+  const branchChars = branches.map((b) => b.char);
   for (const punishment of BRANCH_PUNISHMENTS) {
     const matched = punishment.branches.filter((b) => branchChars.includes(b));
     const isTriple = punishment.branches.length === 3;
@@ -552,10 +637,18 @@ export function analyzeRelations(
     }
   }
 
-  const all: Relation[] = [...combinations, ...clashes, ...harms, ...punishments, ...destructions];
+  const all: Relation[] = [
+    ...combinations,
+    ...stemClashes,
+    ...clashes,
+    ...harms,
+    ...punishments,
+    ...destructions,
+  ];
 
   return {
     combinations,
+    stemClashes,
     clashes,
     harms,
     punishments,

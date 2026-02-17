@@ -213,6 +213,23 @@ class FourPillarsResult {
   final tz.TZDateTime adjustedDtForHour;
 }
 
+/// Korea DST period: 1987-05-10 02:00 ~ 1988-10-08 03:00 (UTC+10)
+double _getEffectiveKSTOffset(tz.TZDateTime dtLocal) {
+  final y = dtLocal.year;
+  final m = dtLocal.month;
+  final d = dtLocal.day;
+  final h = dtLocal.hour;
+
+  final afterStart =
+      y > 1987 ||
+      (y == 1987 && (m > 5 || (m == 5 && (d > 10 || (d == 10 && h >= 2)))));
+  final beforeEnd =
+      y < 1988 ||
+      (y == 1988 && (m < 10 || (m == 10 && (d < 8 || (d == 8 && h < 3)))));
+
+  return afterStart && beforeEnd ? 10.0 : 9.0;
+}
+
 /// Calculates all four pillars (year, month, day, hour) from a datetime.
 ///
 /// Returns a [FourPillarsResult] containing the pillars and calculation metadata.
@@ -228,7 +245,9 @@ FourPillarsResult getFourPillars(
   double tzOffsetHours = 9.0,
   PillarPreset preset = standardPreset,
 }) {
-  final effectiveLongitude = longitudeDeg ?? tzOffsetHours * 15;
+  final effectiveTzOffset =
+      tzOffsetHours == 9.0 ? _getEffectiveKSTOffset(dtLocal) : tzOffsetHours;
+  final effectiveLongitude = longitudeDeg ?? effectiveTzOffset * 15;
 
   final yearResult = yearPillar(dtLocal);
   final monthResult = monthPillar(dtLocal);
@@ -237,7 +256,7 @@ FourPillarsResult getFourPillars(
     dtLocal,
     dayBoundary: preset.dayBoundary,
     longitudeDeg: effectiveLongitude,
-    tzOffsetHours: tzOffsetHours,
+    tzOffsetHours: effectiveTzOffset,
     useMeanSolarTimeForBoundary: preset.useMeanSolarTimeForBoundary,
   );
   final dayPillar = dayPillarFromDate(effDate.year, effDate.month, effDate.day);
@@ -245,7 +264,7 @@ FourPillarsResult getFourPillars(
   final hourResult = hourPillar(
     dtLocal,
     longitudeDeg: effectiveLongitude,
-    tzOffsetHours: tzOffsetHours,
+    tzOffsetHours: effectiveTzOffset,
     useMeanSolarTimeForHour: preset.useMeanSolarTimeForHour,
     dayBoundary: preset.dayBoundary,
     useMeanSolarTimeForBoundary: preset.useMeanSolarTimeForBoundary,

@@ -34,6 +34,10 @@ export const SINSALS = [
   "lostSpirit",
   "robbery",
   "disaster",
+  "heavenlyKiller",
+  "earthlyKiller",
+  "yearKiller",
+  "monthKiller",
   "generalStar",
   "saddleMount",
   "redPhoenix",
@@ -464,6 +468,70 @@ const DISASTER_MAP: Record<string, string> = {
   未: "酉",
 };
 
+// 천살 (년지/일지 기준 삼합 → 지지에서 체크)
+const HEAVENLY_KILLER_MAP: Record<string, string> = {
+  寅: "丑",
+  午: "丑",
+  戌: "丑",
+  巳: "辰",
+  酉: "辰",
+  丑: "辰",
+  申: "未",
+  子: "未",
+  辰: "未",
+  亥: "戌",
+  卯: "戌",
+  未: "戌",
+};
+
+// 지살 (년지/일지 기준 삼합 → 지지에서 체크)
+const EARTHLY_KILLER_MAP: Record<string, string> = {
+  寅: "寅",
+  午: "寅",
+  戌: "寅",
+  巳: "巳",
+  酉: "巳",
+  丑: "巳",
+  申: "申",
+  子: "申",
+  辰: "申",
+  亥: "亥",
+  卯: "亥",
+  未: "亥",
+};
+
+// 연살 (년지/일지 기준 삼합 → 지지에서 체크)
+const YEAR_KILLER_MAP: Record<string, string> = {
+  寅: "卯",
+  午: "卯",
+  戌: "卯",
+  巳: "午",
+  酉: "午",
+  丑: "午",
+  申: "酉",
+  子: "酉",
+  辰: "酉",
+  亥: "子",
+  卯: "子",
+  未: "子",
+};
+
+// 월살 (년지/일지 기준 삼합 → 지지에서 체크)
+const MONTH_KILLER_MAP: Record<string, string> = {
+  寅: "辰",
+  午: "辰",
+  戌: "辰",
+  巳: "未",
+  酉: "未",
+  丑: "未",
+  申: "戌",
+  子: "戌",
+  辰: "戌",
+  亥: "丑",
+  卯: "丑",
+  未: "丑",
+};
+
 // 장성 (년지/일지 기준 삼합의 왕지)
 const GENERAL_STAR_MAP: Record<string, string> = {
   寅: "午",
@@ -827,6 +895,38 @@ export function analyzeSinsals(
     ...checkBranchBasedSinsal(dayBranch, allBranches, positions, DISASTER_MAP, "disaster"),
   );
 
+  // 천살 (년지/일지 기준)
+  matches.push(
+    ...checkBranchBasedSinsal(yearBranch, allBranches, positions, HEAVENLY_KILLER_MAP, "heavenlyKiller"),
+  );
+  matches.push(
+    ...checkBranchBasedSinsal(dayBranch, allBranches, positions, HEAVENLY_KILLER_MAP, "heavenlyKiller"),
+  );
+
+  // 지살 (년지/일지 기준)
+  matches.push(
+    ...checkBranchBasedSinsal(yearBranch, allBranches, positions, EARTHLY_KILLER_MAP, "earthlyKiller"),
+  );
+  matches.push(
+    ...checkBranchBasedSinsal(dayBranch, allBranches, positions, EARTHLY_KILLER_MAP, "earthlyKiller"),
+  );
+
+  // 연살 (년지/일지 기준)
+  matches.push(
+    ...checkBranchBasedSinsal(yearBranch, allBranches, positions, YEAR_KILLER_MAP, "yearKiller"),
+  );
+  matches.push(
+    ...checkBranchBasedSinsal(dayBranch, allBranches, positions, YEAR_KILLER_MAP, "yearKiller"),
+  );
+
+  // 월살 (년지/일지 기준)
+  matches.push(
+    ...checkBranchBasedSinsal(yearBranch, allBranches, positions, MONTH_KILLER_MAP, "monthKiller"),
+  );
+  matches.push(
+    ...checkBranchBasedSinsal(dayBranch, allBranches, positions, MONTH_KILLER_MAP, "monthKiller"),
+  );
+
   // 장성살 (년지/일지 기준)
   matches.push(
     ...checkBranchBasedSinsal(yearBranch, allBranches, positions, GENERAL_STAR_MAP, "generalStar"),
@@ -1081,6 +1181,30 @@ export const SINSAL_INFO: Record<
     korean: "재살",
     hanja: "災煞",
     meaning: "재난, 감금, 소송",
+    type: "inauspicious",
+  },
+  heavenlyKiller: {
+    korean: "천살",
+    hanja: "天煞",
+    meaning: "천재지변, 불의의 사고",
+    type: "inauspicious",
+  },
+  earthlyKiller: {
+    korean: "지살",
+    hanja: "地煞",
+    meaning: "이동 중 사고, 지진, 함몰",
+    type: "inauspicious",
+  },
+  yearKiller: {
+    korean: "연살",
+    hanja: "年煞",
+    meaning: "질병, 관재, 구설",
+    type: "inauspicious",
+  },
+  monthKiller: {
+    korean: "월살",
+    hanja: "月煞",
+    meaning: "가정불화, 부부갈등",
     type: "inauspicious",
   },
   generalStar: {

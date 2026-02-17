@@ -150,18 +150,19 @@ function hasSpecialFormation(
   level: StrengthLevelLabel,
   allElements: Element[],
 ): { isSpecial: boolean; type: string | null; followElement: Element | null } {
-  if (level.key === "extremelyWeak") {
-    const elementCounts: Record<Element, number> = {
-      wood: 0,
-      fire: 0,
-      earth: 0,
-      metal: 0,
-      water: 0,
-    };
-    for (const elem of allElements) {
-      elementCounts[elem]++;
-    }
+  const elementCounts: Record<Element, number> = {
+    wood: 0,
+    fire: 0,
+    earth: 0,
+    metal: 0,
+    water: 0,
+  };
+  for (const elem of allElements) {
+    elementCounts[elem]++;
+  }
 
+  if (level.key === "extremelyWeak") {
+    // Find dominant non-daymaster element
     let dominantElement: Element | null = null;
     let maxCount = 0;
     for (const [elem, count] of Object.entries(elementCounts)) {
@@ -172,7 +173,31 @@ function hasSpecialFormation(
     }
 
     if (dominantElement && maxCount >= 3) {
-      return { isSpecial: true, type: "종격", followElement: dominantElement };
+      // Determine specific 종격 type
+      const dmControls = CONTROLS[dayMasterElement];
+      const dmControlledBy = CONTROLLED_BY[dayMasterElement];
+      const dmGenerates = GENERATES[dayMasterElement];
+
+      let type = "종격";
+      if (dominantElement === dmControls) {
+        type = "종재격"; // Follow Wealth
+      } else if (dominantElement === dmControlledBy) {
+        type = "종살격"; // Follow Killings
+      } else if (dominantElement === dmGenerates) {
+        type = "종아격"; // Follow Children/Output
+      }
+
+      return { isSpecial: true, type, followElement: dominantElement };
+    }
+  }
+
+  if (level.key === "extremelyStrong") {
+    // 종강격: extremely strong with no controllers present
+    const controllerElement = CONTROLLED_BY[dayMasterElement];
+    const hasController = elementCounts[controllerElement] > 0;
+
+    if (!hasController) {
+      return { isSpecial: true, type: "종강격", followElement: dayMasterElement };
     }
   }
 
@@ -223,7 +248,7 @@ export function analyzeYongShen(
     primaryKey = specialFormation.followElement;
     secondaryKey = GENERATES[specialFormation.followElement];
     methodKey = "formation";
-    reasoning = `종격 성립. ${getElementLabel(specialFormation.followElement).korean} 세력을 따름`;
+    reasoning = `${specialFormation.type} 성립. ${getElementLabel(specialFormation.followElement).korean} 세력을 따름`;
 
     const yokbu = getYokbuYongShen(dayMasterElement, strength.level);
     alternativeBalance = { primary: yokbu.primary, secondary: yokbu.secondary };

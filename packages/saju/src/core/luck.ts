@@ -1,4 +1,5 @@
 import type { DateAdapter } from "@/adapters/date-adapter";
+import { type SolarTermKey, getSolarTermLabel } from "@/core/solar-terms";
 import { getStemPolarity } from "@/core/ten-gods";
 import type { Gender, Polarity } from "@/types";
 import { BRANCHES, getPillarIndex, jdnFromDate, pillarFromIndex, STEMS } from "@/utils";
@@ -149,12 +150,32 @@ export function getCurrentMajorLuck(majorLuck: MajorLuckResult, age: number): Lu
   return null;
 }
 
+const MONTH_JIE_KEYS: SolarTermKey[] = [
+  "springBegins",
+  "awakeningInsects",
+  "pureBrightness",
+  "summerBegins",
+  "grainInEar",
+  "minorHeat",
+  "autumnBegins",
+  "whiteDew",
+  "coldDew",
+  "winterBegins",
+  "majorSnow",
+  "minorCold",
+];
+
 export interface MonthlyLuckResult {
   year: number;
   month: number;
   stem: string;
   branch: string;
   pillar: string;
+  solarTerm: {
+    key: SolarTermKey;
+    korean: string;
+    hanja: string;
+  };
 }
 
 export function calculateMonthlyLuck(
@@ -179,12 +200,20 @@ export function calculateMonthlyLuck(
     const branch = BRANCHES[branchIdx];
     const pillar = stem + branch;
 
+    const jieKey = MONTH_JIE_KEYS[monthOffset % 12];
+    const jieLabel = getSolarTermLabel(jieKey);
+
     results.push({
       year,
       month,
       stem,
       branch,
       pillar,
+      solarTerm: {
+        key: jieLabel.key,
+        korean: jieLabel.korean,
+        hanja: jieLabel.hanja,
+      },
     });
   }
 
@@ -210,7 +239,7 @@ export function calculateDailyLuck(
 
   for (let day = fromDay; day <= toDay; day++) {
     const jdn = jdnFromDate(year, month, day);
-    const idx60 = (((jdn + 49) % 60) + 60) % 60;
+    const idx60 = (((jdn - 11) % 60) + 60) % 60;
     const stem = STEMS[idx60 % 10];
     const branch = BRANCHES[idx60 % 12];
     const pillar = stem + branch;
@@ -230,7 +259,7 @@ export function calculateDailyLuck(
 
 export function getDayPillar(year: number, month: number, day: number): string {
   const jdn = jdnFromDate(year, month, day);
-  const idx60 = (((jdn + 49) % 60) + 60) % 60;
+  const idx60 = (((jdn - 11) % 60) + 60) % 60;
   return STEMS[idx60 % 10] + BRANCHES[idx60 % 12];
 }
 

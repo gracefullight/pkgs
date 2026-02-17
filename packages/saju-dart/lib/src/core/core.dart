@@ -1,6 +1,8 @@
 export 'four_pillars.dart';
 export 'luck.dart';
+export 'nayin.dart';
 export 'relations.dart';
+export 'sinsals.dart';
 export 'solar_terms.dart';
 export 'strength.dart';
 export 'ten_gods.dart';

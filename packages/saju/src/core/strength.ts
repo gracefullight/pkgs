@@ -1,3 +1,4 @@
+import { findBranchClash, findStemCombination } from "@/core/relations";
 import {
   type Element,
   getStemElement,
@@ -249,7 +250,30 @@ export function analyzeStrength(
     tonggeun += calculateRootStrength(dayMaster, branch);
   }
 
+  // Clash reduction: if day branch is clashed, reduce root strength
+  let clashReduction = 0;
+  for (const branch of allBranches) {
+    if (branch !== dayPillar[1] && findBranchClash(dayPillar[1], branch)) {
+      clashReduction += 0.3;
+    }
+  }
+  tonggeun = Math.max(0, tonggeun - clashReduction);
+
   const allStems = [yearPillar[0], monthPillar[0], dayPillar[0], hourPillar[0]];
+
+  // Stem combination: check if daymaster is in a stem combination
+  let stemComboBonus = 0;
+  const otherStems = [yearPillar[0], monthPillar[0], hourPillar[0]];
+  for (const stem of otherStems) {
+    const combo = findStemCombination(dayMaster, stem);
+    if (combo) {
+      if (combo.resultElement === dayMasterElement) {
+        stemComboBonus += 0.2; // Combination strengthens day master element
+      } else {
+        stemComboBonus -= 0.1; // Combination transforms away from day master
+      }
+    }
+  }
 
   const monthHiddenStems = HIDDEN_STEM_WEIGHTS[monthBranch] || [];
   let transparentBonus = 0;
@@ -269,7 +293,6 @@ export function analyzeStrength(
   }
 
   let deukse = 0;
-  const otherStems = [yearPillar[0], monthPillar[0], hourPillar[0]];
   for (const stem of otherStems) {
     const tenGod = getTenGodKey(dayMaster, stem);
     if (isHelpfulTenGod(tenGod)) {
@@ -304,6 +327,7 @@ export function analyzeStrength(
   score += deukse * 8;
   score += helpCount * 5;
   score -= weakenCount * 6;
+  score += stemComboBonus * 10;
 
   score = Math.round(score * 10) / 10;
 
