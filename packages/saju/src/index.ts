@@ -34,9 +34,9 @@ export {
 export { getLunarDate, getSolarDate, type LunarDate } from "@/core/lunar";
 export {
   analyzeFourPillarsNayin,
+  type FourPillarsNayin,
   getNayin,
   getNayinFromPillar,
-  type FourPillarsNayin,
   type NayinResult,
 } from "@/core/nayin";
 export {

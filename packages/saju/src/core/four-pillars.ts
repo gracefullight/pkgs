@@ -32,11 +32,9 @@ function getEffectiveKSTOffset<T>(adapter: DateAdapter<T>, dtLocal: T): number {
   // KDT start: 1987-05-10 02:00 KST (becomes 03:00 KDT)
   // KDT end: 1988-10-08 03:00 KDT (becomes 02:00 KST)
   const afterStart =
-    y > 1987 ||
-    (y === 1987 && (m > 5 || (m === 5 && (d > 10 || (d === 10 && h >= 2)))));
+    y > 1987 || (y === 1987 && (m > 5 || (m === 5 && (d > 10 || (d === 10 && h >= 2)))));
   const beforeEnd =
-    y < 1988 ||
-    (y === 1988 && (m < 10 || (m === 10 && (d < 8 || (d === 8 && h < 3)))));
+    y < 1988 || (y === 1988 && (m < 10 || (m === 10 && (d < 8 || (d === 8 && h < 3)))));
 
   return afterStart && beforeEnd ? 10 : 9;
 }
@@ -52,10 +50,14 @@ function deltaT(year: number): number {
   }
   if (year >= 1986 && year < 2005) {
     const t = year - 2000;
-    return 63.86 + 0.3345 * t - 0.060374 * t * t
-      + 0.0017275 * t * t * t
-      + 0.000651814 * t * t * t * t
-      + 0.00002373599 * t * t * t * t * t;
+    return (
+      63.86 +
+      0.3345 * t -
+      0.060374 * t * t +
+      0.0017275 * t * t * t +
+      0.000651814 * t * t * t * t +
+      0.00002373599 * t * t * t * t * t
+    );
   }
   if (year >= 1900 && year < 1986) {
     const t = year - 1900;

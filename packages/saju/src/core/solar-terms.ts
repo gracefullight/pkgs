@@ -129,10 +129,14 @@ function deltaT(year: number): number {
   }
   if (year >= 1986 && year < 2005) {
     const t = year - 2000;
-    return 63.86 + 0.3345 * t - 0.060374 * t * t
-      + 0.0017275 * t * t * t
-      + 0.000651814 * t * t * t * t
-      + 0.00002373599 * t * t * t * t * t;
+    return (
+      63.86 +
+      0.3345 * t -
+      0.060374 * t * t +
+      0.0017275 * t * t * t +
+      0.000651814 * t * t * t * t +
+      0.00002373599 * t * t * t * t * t
+    );
   }
   if (year >= 1900 && year < 1986) {
     const t = year - 1900;

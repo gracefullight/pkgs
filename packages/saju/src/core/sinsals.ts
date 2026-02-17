@@ -897,18 +897,42 @@ export function analyzeSinsals(
 
   // 천살 (년지/일지 기준)
   matches.push(
-    ...checkBranchBasedSinsal(yearBranch, allBranches, positions, HEAVENLY_KILLER_MAP, "heavenlyKiller"),
+    ...checkBranchBasedSinsal(
+      yearBranch,
+      allBranches,
+      positions,
+      HEAVENLY_KILLER_MAP,
+      "heavenlyKiller",
+    ),
   );
   matches.push(
-    ...checkBranchBasedSinsal(dayBranch, allBranches, positions, HEAVENLY_KILLER_MAP, "heavenlyKiller"),
+    ...checkBranchBasedSinsal(
+      dayBranch,
+      allBranches,
+      positions,
+      HEAVENLY_KILLER_MAP,
+      "heavenlyKiller",
+    ),
   );
 
   // 지살 (년지/일지 기준)
   matches.push(
-    ...checkBranchBasedSinsal(yearBranch, allBranches, positions, EARTHLY_KILLER_MAP, "earthlyKiller"),
+    ...checkBranchBasedSinsal(
+      yearBranch,
+      allBranches,
+      positions,
+      EARTHLY_KILLER_MAP,
+      "earthlyKiller",
+    ),
   );
   matches.push(
-    ...checkBranchBasedSinsal(dayBranch, allBranches, positions, EARTHLY_KILLER_MAP, "earthlyKiller"),
+    ...checkBranchBasedSinsal(
+      dayBranch,
+      allBranches,
+      positions,
+      EARTHLY_KILLER_MAP,
+      "earthlyKiller",
+    ),
   );
 
   // 연살 (년지/일지 기준)

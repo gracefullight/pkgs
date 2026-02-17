@@ -1,5 +1,5 @@
 import type { DateAdapter } from "@/adapters/date-adapter";
-import { type SolarTermKey, getSolarTermLabel } from "@/core/solar-terms";
+import { getSolarTermLabel, type SolarTermKey } from "@/core/solar-terms";
 import { getStemPolarity } from "@/core/ten-gods";
 import type { Gender, Polarity } from "@/types";
 import { BRANCHES, getPillarIndex, jdnFromDate, pillarFromIndex, STEMS } from "@/utils";
