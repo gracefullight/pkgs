@@ -1,5 +1,12 @@
 # @gracefullight/saju
 
+## [1.3.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.2.0...@gracefullight/saju@1.3.0) (2026-02-21)
+
+
+### Features
+
+* **saju,saju-dart:** add sinsals, nayin, solar term monthly luck, and parity fixes ([fe6922c](https://github.com/gracefullight/pkgs/commit/fe6922cf05bf2b55d4c4b19ffe0d1d3f21b3046b))
+
 ## [1.2.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.1.3...@gracefullight/saju@1.2.0) (2026-02-01)
 
 
