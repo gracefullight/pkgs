@@ -65,8 +65,4 @@ gh api --method PUT /user/starred/gracefullight/pkgs
 
 ## License
 
-MIT License - see [LICENSE](../../LICENSE) for details.
-
-## Author
-
-**gracefullight** - [GitHub](https://github.com/gracefullight)
+MIT
