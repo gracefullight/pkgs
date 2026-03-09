@@ -1,5 +1,12 @@
 # create-fullstack-starter
 
+## [0.2.3](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.2...create-fullstack-starter@0.2.3) (2026-03-09)
+
+
+### Features
+
+* **create-fullstack-starter:** add interactive GitHub star prompt with y as default ([ff39460](https://github.com/gracefullight/pkgs/commit/ff39460aeb29a3fbf4dd98aee70ca3373abc35dd))
+
 ## [0.2.2](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.1...create-fullstack-starter@0.2.2) (2026-01-22)
 
 
