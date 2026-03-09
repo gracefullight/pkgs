@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import * as p from "@clack/prompts";
@@ -6,6 +7,47 @@ import { Command } from "commander";
 import tiged from "tiged";
 
 const TEMPLATE_REPO = "first-fluke/fullstack-starter";
+
+async function isGhCliAvailable(): Promise<boolean> {
+  try {
+    execSync("gh auth status", { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function isAlreadyStarred(): Promise<boolean> {
+  try {
+    execSync(`gh api user/starred/${TEMPLATE_REPO}`, { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function promptForStar(): Promise<boolean> {
+  const result = await p.confirm({
+    message:
+      "If you're enjoying fullstack-starter, would you like to support the project by starring it on GitHub?",
+    initialValue: true,
+  });
+
+  if (p.isCancel(result)) {
+    return false;
+  }
+
+  return result === true;
+}
+
+async function starRepository(): Promise<boolean> {
+  try {
+    execSync(`gh api -X PUT /user/starred/${TEMPLATE_REPO}`, { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const program = new Command();
 
@@ -68,6 +110,20 @@ async function main(directory?: string) {
     await emitter.clone(resolvedPath);
     s.stop("Template cloned successfully!");
 
+    const ghAvailable = await isGhCliAvailable();
+    if (ghAvailable) {
+      const alreadyStarred = await isAlreadyStarred();
+      if (!alreadyStarred) {
+        const shouldStar = await promptForStar();
+        if (shouldStar) {
+          const starred = await starRepository();
+          if (starred) {
+            p.log.message(chalk.yellow("Thanks for starring! ⭐"));
+          }
+        }
+      }
+    }
+
     p.note(
       [
         !isCurrentDir && chalk.cyan(`cd ${targetDir}`),
@@ -82,8 +138,6 @@ async function main(directory?: string) {
     );
 
     p.log.info(chalk.gray("Documentation: https://github.com/first-fluke/fullstack-starter"));
-    p.log.info(chalk.gray("If you like this template, please leave a star:"));
-    p.log.info(chalk.gray("  gh api --method PUT /user/starred/first-fluke/fullstack-starter"));
 
     p.outro(chalk.green.bold("Your project is ready!"));
   } catch (error) {
