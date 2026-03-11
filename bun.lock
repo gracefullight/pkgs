@@ -106,19 +106,9 @@
         "typescript": "^5.9.3",
       },
     },
-    "packages/biome-plugin": {
-      "name": "@gracefullight/biome-plugin",
-      "version": "0.2.2",
-      "devDependencies": {
-        "@biomejs/biome": "^2.3.11",
-        "@types/node": "^24",
-        "typescript": "^5.9.3",
-        "vitest": "^4.0.17",
-      },
-    },
     "packages/create-fullstack-starter": {
       "name": "create-fullstack-starter",
-      "version": "0.2.2",
+      "version": "0.0.0",
       "bin": {
         "create-fullstack-starter": "./dist/index.js",
       },
@@ -137,7 +127,7 @@
     },
     "packages/markdown": {
       "name": "@gracefullight/markdown",
-      "version": "0.1.0",
+      "version": "0.0.0",
       "devDependencies": {
         "tsup": "^8.5.1",
         "typescript": "^5",
@@ -146,7 +136,7 @@
     },
     "packages/mcp-cafe24-admin": {
       "name": "@gracefullight/mcp-cafe24-admin",
-      "version": "0.2.2",
+      "version": "0.0.0",
       "bin": {
         "mcp-cafe24-admin": "./dist/index.js",
       },
@@ -168,7 +158,7 @@
     },
     "packages/ng-daum-address": {
       "name": "@gracefullight/ng-daum-address",
-      "version": "1.0.1",
+      "version": "0.0.0",
       "devDependencies": {
         "@analogjs/vite-plugin-angular": "^2.2.2",
         "@analogjs/vitest-angular": "^2.2.2",
@@ -194,7 +184,7 @@
     },
     "packages/react-share": {
       "name": "@gracefullight/react-share",
-      "version": "0.1.4",
+      "version": "0.0.0",
       "dependencies": {
         "@types/facebook-js-sdk": "^3.3.12",
       },
@@ -218,7 +208,7 @@
     },
     "packages/saju": {
       "name": "@gracefullight/saju",
-      "version": "1.3.0",
+      "version": "0.0.0",
       "dependencies": {
         "lunar-javascript": "^1.7.7",
       },
@@ -245,7 +235,7 @@
     },
     "packages/tems-trp-parser": {
       "name": "@gracefullight/tems-trp-parser",
-      "version": "0.1.1",
+      "version": "0.0.0",
       "bin": {
         "tems-trp": "./dist/cli.js",
       },
@@ -263,7 +253,7 @@
     },
     "packages/validate-branch": {
       "name": "@gracefullight/validate-branch",
-      "version": "1.1.2",
+      "version": "0.0.0",
       "bin": {
         "validate-branch": "./dist/cli.js",
       },
@@ -282,7 +272,7 @@
     },
     "packages/zotero-plugin-uts": {
       "name": "zotero-plugin-uts",
-      "version": "0.1.2",
+      "version": "0.0.0",
       "devDependencies": {
         "@citation-js/core": "^0.7.21",
         "@citation-js/plugin-csl": "^0.7.22",
@@ -550,7 +540,7 @@
 
     "@formatjs/intl-localematcher": ["@formatjs/intl-localematcher@0.5.10", "", { "dependencies": { "tslib": "2" } }, "sha512-af3qATX+m4Rnd9+wHcjJ4w2ijq+rAVP3CCinJQvFv1kgSu1W6jypUmvleJxcewdxmutM8dmIRZFxO/IQBZmP2Q=="],
 
-    "@gracefullight/biome-plugin": ["@gracefullight/biome-plugin@workspace:packages/biome-plugin"],
+    "@gracefullight/biome-plugin": ["@gracefullight/biome-plugin@0.2.2", "", {}, "sha512-ghkqRdMvM3d+RnTiiFqpjPSXMGDknMAinwvTFzoBK9XgVhg6f0kKZj81v5cNcBoIkjwk+QFdN8fkg4arBqbTvQ=="],
 
     "@gracefullight/markdown": ["@gracefullight/markdown@workspace:packages/markdown"],
 
