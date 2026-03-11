@@ -1,5 +1,6 @@
 /**
  * Preprocess markdown content to fix rendering issues with Korean text.
+ * Version 0.1.1
  *
  * Handles:
  * 1. Bold markers wrapping quoted text: `**'text'**` → `'**text**'`
