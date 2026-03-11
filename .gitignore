@@ -18,3 +18,4 @@ pubspec.lock
 
 # Zotero plugin
 *.xpi
+.omc/
