@@ -40,7 +40,6 @@ packages/           — published npm/pub packages
   biome-plugin/     — Biome GritQL plugins
   create-fullstack-starter/ — CLI scaffold tool
   markdown/         — Markdown preprocessing for Korean text
-  mcp-cafe24-admin/ — MCP server for Cafe24 Admin API
   ng-daum-address/  — Angular Daum address component
   react-share/      — Headless social sharing for React
   saju/             — Four Pillars calculation (Node)
