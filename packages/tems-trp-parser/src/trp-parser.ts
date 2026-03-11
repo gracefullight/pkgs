@@ -99,6 +99,88 @@ export class TRPParser {
     return null;
   }
 
+  private getChildRecord(
+    obj: Record<string, unknown>,
+    key: string,
+  ): Record<string, unknown> | null {
+    const child = obj[`tems:${key}`] ?? obj[key];
+    if (!child || typeof child !== "object") return null;
+    return child as Record<string, unknown>;
+  }
+
+  private parseContentIdentity(content: Record<string, unknown>, metadata: TRPMetadata): void {
+    const identity = this.getChildRecord(content, "Identity");
+    if (!identity) return;
+
+    const guid = identity["tems:Guid"];
+    if (typeof guid === "string") metadata.guid = guid;
+  }
+
+  private parseContentTags(content: Record<string, unknown>, metadata: TRPMetadata): void {
+    const tagsText = this.getText(content, "Tags");
+    if (!tagsText) return;
+
+    metadata.tags = tagsText
+      .split(";")
+      .map((t) => t.trim())
+      .filter(Boolean);
+  }
+
+  private parseContentProbe(content: Record<string, unknown>, metadata: TRPMetadata): void {
+    const probe = this.getChildRecord(content, "Probe");
+    if (!probe) return;
+
+    metadata.probeIdentity = this.getText(probe, "ProbeIdentity");
+    metadata.probeCompany = this.getText(probe, "Company");
+    metadata.probeFamily = this.getText(probe, "Family");
+    metadata.subsystem = this.getText(probe, "Subsystem");
+    metadata.probeVersion = this.parseVersion(probe["tems:Version"]);
+    metadata.coreVersion = this.parseVersion(probe["tems:CoreVersion"]);
+  }
+
+  private parseContentStartTime(startTime: Record<string, unknown>, metadata: TRPMetadata): void {
+    const timeStr = this.getText(startTime, "Time");
+    metadata.timeInfo.startTime = this.parseDateTime(timeStr);
+    metadata.timeInfo.timezone = this.getText(startTime, "TimeZoneIdentifier");
+
+    const offsetStr = this.getText(startTime, "UtcOffset");
+    if (offsetStr) {
+      metadata.timeInfo.utcOffsetMinutes = parseInt(offsetStr, 10) || 0;
+    }
+  }
+
+  private parseContentTime(content: Record<string, unknown>, metadata: TRPMetadata): void {
+    const time = this.getChildRecord(content, "Time");
+    if (!time) return;
+
+    const startTime = this.getChildRecord(time, "StartTime");
+    if (startTime) {
+      this.parseContentStartTime(startTime, metadata);
+    }
+
+    const stopTime = this.getChildRecord(time, "StopTime");
+    if (!stopTime) return;
+
+    const timeStr = this.getText(stopTime, "Time");
+    metadata.timeInfo.stopTime = this.parseDateTime(timeStr);
+  }
+
+  private parseContentStatus(content: Record<string, unknown>, metadata: TRPMetadata): void {
+    const status = this.getChildRecord(content, "Status");
+    if (!status) return;
+
+    const value = status["tems:Value"];
+    if (typeof value === "string") metadata.status = value;
+  }
+
+  private parseContentCreator(content: Record<string, unknown>, metadata: TRPMetadata): void {
+    const creator = this.getChildRecord(content, "Creator");
+    if (!creator) return;
+
+    const userName = creator["tems:UserName"];
+    if (typeof userName === "string") metadata.creator = userName;
+  }
+
   private parseContentXml(metadata: TRPMetadata): void {
     const root = this.readXml("trp/content.xml");
     if (!root || typeof root !== "object") return;
@@ -108,65 +190,14 @@ export class TRPParser {
     if (!content || typeof content !== "object") return;
 
     const c = content as Record<string, unknown>;
-
-    const identity = c["tems:Identity"] as Record<string, unknown> | undefined;
-    if (identity) {
-      const guid = identity["tems:Guid"];
-      if (typeof guid === "string") metadata.guid = guid;
-    }
-
+    this.parseContentIdentity(c, metadata);
     metadata.subject = this.getText(c, "Subject");
     metadata.description = this.getText(c, "Description");
-
-    const tagsText = this.getText(c, "Tags");
-    if (tagsText) {
-      metadata.tags = tagsText
-        .split(";")
-        .map((t) => t.trim())
-        .filter(Boolean);
-    }
-
-    const probe = c["tems:Probe"] as Record<string, unknown> | undefined;
-    if (probe) {
-      metadata.probeIdentity = this.getText(probe, "ProbeIdentity");
-      metadata.probeCompany = this.getText(probe, "Company");
-      metadata.probeFamily = this.getText(probe, "Family");
-      metadata.subsystem = this.getText(probe, "Subsystem");
-      metadata.probeVersion = this.parseVersion(probe["tems:Version"]);
-      metadata.coreVersion = this.parseVersion(probe["tems:CoreVersion"]);
-    }
-
-    const time = c["tems:Time"] as Record<string, unknown> | undefined;
-    if (time) {
-      const startTime = time["tems:StartTime"] as Record<string, unknown> | undefined;
-      if (startTime) {
-        const timeStr = this.getText(startTime, "Time");
-        metadata.timeInfo.startTime = this.parseDateTime(timeStr);
-        metadata.timeInfo.timezone = this.getText(startTime, "TimeZoneIdentifier");
-        const offsetStr = this.getText(startTime, "UtcOffset");
-        if (offsetStr) {
-          metadata.timeInfo.utcOffsetMinutes = parseInt(offsetStr, 10) || 0;
-        }
-      }
-
-      const stopTime = time["tems:StopTime"] as Record<string, unknown> | undefined;
-      if (stopTime) {
-        const timeStr = this.getText(stopTime, "Time");
-        metadata.timeInfo.stopTime = this.parseDateTime(timeStr);
-      }
-    }
-
-    const status = c["tems:Status"] as Record<string, unknown> | undefined;
-    if (status) {
-      const val = status["tems:Value"];
-      if (typeof val === "string") metadata.status = val;
-    }
-
-    const creator = c["tems:Creator"] as Record<string, unknown> | undefined;
-    if (creator) {
-      const userName = creator["tems:UserName"];
-      if (typeof userName === "string") metadata.creator = userName;
-    }
+    this.parseContentTags(c, metadata);
+    this.parseContentProbe(c, metadata);
+    this.parseContentTime(c, metadata);
+    this.parseContentStatus(c, metadata);
+    this.parseContentCreator(c, metadata);
   }
 
   private parseSystemInfoXml(metadata: TRPMetadata): void {
@@ -204,6 +235,150 @@ export class TRPParser {
     return null;
   }
 
+  private getServiceProviderPropertyList(
+    provider: Record<string, unknown>,
+  ): Array<Record<string, unknown>> {
+    const properties = provider["tems:Properties"];
+    if (!properties || typeof properties !== "object") return [];
+
+    const props = properties as Record<string, unknown>;
+    const propList = props["tems:Property"];
+    if (!propList) return [];
+
+    return Array.isArray(propList)
+      ? (propList as Array<Record<string, unknown>>)
+      : [propList as Record<string, unknown>];
+  }
+
+  private getServiceProviderPropertyValue(valueObj: unknown): string {
+    if (typeof valueObj === "string") return valueObj.trim();
+    if (typeof valueObj === "number") return String(valueObj);
+    return "";
+  }
+
+  private parseSupportedAppsValue(valueObj: unknown): string[] | null {
+    if (!valueObj || typeof valueObj !== "object") return null;
+
+    const valueRecord = valueObj as Record<string, unknown>;
+    const strings = valueRecord["arr:string"];
+    if (!strings) return null;
+
+    const appList = Array.isArray(strings) ? strings : [strings];
+    return appList.filter((app): app is string => typeof app === "string");
+  }
+
+  private applyServiceProviderProperty(
+    device: TRPMetadata["deviceInfo"],
+    name: string,
+    valueObj: unknown,
+  ): void {
+    const value = this.getServiceProviderPropertyValue(valueObj);
+
+    switch (name) {
+      case "IMEI":
+        device.imei = value;
+        break;
+      case "IMSI":
+        device.imsi = value;
+        break;
+      case "MSISDN":
+        device.msisdn = value;
+        break;
+      case "Revision":
+        device.firmwareRevision = value;
+        break;
+      case "DiagnosticRevision":
+        device.diagnosticRevision = value;
+        break;
+      case "BuildDate":
+        device.buildDate = value;
+        break;
+      case "BuildVersion":
+        device.buildVersion = value;
+        break;
+      case "Label":
+        device.label = value;
+        break;
+      case "UsingExternalDecoder":
+        device.usingExternalDecoder = value.toLowerCase() === "yes";
+        break;
+      case "OnDeviceSupportedApk": {
+        const supportedApps = this.parseSupportedAppsValue(valueObj);
+        if (supportedApps) {
+          device.supportedApps = supportedApps;
+        }
+        break;
+      }
+    }
+  }
+
+  private collectChannelDirs(channelsRoot: string): string[] {
+    const channelDirs = new Set<string>();
+
+    for (const entry of this.zip.getEntries()) {
+      if (!entry.entryName.startsWith(channelsRoot) || !entry.entryName.includes("/ch")) {
+        continue;
+      }
+
+      const relPath = entry.entryName.slice(channelsRoot.length + 1);
+      const parts = relPath.split("/");
+      if (parts.length > 0 && parts[0]?.startsWith("ch")) {
+        channelDirs.add(parts[0]);
+      }
+    }
+
+    return [...channelDirs].sort();
+  }
+
+  private parseNumericProperty(valueObj: unknown): number {
+    if (typeof valueObj === "number") return valueObj;
+    if (typeof valueObj === "string") return parseInt(valueObj, 10) || 0;
+    return 0;
+  }
+
+  private getNestedString(valueObj: unknown, key: string): string {
+    if (!valueObj || typeof valueObj !== "object") return "";
+
+    const valueRecord = valueObj as Record<string, unknown>;
+    const nested = valueRecord[key];
+    return typeof nested === "string" ? nested : "";
+  }
+
+  private applyChannelProperty(chInfo: ChannelInfo, name: string, valueObj: unknown): void {
+    switch (name) {
+      case "ElementCount":
+        chInfo.elementCount = this.parseNumericProperty(valueObj);
+        break;
+      case "ChannelCategory":
+        chInfo.category = this.getNestedString(valueObj, "tems:Value");
+        break;
+      case "InstanceIdentity":
+        chInfo.instanceGuid = this.getNestedString(valueObj, "tems:Guid");
+        break;
+      case "ProducerIdentity":
+        chInfo.producer = this.getNestedString(valueObj, "tems:Value");
+        break;
+    }
+  }
+
+  private parseServiceProviderChannelXml(chInfo: ChannelInfo, xmlPath: string): void {
+    const root = this.readXml(xmlPath);
+    if (!root || typeof root !== "object") return;
+
+    const doc = root as Record<string, unknown>;
+    const channel = doc["tems:ServiceProviderChannel"] ?? doc.ServiceProviderChannel;
+    if (!channel || typeof channel !== "object") return;
+
+    const channelRecord = channel as Record<string, unknown>;
+    const propList = this.getServiceProviderPropertyList(channelRecord);
+    for (const prop of propList) {
+      const name = prop["tems:Name"];
+      if (typeof name !== "string") continue;
+
+      this.applyChannelProperty(chInfo, name, prop["tems:Value"]);
+    }
+  }
+
   private parseServiceProviderXml(metadata: TRPMetadata): void {
     const providerRoot = this.findProviderRoot();
     if (!providerRoot) return;
@@ -216,69 +391,15 @@ export class TRPParser {
     if (!provider || typeof provider !== "object") return;
 
     const p = provider as Record<string, unknown>;
-    const properties = p["tems:Properties"];
-    if (!properties || typeof properties !== "object") return;
-
-    const props = properties as Record<string, unknown>;
-    let propList = props["tems:Property"];
-    if (!propList) return;
-
-    if (!Array.isArray(propList)) propList = [propList];
+    const propList = this.getServiceProviderPropertyList(p);
+    if (propList.length === 0) return;
 
     const device = metadata.deviceInfo;
-    for (const prop of propList as Array<Record<string, unknown>>) {
+    for (const prop of propList) {
       const name = prop["tems:Name"];
-      const valueObj = prop["tems:Value"];
-
       if (typeof name !== "string") continue;
-      const value =
-        typeof valueObj === "string"
-          ? valueObj.trim()
-          : typeof valueObj === "number"
-            ? String(valueObj)
-            : "";
 
-      switch (name) {
-        case "IMEI":
-          device.imei = value;
-          break;
-        case "IMSI":
-          device.imsi = value;
-          break;
-        case "MSISDN":
-          device.msisdn = value;
-          break;
-        case "Revision":
-          device.firmwareRevision = value;
-          break;
-        case "DiagnosticRevision":
-          device.diagnosticRevision = value;
-          break;
-        case "BuildDate":
-          device.buildDate = value;
-          break;
-        case "BuildVersion":
-          device.buildVersion = value;
-          break;
-        case "Label":
-          device.label = value;
-          break;
-        case "UsingExternalDecoder":
-          device.usingExternalDecoder = value.toLowerCase() === "yes";
-          break;
-        case "OnDeviceSupportedApk":
-          if (valueObj && typeof valueObj === "object") {
-            const vo = valueObj as Record<string, unknown>;
-            let strings = vo["arr:string"];
-            if (strings) {
-              if (!Array.isArray(strings)) strings = [strings];
-              device.supportedApps = (strings as unknown[]).filter(
-                (s): s is string => typeof s === "string",
-              );
-            }
-          }
-          break;
-      }
+      this.applyServiceProviderProperty(device, name, prop["tems:Value"]);
     }
   }
 
@@ -287,79 +408,16 @@ export class TRPParser {
     if (!providerRoot) return;
 
     const channelsRoot = `${providerRoot}/channels`;
-    const channelDirs = new Set<string>();
+    const channelDirs = this.collectChannelDirs(channelsRoot);
 
-    for (const entry of this.zip.getEntries()) {
-      if (entry.entryName.startsWith(channelsRoot) && entry.entryName.includes("/ch")) {
-        const relPath = entry.entryName.slice(channelsRoot.length + 1);
-        const parts = relPath.split("/");
-        if (parts.length > 0 && parts[0]?.startsWith("ch")) {
-          channelDirs.add(parts[0]);
-        }
-      }
-    }
-
-    for (const chId of [...channelDirs].sort()) {
+    for (const chId of channelDirs) {
       const chInfo: ChannelInfo = {
         ...createDefaultChannelInfo(),
         channelId: chId,
       };
 
       const xmlPath = `${channelsRoot}/${chId}/serviceproviderchannel.xml`;
-      const root = this.readXml(xmlPath);
-      if (root && typeof root === "object") {
-        const doc = root as Record<string, unknown>;
-        const channel = doc["tems:ServiceProviderChannel"] ?? doc.ServiceProviderChannel;
-        if (channel && typeof channel === "object") {
-          const c = channel as Record<string, unknown>;
-          const properties = c["tems:Properties"];
-          if (properties && typeof properties === "object") {
-            const props = properties as Record<string, unknown>;
-            let propList = props["tems:Property"];
-            if (propList) {
-              if (!Array.isArray(propList)) propList = [propList];
-
-              for (const prop of propList as Array<Record<string, unknown>>) {
-                const name = prop["tems:Name"];
-                const valueObj = prop["tems:Value"];
-
-                if (typeof name !== "string") continue;
-
-                switch (name) {
-                  case "ElementCount":
-                    if (typeof valueObj === "number") {
-                      chInfo.elementCount = valueObj;
-                    } else if (typeof valueObj === "string") {
-                      chInfo.elementCount = parseInt(valueObj, 10) || 0;
-                    }
-                    break;
-                  case "ChannelCategory":
-                    if (valueObj && typeof valueObj === "object") {
-                      const vo = valueObj as Record<string, unknown>;
-                      const val = vo["tems:Value"];
-                      if (typeof val === "string") chInfo.category = val;
-                    }
-                    break;
-                  case "InstanceIdentity":
-                    if (valueObj && typeof valueObj === "object") {
-                      const vo = valueObj as Record<string, unknown>;
-                      const guid = vo["tems:Guid"];
-                      if (typeof guid === "string") chInfo.instanceGuid = guid;
-                    }
-                    break;
-                  case "ProducerIdentity":
-                    if (valueObj && typeof valueObj === "object") {
-                      const vo = valueObj as Record<string, unknown>;
-                      const val = vo["tems:Value"];
-                      if (typeof val === "string") chInfo.producer = val;
-                    }
-                    break;
-                }
-              }
-            }
-          }
-        }
-      }
+      this.parseServiceProviderChannelXml(chInfo, xmlPath);
 
       const logPath = `${channelsRoot}/${chId}/channel.log`;
       const logEntry = this.zip.getEntry(logPath);

@@ -12,69 +12,63 @@ function datetimeSerializer(_key: string, value: unknown): unknown {
   return value;
 }
 
-function printMetadataText(metadata: TRPMetadata, filePath: string): void {
-  console.log("=".repeat(60));
-  console.log("TEMS TRP RF Log File Analysis");
-  console.log("=".repeat(60));
+function printIfValue(label: string, value: string | number | undefined): void {
+  if (value !== undefined && value !== "") {
+    console.log(`   ${label}: ${value}`);
+  }
+}
 
-  const fileName = filePath.split("/").pop() ?? filePath;
-  console.log(`\nFile: ${fileName}`);
-  console.log(`   GUID: ${metadata.guid}`);
+function printRecordingTime(metadata: TRPMetadata): void {
+  const { timeInfo } = metadata;
 
   console.log("\nRecording Time:");
-  if (metadata.timeInfo.startTime) {
-    console.log(`   Start: ${metadata.timeInfo.startTime.toISOString()}`);
+  if (timeInfo.startTime) {
+    console.log(`   Start: ${timeInfo.startTime.toISOString()}`);
   }
-  if (metadata.timeInfo.stopTime) {
-    console.log(`   Stop:  ${metadata.timeInfo.stopTime.toISOString()}`);
+  if (timeInfo.stopTime) {
+    console.log(`   Stop:  ${timeInfo.stopTime.toISOString()}`);
   }
-  if (metadata.timeInfo.timezone) {
-    console.log(`   Timezone: ${metadata.timeInfo.timezone}`);
-  }
-  if (metadata.timeInfo.utcOffsetMinutes) {
-    const hours = metadata.timeInfo.utcOffsetMinutes / 60;
+  printIfValue("Timezone", timeInfo.timezone);
+
+  if (timeInfo.utcOffsetMinutes) {
+    const hours = timeInfo.utcOffsetMinutes / 60;
     const sign = hours >= 0 ? "+" : "";
     console.log(`   UTC Offset: ${sign}${hours}h`);
   }
 
-  if (metadata.timeInfo.startTime && metadata.timeInfo.stopTime) {
-    const durationMs = metadata.timeInfo.stopTime.getTime() - metadata.timeInfo.startTime.getTime();
+  if (timeInfo.startTime && timeInfo.stopTime) {
+    const durationMs = timeInfo.stopTime.getTime() - timeInfo.startTime.getTime();
     const durationSec = durationMs / 1000;
     console.log(`   Duration: ${durationSec.toFixed(1)} seconds`);
   }
+}
 
+function printProbeInformation(metadata: TRPMetadata): void {
   console.log("\nProbe Information:");
   console.log(`   Identity: ${metadata.probeIdentity}`);
   console.log(`   Company: ${metadata.probeCompany}`);
   console.log(`   Family: ${metadata.probeFamily}`);
   console.log(`   Version: ${metadata.probeVersion}`);
-  if (metadata.coreVersion) {
-    console.log(`   Core Version: ${metadata.coreVersion}`);
-  }
+  printIfValue("Core Version", metadata.coreVersion);
   console.log(`   Subsystem: ${metadata.subsystem}`);
+}
 
+function printDeviceInformation(metadata: TRPMetadata): void {
   const device = metadata.deviceInfo;
+
   console.log("\nDevice Information:");
   console.log(`   Manufacturer: ${device.manufacturer}`);
   console.log(`   Model: ${device.model}`);
   console.log(`   OS: ${device.osName} ${device.osVersion}`);
-  if (device.imei) {
-    console.log(`   IMEI: ${device.imei}`);
-  }
-  if (device.firmwareRevision) {
-    console.log(`   Firmware: ${device.firmwareRevision}`);
-  }
-  if (device.label) {
-    console.log(`   Label: ${device.label}`);
-  }
+  printIfValue("IMEI", device.imei);
+  printIfValue("Firmware", device.firmwareRevision);
+  printIfValue("Label", device.label);
   if (device.usingExternalDecoder) {
     console.log("   External Decoder: Yes");
   }
+}
 
-  if (metadata.tags.length > 0) {
-    console.log(`\nTags: ${metadata.tags.join(", ")}`);
-  }
-
+function printDataChannels(metadata: TRPMetadata): void {
   console.log("\nData Channels:");
   console.log("-".repeat(50));
   console.log(
@@ -87,15 +81,43 @@ function printMetadataText(metadata: TRPMetadata, filePath: string): void {
     );
   }
   console.log("-".repeat(50));
+}
 
-  if (device.supportedApps.length > 0) {
-    console.log("\nSupported Test Types:");
-    for (const app of device.supportedApps.sort()) {
-      if (!app.startsWith("?")) {
-        console.log(`   - ${app}`);
-      }
-    }
+function printSupportedTestTypes(metadata: TRPMetadata): void {
+  const visibleApps = metadata.deviceInfo.supportedApps
+    .slice()
+    .sort()
+    .filter((app) => !app.startsWith("?"));
+
+  if (visibleApps.length === 0) {
+    return;
   }
+
+  console.log("\nSupported Test Types:");
+  for (const app of visibleApps) {
+    console.log(`   - ${app}`);
+  }
+}
+
+function printMetadataText(metadata: TRPMetadata, filePath: string): void {
+  console.log("=".repeat(60));
+  console.log("TEMS TRP RF Log File Analysis");
+  console.log("=".repeat(60));
+
+  const fileName = filePath.split("/").pop() ?? filePath;
+  console.log(`\nFile: ${fileName}`);
+  console.log(`   GUID: ${metadata.guid}`);
+
+  printRecordingTime(metadata);
+  printProbeInformation(metadata);
+  printDeviceInformation(metadata);
+
+  if (metadata.tags.length > 0) {
+    console.log(`\nTags: ${metadata.tags.join(", ")}`);
+  }
+
+  printDataChannels(metadata);
+  printSupportedTestTypes(metadata);
 
   console.log(`\n${"=".repeat(60)}`);
 }
@@ -133,7 +155,9 @@ function main(): number {
     },
   });
 
-  if (values.help || positionals.length === 0) {
+  const trpFile = positionals[0];
+
+  if (values.help || !trpFile) {
     console.log(`Usage: tems-trp <trp_file> [options]
 
 Options:
@@ -150,8 +174,6 @@ Examples:
   tems-trp logs/20231004T150530Z.trp --export output.csv`);
     return values.help ? 0 : 1;
   }
-
-  const trpFile = positionals[0]!;
 
   if (!existsSync(trpFile)) {
     console.error(`Error: File not found: ${trpFile}`);

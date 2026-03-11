@@ -145,11 +145,7 @@ function getYokbuYongShen(
   return { primary, secondary };
 }
 
-function hasSpecialFormation(
-  dayMasterElement: Element,
-  level: StrengthLevelLabel,
-  allElements: Element[],
-): { isSpecial: boolean; type: string | null; followElement: Element | null } {
+function countElements(elements: Element[]): Record<Element, number> {
   const elementCounts: Record<Element, number> = {
     wood: 0,
     fire: 0,
@@ -157,48 +153,88 @@ function hasSpecialFormation(
     metal: 0,
     water: 0,
   };
-  for (const elem of allElements) {
+
+  for (const elem of elements) {
     elementCounts[elem]++;
   }
 
-  if (level.key === "extremelyWeak") {
-    // Find dominant non-daymaster element
-    let dominantElement: Element | null = null;
-    let maxCount = 0;
-    for (const [elem, count] of Object.entries(elementCounts)) {
-      if (count > maxCount && elem !== dayMasterElement) {
-        maxCount = count;
-        dominantElement = elem as Element;
-      }
-    }
+  return elementCounts;
+}
 
-    if (dominantElement && maxCount >= 3) {
-      // Determine specific 종격 type
-      const dmControls = CONTROLS[dayMasterElement];
-      const dmControlledBy = CONTROLLED_BY[dayMasterElement];
-      const dmGenerates = GENERATES[dayMasterElement];
+function getDominantNonDayMasterElement(
+  dayMasterElement: Element,
+  elementCounts: Record<Element, number>,
+): { dominantElement: Element | null; maxCount: number } {
+  let dominantElement: Element | null = null;
+  let maxCount = 0;
 
-      let type = "종격";
-      if (dominantElement === dmControls) {
-        type = "종재격"; // Follow Wealth
-      } else if (dominantElement === dmControlledBy) {
-        type = "종살격"; // Follow Killings
-      } else if (dominantElement === dmGenerates) {
-        type = "종아격"; // Follow Children/Output
-      }
-
-      return { isSpecial: true, type, followElement: dominantElement };
+  for (const [elem, count] of Object.entries(elementCounts)) {
+    if (count > maxCount && elem !== dayMasterElement) {
+      maxCount = count;
+      dominantElement = elem as Element;
     }
   }
 
-  if (level.key === "extremelyStrong") {
-    // 종강격: extremely strong with no controllers present
-    const controllerElement = CONTROLLED_BY[dayMasterElement];
-    const hasController = elementCounts[controllerElement] > 0;
+  return { dominantElement, maxCount };
+}
 
-    if (!hasController) {
-      return { isSpecial: true, type: "종강격", followElement: dayMasterElement };
-    }
+function getFollowFormationType(dayMasterElement: Element, dominantElement: Element): string {
+  const followTypeByElement: Partial<Record<Element, string>> = {
+    [CONTROLS[dayMasterElement]]: "종재격",
+    [CONTROLLED_BY[dayMasterElement]]: "종살격",
+    [GENERATES[dayMasterElement]]: "종아격",
+  };
+
+  return followTypeByElement[dominantElement] ?? "종격";
+}
+
+function getExtremelyWeakSpecialFormation(
+  dayMasterElement: Element,
+  elementCounts: Record<Element, number>,
+): { isSpecial: boolean; type: string | null; followElement: Element | null } {
+  const { dominantElement, maxCount } = getDominantNonDayMasterElement(
+    dayMasterElement,
+    elementCounts,
+  );
+
+  if (!dominantElement || maxCount < 3) {
+    return { isSpecial: false, type: null, followElement: null };
+  }
+
+  return {
+    isSpecial: true,
+    type: getFollowFormationType(dayMasterElement, dominantElement),
+    followElement: dominantElement,
+  };
+}
+
+function getExtremelyStrongSpecialFormation(
+  dayMasterElement: Element,
+  elementCounts: Record<Element, number>,
+): { isSpecial: boolean; type: string | null; followElement: Element | null } {
+  const controllerElement = CONTROLLED_BY[dayMasterElement];
+  const hasController = elementCounts[controllerElement] > 0;
+
+  if (hasController) {
+    return { isSpecial: false, type: null, followElement: null };
+  }
+
+  return { isSpecial: true, type: "종강격", followElement: dayMasterElement };
+}
+
+function hasSpecialFormation(
+  dayMasterElement: Element,
+  level: StrengthLevelLabel,
+  allElements: Element[],
+): { isSpecial: boolean; type: string | null; followElement: Element | null } {
+  const elementCounts = countElements(allElements);
+
+  if (level.key === "extremelyWeak") {
+    return getExtremelyWeakSpecialFormation(dayMasterElement, elementCounts);
+  }
+
+  if (level.key === "extremelyStrong") {
+    return getExtremelyStrongSpecialFormation(dayMasterElement, elementCounts);
   }
 
   return { isSpecial: false, type: null, followElement: null };

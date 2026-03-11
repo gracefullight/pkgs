@@ -129,22 +129,12 @@ export function* iterLengthPrefixedMessages(
     let consumed = 0;
 
     while (true) {
-      const hdr = tryReadVarint(buf, consumed);
-      if (hdr === null) break;
+      const parsed = parseLengthPrefixedMessage(buf, consumed, maxMsgLen);
+      if (parsed.type === "stop") return;
+      if (parsed.type === "incomplete") break;
 
-      const msgLen = hdr.value;
-      const afterLen = hdr.newPos;
-
-      if (msgLen <= 0) return;
-      if (msgLen > maxMsgLen) {
-        throw new Error(`message too large: ${msgLen}`);
-      }
-
-      if (buf.length < afterLen - consumed + msgLen + consumed) break;
-
-      const msgBytes = buf.slice(afterLen, afterLen + msgLen);
-      consumed = afterLen + msgLen;
-      yield msgBytes;
+      consumed = parsed.nextPos;
+      yield parsed.message;
     }
 
     if (consumed > 0) {
@@ -156,6 +146,41 @@ export function* iterLengthPrefixedMessages(
       totalLen = remaining.length;
     }
   }
+}
+
+type LengthPrefixedParseResult =
+  | { type: "message"; message: Uint8Array; nextPos: number }
+  | { type: "incomplete" }
+  | { type: "stop" };
+
+function parseLengthPrefixedMessage(
+  data: Uint8Array,
+  pos: number,
+  maxMsgLen: number,
+): LengthPrefixedParseResult {
+  const header = tryReadVarint(data, pos);
+  if (header === null) {
+    return { type: "incomplete" };
+  }
+
+  if (header.value <= 0) {
+    return { type: "stop" };
+  }
+
+  if (header.value > maxMsgLen) {
+    throw new Error(`message too large: ${header.value}`);
+  }
+
+  const messageEnd = header.newPos + header.value;
+  if (messageEnd > data.length) {
+    return { type: "incomplete" };
+  }
+
+  return {
+    type: "message",
+    message: data.slice(header.newPos, messageEnd),
+    nextPos: messageEnd,
+  };
 }
 
 function concatUint8Arrays(arrays: Uint8Array[], totalLength: number): Uint8Array {
@@ -181,6 +206,49 @@ function decodeUtf8(data: Uint8Array): string | null {
   }
 }
 
+type FieldDefinitionMessage = {
+  name: string | null;
+  fieldId: number | null;
+  lookupTable: string | null;
+};
+
+function extractLookupTableName(metaBytes: Uint8Array): string | null {
+  for (const [fieldNum, , value] of parseAllFields(metaBytes)) {
+    if (fieldNum === 6 && value instanceof Uint8Array) {
+      return decodeUtf8(value);
+    }
+  }
+  return null;
+}
+
+function parseFieldDefinitionMessage(
+  fields: Array<[number, WireType, number | Uint8Array]>,
+): FieldDefinitionMessage {
+  const result: FieldDefinitionMessage = {
+    name: null,
+    fieldId: null,
+    lookupTable: null,
+  };
+
+  for (const [fieldNum, wireType, value] of fields) {
+    if (fieldNum === 1 && wireType === 2 && value instanceof Uint8Array) {
+      result.name = decodeUtf8(value);
+      continue;
+    }
+
+    if (fieldNum === 2 && wireType === 0 && typeof value === "number") {
+      result.fieldId = value;
+      continue;
+    }
+
+    if (fieldNum === 5 && wireType === 2 && value instanceof Uint8Array) {
+      result.lookupTable = extractLookupTableName(value);
+    }
+  }
+
+  return result;
+}
+
 function extractFieldDefinitionsFromBytes(data: Uint8Array): {
   fieldNames: Map<number, string>;
   fieldLookups: Map<number, string>;
@@ -188,40 +256,12 @@ function extractFieldDefinitionsFromBytes(data: Uint8Array): {
   const fieldNames = new Map<number, string>();
   const fieldLookups = new Map<number, string>();
 
-  let pos = 0;
-  while (pos < data.length) {
-    const { value: msgLen, newPos: afterLen } = readVarint(data, pos);
-    pos = afterLen;
-
-    if (msgLen === 0 || pos + msgLen > data.length) break;
-
-    const msgData = data.slice(pos, pos + msgLen);
-    pos += msgLen;
-    const fields = parseAllFields(msgData);
-
-    let name: string | null = null;
-    let fieldId: number | null = null;
-    let lookupTable: string | null = null;
-
-    for (const [fnum, wtype, val] of fields) {
-      if (fnum === 1 && wtype === 2 && val instanceof Uint8Array) {
-        name = decodeUtf8(val);
-      } else if (fnum === 2 && wtype === 0 && typeof val === "number") {
-        fieldId = val;
-      } else if (fnum === 5 && wtype === 2 && val instanceof Uint8Array) {
-        const metaFields = parseAllFields(val);
-        for (const [mfnum, , mval] of metaFields) {
-          if (mfnum === 6 && mval instanceof Uint8Array) {
-            lookupTable = decodeUtf8(mval);
-          }
-        }
-      }
-    }
-
-    if (name && fieldId !== null) {
-      fieldNames.set(fieldId, name);
-      if (lookupTable) {
-        fieldLookups.set(fieldId, lookupTable);
+  for (const msgData of iterLengthPrefixedMessages([data])) {
+    const parsed = parseFieldDefinitionMessage(parseAllFields(msgData));
+    if (parsed.name && parsed.fieldId !== null) {
+      fieldNames.set(parsed.fieldId, parsed.name);
+      if (parsed.lookupTable) {
+        fieldLookups.set(parsed.fieldId, parsed.lookupTable);
       }
     }
   }
@@ -229,41 +269,53 @@ function extractFieldDefinitionsFromBytes(data: Uint8Array): {
   return { fieldNames, fieldLookups };
 }
 
+function parseLookupTableEntryName(entryBytes: Uint8Array): string | null {
+  for (const [fieldNum, , value] of parseAllFields(entryBytes)) {
+    if (fieldNum === 1 && value instanceof Uint8Array) {
+      return decodeUtf8(value);
+    }
+  }
+  return null;
+}
+
+function parseLookupTableMessage(fields: Array<[number, WireType, number | Uint8Array]>): {
+  tableName: string | null;
+  entries: string[];
+} {
+  const entries: string[] = [];
+  let tableName: string | null = null;
+
+  for (const [fieldNum, wireType, value] of fields) {
+    if (fieldNum === 1 && wireType === 2 && value instanceof Uint8Array) {
+      tableName = decodeUtf8(value);
+      continue;
+    }
+
+    if (fieldNum !== 2 || wireType !== 2 || !(value instanceof Uint8Array)) {
+      continue;
+    }
+
+    const entryName = parseLookupTableEntryName(value);
+    if (entryName) {
+      entries.push(entryName);
+    }
+  }
+
+  return { tableName, entries };
+}
+
 function extractLookuptablesFromBytes(data: Uint8Array): Map<string, Map<number, string>> {
   const tables = new Map<string, Map<number, string>>();
 
-  let pos = 0;
-  while (pos < data.length) {
-    const { value: msgLen, newPos: afterLen } = readVarint(data, pos);
-    pos = afterLen;
-
-    if (msgLen === 0 || pos + msgLen > data.length) break;
-
-    const msgData = data.slice(pos, pos + msgLen);
-    pos += msgLen;
-    const fields = parseAllFields(msgData);
-
-    let tableName: string | null = null;
-    const entries: string[] = [];
-
-    for (const [fnum, wtype, val] of fields) {
-      if (fnum === 1 && wtype === 2 && val instanceof Uint8Array) {
-        tableName = decodeUtf8(val);
-      } else if (fnum === 2 && wtype === 2 && val instanceof Uint8Array) {
-        const entryFields = parseAllFields(val);
-        for (const [efnum, , eval_] of entryFields) {
-          if (efnum === 1 && eval_ instanceof Uint8Array) {
-            const decoded = decodeUtf8(eval_);
-            if (decoded) entries.push(decoded);
-          }
-        }
-      }
-    }
-
+  for (const msgData of iterLengthPrefixedMessages([data])) {
+    const { tableName, entries } = parseLookupTableMessage(parseAllFields(msgData));
     if (tableName && entries.length > 0) {
       const entryMap = new Map<number, string>();
       for (let i = 0; i < entries.length; i++) {
-        entryMap.set(i, entries[i]!);
+        const entry = entries[i];
+        if (entry !== undefined) {
+          entryMap.set(i, entry);
+        }
       }
       tables.set(tableName, entryMap);
     }
@@ -277,56 +329,77 @@ function extractValue(
   rawValue: number | Uint8Array,
   signed = false,
 ): number | string | null {
-  if (wireType === 0) {
-    if (typeof rawValue === "number") {
-      return signed ? decodeZigzag(rawValue) : rawValue;
-    }
+  switch (wireType) {
+    case 0:
+      return extractVarintValue(rawValue, signed);
+    case 1:
+      return extractFloat64Value(rawValue);
+    case 2:
+      return extractLengthDelimitedValue(rawValue);
+    case 5:
+      return extractFloat32Value(rawValue);
+    default:
+      return null;
+  }
+}
+
+function extractVarintValue(rawValue: number | Uint8Array, signed: boolean): number | null {
+  if (typeof rawValue !== "number") {
     return null;
   }
 
-  if (wireType === 1) {
-    if (rawValue instanceof Uint8Array) {
-      try {
-        const view = new DataView(rawValue.buffer, rawValue.byteOffset, 8);
-        return view.getFloat64(0, true);
-      } catch {
-        return null;
-      }
-    }
+  return signed ? decodeZigzag(rawValue) : rawValue;
+}
+
+function extractFloat64Value(rawValue: number | Uint8Array): number | null {
+  if (!(rawValue instanceof Uint8Array)) {
     return null;
   }
 
-  if (wireType === 5) {
-    if (rawValue instanceof Uint8Array) {
-      try {
-        const view = new DataView(rawValue.buffer, rawValue.byteOffset, 4);
-        return view.getFloat32(0, true);
-      } catch {
-        return null;
-      }
-    }
+  try {
+    const view = new DataView(rawValue.buffer, rawValue.byteOffset, 8);
+    return view.getFloat64(0, true);
+  } catch {
+    return null;
+  }
+}
+
+function extractFloat32Value(rawValue: number | Uint8Array): number | null {
+  if (!(rawValue instanceof Uint8Array)) {
     return null;
   }
 
-  if (wireType === 2) {
-    if (rawValue instanceof Uint8Array) {
-      try {
-        const decoded = new TextDecoder("utf-8", { fatal: true }).decode(rawValue);
-        if (decoded.startsWith("b'") && decoded.endsWith("'")) {
-          return decoded.slice(2, -1);
-        }
-        if (decoded.startsWith('b"') && decoded.endsWith('"')) {
-          return decoded.slice(2, -1);
-        }
-        return decoded;
-      } catch {
-        return `0x${Buffer.from(rawValue).toString("hex")}`;
-      }
-    }
+  try {
+    const view = new DataView(rawValue.buffer, rawValue.byteOffset, 4);
+    return view.getFloat32(0, true);
+  } catch {
+    return null;
+  }
+}
+
+function extractLengthDelimitedValue(rawValue: number | Uint8Array): string | null {
+  if (!(rawValue instanceof Uint8Array)) {
     return null;
   }
 
-  return null;
+  try {
+    const decoded = new TextDecoder("utf-8", { fatal: true }).decode(rawValue);
+    return unwrapByteLiteral(decoded);
+  } catch {
+    return `0x${Buffer.from(rawValue).toString("hex")}`;
+  }
+}
+
+function unwrapByteLiteral(decoded: string): string {
+  if (decoded.startsWith("b'") && decoded.endsWith("'")) {
+    return decoded.slice(2, -1);
+  }
+
+  if (decoded.startsWith('b"') && decoded.endsWith('"')) {
+    return decoded.slice(2, -1);
+  }
+
+  return decoded;
 }
 
 function parseDataRecord(
@@ -340,60 +413,112 @@ function parseDataRecord(
 
   for (const [fnum, wtype, val] of fields) {
     if (fnum === 1 && wtype === 2 && val instanceof Uint8Array) {
-      const nested = parseAllFields(val);
-      for (const [nfnum, nwtype, nval] of nested) {
-        if (nfnum === 1 && nwtype === 0 && typeof nval === "number") {
-          record.timestamp_raw = nval;
-        } else if (nfnum === 2 && nwtype === 0 && typeof nval === "number") {
-          record.timestamp_us = nval;
-        }
-      }
-    } else if (fnum === 3 && wtype === 2 && val instanceof Uint8Array) {
-      const nested = parseAllFields(val);
-      let fieldId: number | null = null;
+      parseTimestampRecord(val, record);
+      continue;
+    }
 
-      for (const [nfnum, nwtype, nval] of nested) {
-        if (nfnum === 1 && nwtype === 0 && typeof nval === "number") {
-          fieldId = nval;
-        } else if (fieldId !== null) {
-          let fieldName: string | null = null;
-          let isSigned = false;
-
-          const rfFieldName = RF_FIELD_IDS[fieldId];
-          if (rfFieldName !== undefined) {
-            fieldName = rfFieldName;
-            isSigned = SIGNED_FIELD_IDS.has(fieldId);
-          } else if (fieldNames.has(fieldId)) {
-            fieldName = fieldNames.get(fieldId) ?? null;
-            isSigned = SIGNED_KEYWORDS.some((kw) => fieldName?.toLowerCase().includes(kw) ?? false);
-          }
-
-          if (fieldName) {
-            let value = extractValue(nwtype as WireType, nval, isSigned);
-            if (value !== null) {
-              if (
-                typeof value === "number" &&
-                fieldLookups &&
-                lookupTables &&
-                fieldLookups.has(fieldId)
-              ) {
-                const tblName = fieldLookups.get(fieldId);
-                if (tblName) {
-                  const table = lookupTables.get(tblName);
-                  if (table?.has(value)) {
-                    value = table.get(value) ?? value;
-                  }
-                }
-              }
-              record[fieldName] = value;
-            }
-          }
-        }
-      }
+    if (fnum === 3 && wtype === 2 && val instanceof Uint8Array) {
+      parseRfFieldRecord(val, record, fieldNames, fieldLookups, lookupTables);
     }
   }
 
   return record;
+}
+
+function parseTimestampRecord(data: Uint8Array, record: RFRecord): void {
+  for (const [fieldNum, wireType, value] of parseAllFields(data)) {
+    if (wireType !== 0 || typeof value !== "number") {
+      continue;
+    }
+
+    if (fieldNum === 1) {
+      record.timestamp_raw = value;
+      continue;
+    }
+
+    if (fieldNum === 2) {
+      record.timestamp_us = value;
+    }
+  }
+}
+
+function resolveFieldInfo(
+  fieldId: number,
+  fieldNames: Map<number, string>,
+): { fieldName: string | null; isSigned: boolean } {
+  const rfFieldName = RF_FIELD_IDS[fieldId];
+  if (rfFieldName !== undefined) {
+    return {
+      fieldName: rfFieldName,
+      isSigned: SIGNED_FIELD_IDS.has(fieldId),
+    };
+  }
+
+  const fieldName = fieldNames.get(fieldId);
+  if (!fieldName) {
+    return { fieldName: null, isSigned: false };
+  }
+
+  return {
+    fieldName,
+    isSigned: SIGNED_KEYWORDS.some((kw) => fieldName.toLowerCase().includes(kw)),
+  };
+}
+
+function applyLookupValue(
+  value: number | string,
+  fieldId: number,
+  fieldLookups: Map<number, string> | null,
+  lookupTables: Map<string, Map<number, string>> | null,
+): number | string {
+  if (typeof value !== "number" || !fieldLookups || !lookupTables) {
+    return value;
+  }
+
+  const tableName = fieldLookups.get(fieldId);
+  if (!tableName) {
+    return value;
+  }
+
+  const table = lookupTables.get(tableName);
+  if (!table?.has(value)) {
+    return value;
+  }
+
+  return table.get(value) ?? value;
+}
+
+function parseRfFieldRecord(
+  data: Uint8Array,
+  record: RFRecord,
+  fieldNames: Map<number, string>,
+  fieldLookups: Map<number, string> | null,
+  lookupTables: Map<string, Map<number, string>> | null,
+): void {
+  let fieldId: number | null = null;
+
+  for (const [fieldNum, wireType, value] of parseAllFields(data)) {
+    if (fieldNum === 1 && wireType === 0 && typeof value === "number") {
+      fieldId = value;
+      continue;
+    }
+
+    if (fieldId === null) {
+      continue;
+    }
+
+    const { fieldName, isSigned } = resolveFieldInfo(fieldId, fieldNames);
+    if (!fieldName) {
+      continue;
+    }
+
+    const extracted = extractValue(wireType as WireType, value, isSigned);
+    if (extracted === null) {
+      continue;
+    }
+
+    record[fieldName] = applyLookupValue(extracted, fieldId, fieldLookups, lookupTables);
+  }
 }
 
 function findCdfPaths(zip: AdmZip): {
@@ -489,70 +614,125 @@ function escapeCSVField(field: string | number): string {
   return str;
 }
 
-export function extract(trpPath: string, options: ExtractOptions = {}): string {
+function inferFormatFromOutputExtension(outputPath: string): OutputFormat | null {
+  const ext = extname(outputPath).slice(1);
+  if (!ext) return null;
+  if (!["csv", "json", "jsonl", "ndjson"].includes(ext)) return null;
+  return ext === "ndjson" ? "jsonl" : (ext as OutputFormat);
+}
+
+function buildOutputPathFromDirectory(
+  trpPath: string,
+  outputDir: string,
+  format: OutputFormat,
+): string {
+  const basename = trpPath
+    .split("/")
+    .pop()
+    ?.replace(/\.trp$/i, "");
+  return `${outputDir}/${basename}.${format}`;
+}
+
+function resolveOutputTarget(
+  trpPath: string,
+  options: ExtractOptions,
+): { outputPath: string; format: OutputFormat } {
   const { output, format } = options;
 
-  let outputPath: string;
-  let fmt: OutputFormat;
-
   if (output === undefined) {
-    fmt = format ?? "csv";
-    outputPath = trpPath.replace(/\.trp$/i, `.${fmt}`);
-  } else if (existsSync(output) && statSync(output).isDirectory()) {
-    fmt = format ?? "csv";
-    const basename = trpPath
-      .split("/")
-      .pop()
-      ?.replace(/\.trp$/i, "");
-    outputPath = `${output}/${basename}.${fmt}`;
-  } else {
-    const ext = extname(output).slice(1);
-    if (["csv", "json", "jsonl", "ndjson"].includes(ext) && !format) {
-      fmt = (ext === "ndjson" ? "jsonl" : ext) as OutputFormat;
-      outputPath = output;
-    } else {
-      fmt = format ?? "csv";
-      outputPath = trpPath.replace(/\.trp$/i, `.${fmt}`);
-    }
+    const resolvedFormat = format ?? "csv";
+    return {
+      outputPath: trpPath.replace(/\.trp$/i, `.${resolvedFormat}`),
+      format: resolvedFormat,
+    };
   }
 
-  const dir = dirname(outputPath);
+  if (existsSync(output) && statSync(output).isDirectory()) {
+    const resolvedFormat = format ?? "csv";
+    return {
+      outputPath: buildOutputPathFromDirectory(trpPath, output, resolvedFormat),
+      format: resolvedFormat,
+    };
+  }
+
+  const inferredFormat = inferFormatFromOutputExtension(output);
+  if (inferredFormat && !format) {
+    return { outputPath: output, format: inferredFormat };
+  }
+
+  const resolvedFormat = format ?? "csv";
+  return {
+    outputPath: trpPath.replace(/\.trp$/i, `.${resolvedFormat}`),
+    format: resolvedFormat,
+  };
+}
+
+function ensureParentDirectory(filePath: string): void {
+  const dir = dirname(filePath);
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
+}
 
-  const zip = new AdmZip(trpPath);
+function writeCsvFromZip(zip: AdmZip, outputPath: string): number {
+  const fieldnames = computeFieldnamesFromZip(zip);
+  const stream = createWriteStream(outputPath);
+  stream.write(`${fieldnames.join(",")}\n`);
+
+  let count = 0;
+  for (const record of iterRecordsFromZip(zip)) {
+    const row = fieldnames.map((f) => {
+      const val = record[f];
+      return val !== undefined ? escapeCSVField(val) : "";
+    });
+    stream.write(`${row.join(",")}\n`);
+    count++;
+  }
+  stream.end();
+
+  return count;
+}
+
+function writeJsonFromZip(zip: AdmZip, outputPath: string): number {
+  const records: RFRecord[] = [];
+  for (const record of iterRecordsFromZip(zip)) {
+    records.push(record);
+  }
+  writeFileSync(outputPath, JSON.stringify(records, null, 2));
+  return records.length;
+}
+
+function writeJsonlFromZip(zip: AdmZip, outputPath: string): number {
+  const stream = createWriteStream(outputPath);
   let count = 0;
 
-  if (fmt === "csv") {
-    const fieldnames = computeFieldnamesFromZip(zip);
-    const stream = createWriteStream(outputPath);
-    stream.write(`${fieldnames.join(",")}\n`);
-
-    for (const record of iterRecordsFromZip(zip)) {
-      const row = fieldnames.map((f) => {
-        const val = record[f];
-        return val !== undefined ? escapeCSVField(val) : "";
-      });
-      stream.write(`${row.join(",")}\n`);
-      count++;
-    }
-    stream.end();
-  } else if (fmt === "json") {
-    const records: RFRecord[] = [];
-    for (const record of iterRecordsFromZip(zip)) {
-      records.push(record);
-      count++;
-    }
-    writeFileSync(outputPath, JSON.stringify(records, null, 2));
-  } else if (fmt === "jsonl") {
-    const stream = createWriteStream(outputPath);
-    for (const record of iterRecordsFromZip(zip)) {
-      stream.write(`${JSON.stringify(record)}\n`);
-      count++;
-    }
-    stream.end();
+  for (const record of iterRecordsFromZip(zip)) {
+    stream.write(`${JSON.stringify(record)}\n`);
+    count++;
   }
+  stream.end();
+
+  return count;
+}
+
+function writeRecordsFromZip(zip: AdmZip, outputPath: string, format: OutputFormat): number {
+  if (format === "csv") {
+    return writeCsvFromZip(zip, outputPath);
+  }
+  if (format === "json") {
+    return writeJsonFromZip(zip, outputPath);
+  }
+  return writeJsonlFromZip(zip, outputPath);
+}
+
+export function extract(trpPath: string, options: ExtractOptions = {}): string {
+  const target = resolveOutputTarget(trpPath, options);
+  const { outputPath, format } = target;
+
+  ensureParentDirectory(outputPath);
+
+  const zip = new AdmZip(trpPath);
+  const count = writeRecordsFromZip(zip, outputPath, format);
 
   console.log(`Exported ${count} records to ${outputPath}`);
   return outputPath;
