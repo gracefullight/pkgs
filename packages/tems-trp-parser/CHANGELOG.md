@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/tems-trp-parser@0.1.1...@gracefullight/tems-trp-parser@0.0.0) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release-please ([a800d57](https://github.com/gracefullight/pkgs/commit/a800d5745c441006d025d3f6fb3151876d2c4b7a))
+
 ## [0.1.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/tems-trp-parser@0.1.0...@gracefullight/tems-trp-parser@0.1.1) (2026-02-03)
 
 
