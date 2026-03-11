@@ -135,6 +135,15 @@
         "typescript": "^5",
       },
     },
+    "packages/markdown": {
+      "name": "@gracefullight/markdown",
+      "version": "0.1.0",
+      "devDependencies": {
+        "tsup": "^8.5.1",
+        "typescript": "^5",
+        "vitest": "^4.0.17",
+      },
+    },
     "packages/mcp-cafe24-admin": {
       "name": "@gracefullight/mcp-cafe24-admin",
       "version": "0.2.2",
@@ -185,7 +194,7 @@
     },
     "packages/react-share": {
       "name": "@gracefullight/react-share",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": {
         "@types/facebook-js-sdk": "^3.3.12",
       },
@@ -209,7 +218,7 @@
     },
     "packages/saju": {
       "name": "@gracefullight/saju",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "dependencies": {
         "lunar-javascript": "^1.7.7",
       },
@@ -542,6 +551,8 @@
     "@formatjs/intl-localematcher": ["@formatjs/intl-localematcher@0.5.10", "", { "dependencies": { "tslib": "2" } }, "sha512-af3qATX+m4Rnd9+wHcjJ4w2ijq+rAVP3CCinJQvFv1kgSu1W6jypUmvleJxcewdxmutM8dmIRZFxO/IQBZmP2Q=="],
 
     "@gracefullight/biome-plugin": ["@gracefullight/biome-plugin@workspace:packages/biome-plugin"],
+
+    "@gracefullight/markdown": ["@gracefullight/markdown@workspace:packages/markdown"],
 
     "@gracefullight/mcp-cafe24-admin": ["@gracefullight/mcp-cafe24-admin@workspace:packages/mcp-cafe24-admin"],
 
