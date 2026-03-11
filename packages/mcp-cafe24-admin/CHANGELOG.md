@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/mcp-cafe24-admin@0.2.2...@gracefullight/mcp-cafe24-admin@0.0.0) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release-please ([a800d57](https://github.com/gracefullight/pkgs/commit/a800d5745c441006d025d3f6fb3151876d2c4b7a))
+
 ## [0.2.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/mcp-cafe24-admin@0.2.1...@gracefullight/mcp-cafe24-admin@0.2.2) (2026-02-04)
 
 
