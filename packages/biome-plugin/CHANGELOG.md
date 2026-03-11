@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.2.2...@gracefullight/biome-plugin@0.1.1) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release ([fc9a74c](https://github.com/gracefullight/pkgs/commit/fc9a74c173c70ce2f98ee286fec97b474b99eba3))
+
 ## [0.2.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.2.1...@gracefullight/biome-plugin@0.2.2) (2026-01-22)
 
 

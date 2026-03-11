@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/ng-daum-address@1.0.1...@gracefullight/ng-daum-address@0.1.1) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release ([fc9a74c](https://github.com/gracefullight/pkgs/commit/fc9a74c173c70ce2f98ee286fec97b474b99eba3))
+
 ## [1.0.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/ng-daum-address@1.0.0...@gracefullight/ng-daum-address@1.0.1) (2026-01-22)
 
 

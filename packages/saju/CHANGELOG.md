@@ -1,5 +1,12 @@
 # @gracefullight/saju
 
+## [0.1.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.3.0...@gracefullight/saju@0.1.1) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release ([fc9a74c](https://github.com/gracefullight/pkgs/commit/fc9a74c173c70ce2f98ee286fec97b474b99eba3))
+
 ## [1.3.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.2.0...@gracefullight/saju@1.3.0) (2026-02-21)
 
 

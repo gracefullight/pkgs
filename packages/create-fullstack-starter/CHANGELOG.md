@@ -1,5 +1,12 @@
 # create-fullstack-starter
 
+## [0.1.1](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.3...create-fullstack-starter@0.1.1) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release ([fc9a74c](https://github.com/gracefullight/pkgs/commit/fc9a74c173c70ce2f98ee286fec97b474b99eba3))
+
 ## [0.2.3](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.2...create-fullstack-starter@0.2.3) (2026-03-09)
 
 

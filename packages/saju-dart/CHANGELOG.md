@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/gracefullight/pkgs/compare/saju-dart@0.1.3...saju-dart@0.1.1) (2026-03-11)
+
+
+### Miscellaneous Chores
+
+* trigger release ([fc9a74c](https://github.com/gracefullight/pkgs/commit/fc9a74c173c70ce2f98ee286fec97b474b99eba3))
+
 ## [0.1.3](https://github.com/gracefullight/pkgs/compare/saju-dart@0.1.2...saju-dart@0.1.3) (2026-02-21)
 
 
