@@ -9,6 +9,8 @@ Fixes common issues where `react-markdown` (or similar parsers) fails to parse b
 ```bash
 npm install @gracefullight/markdown
 # or
+yarn add @gracefullight/markdown
+# or
 bun add @gracefullight/markdown
 ```
 
