@@ -48,6 +48,10 @@
     "packages/tems-trp-parser": {
       "release-type": "node",
       "component": "@gracefullight/tems-trp-parser"
+    },
+    "packages/markdown": {
+      "release-type": "node",
+      "component": "@gracefullight/markdown"
     }
   }
 }
