@@ -14,8 +14,10 @@ pubspec.lock
 .vercel
 .tsconfig.tsbuildinfo
 
-.opencode/mimic/
-
 # Zotero plugin
 *.xpi
+
+# Tool state
 .omc/
+.opencode/
+.sisyphus/
