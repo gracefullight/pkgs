@@ -39,7 +39,7 @@
     "@citation-js/core": "^0.7.21",
     "@citation-js/plugin-csl": "^0.7.22",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0",
+    "typescript": "^6",
     "vitest": "^4.0.17",
     "zotero-types": "^4.1.0-beta.4"
   },

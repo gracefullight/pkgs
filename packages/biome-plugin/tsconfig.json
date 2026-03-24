@@ -12,7 +12,6 @@
     "isolatedModules": true,
     "noEmit": true,
     "types": ["node"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     }

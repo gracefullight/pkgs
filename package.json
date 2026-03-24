@@ -23,7 +23,7 @@
     "@commitlint/config-conventional": "^20.3.1",
     "@gracefullight/biome-plugin": "^0.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "packageManager": "bun@1.2.4",
   "workspaces": [

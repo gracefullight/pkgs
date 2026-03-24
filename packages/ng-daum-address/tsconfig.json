@@ -16,9 +16,8 @@
     "useDefineForClassFields": false,
     "importHelpers": false,
     "isolatedModules": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "angularCompilerOptions": {
