@@ -11,10 +11,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["node"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "ignoreDeprecations": "6.0",
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
