@@ -82,45 +82,55 @@ function ensureTargetDirectoryIsAvailable(targetDir: string, resolvedPath: strin
   }
 }
 
-async function maybePromptToStarRepository(): Promise<void> {
-  if (!isGhInstalled()) {
-    const installCmd = getGhInstallCommand();
-    const shouldInstall = await p.confirm({
-      message: `GitHub CLI (gh) is not installed. Install with ${chalk.cyan(installCmd)}?`,
-      initialValue: false,
-    });
-
-    if (p.isCancel(shouldInstall) || !shouldInstall) {
-      return;
-    }
-
-    const s = p.spinner();
-    s.start("Installing GitHub CLI...");
-    const result = spawnSync(installCmd, { shell: true, stdio: "pipe" });
-
-    if (result.status !== 0) {
-      s.stop("Installation failed.");
-      return;
-    }
-
-    s.stop("GitHub CLI installed!");
+async function ensureGhInstalled(): Promise<boolean> {
+  if (isGhInstalled()) {
+    return true;
   }
 
-  if (!isGhAuthenticated()) {
-    const shouldAuth = await p.confirm({
-      message: `GitHub CLI is not authenticated. Run ${chalk.cyan("gh auth login")}?`,
-      initialValue: false,
-    });
+  const installCmd = getGhInstallCommand();
+  const shouldInstall = await p.confirm({
+    message: `GitHub CLI (gh) is not installed. Install with ${chalk.cyan(installCmd)}?`,
+    initialValue: false,
+  });
 
-    if (p.isCancel(shouldAuth) || !shouldAuth) {
-      return;
-    }
+  if (p.isCancel(shouldInstall) || !shouldInstall) {
+    return false;
+  }
 
-    spawnSync("gh", ["auth", "login"], { stdio: "inherit" });
+  const s = p.spinner();
+  s.start("Installing GitHub CLI...");
+  const result = spawnSync(installCmd, { shell: true, stdio: "pipe" });
 
-    if (!isGhAuthenticated()) {
-      return;
-    }
+  if (result.status !== 0) {
+    s.stop("Installation failed.");
+    return false;
+  }
+
+  s.stop("GitHub CLI installed!");
+  return true;
+}
+
+async function ensureGhAuthenticated(): Promise<boolean> {
+  if (isGhAuthenticated()) {
+    return true;
+  }
+
+  const shouldAuth = await p.confirm({
+    message: `GitHub CLI is not authenticated. Run ${chalk.cyan("gh auth login")}?`,
+    initialValue: false,
+  });
+
+  if (p.isCancel(shouldAuth) || !shouldAuth) {
+    return false;
+  }
+
+  spawnSync("gh", ["auth", "login"], { stdio: "inherit" });
+  return isGhAuthenticated();
+}
+
+async function maybePromptToStarRepository(): Promise<void> {
+  if (!(await ensureGhInstalled()) || !(await ensureGhAuthenticated())) {
+    return;
   }
 
   if (isAlreadyStarred()) {
