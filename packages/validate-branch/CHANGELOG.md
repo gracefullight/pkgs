@@ -1,5 +1,12 @@
 # @gracefullight/validate-branch
 
+## [1.1.3](https://github.com/gracefullight/pkgs/compare/@gracefullight/validate-branch@1.1.2...@gracefullight/validate-branch@1.1.3) (2026-03-25)
+
+
+### Bug Fixes
+
+* resolve TS6 build errors across packages ([3644648](https://github.com/gracefullight/pkgs/commit/36446487995299b19ca4b20b7022fda3be514fe2))
+
 ## [1.1.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/validate-branch@1.1.1...@gracefullight/validate-branch@1.1.2) (2026-01-22)
 
 

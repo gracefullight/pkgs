@@ -1,5 +1,17 @@
 # create-fullstack-starter
 
+## [0.2.4](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.3...create-fullstack-starter@0.2.4) (2026-03-25)
+
+
+### Features
+
+* **create-fullstack-starter:** enhance GitHub star prompt with gh CLI install/auth flow ([007e6b9](https://github.com/gracefullight/pkgs/commit/007e6b9836eccbacf8324bae707696465f76ad1c))
+
+
+### Bug Fixes
+
+* resolve TS6 build errors across packages ([3644648](https://github.com/gracefullight/pkgs/commit/36446487995299b19ca4b20b7022fda3be514fe2))
+
 ## [0.2.3](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.2...create-fullstack-starter@0.2.3) (2026-03-09)
 
 
