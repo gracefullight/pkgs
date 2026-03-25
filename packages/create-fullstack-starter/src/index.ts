@@ -1,5 +1,6 @@
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
+import { platform } from "node:os";
 import path from "node:path";
 import * as p from "@clack/prompts";
 import chalk from "chalk";
@@ -8,7 +9,16 @@ import tiged from "tiged";
 
 const TEMPLATE_REPO = "first-fluke/fullstack-starter";
 
-async function isGhCliAvailable(): Promise<boolean> {
+function isGhInstalled(): boolean {
+  try {
+    execSync("gh --version", { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isGhAuthenticated(): boolean {
   try {
     execSync("gh auth status", { stdio: "pipe" });
     return true;
@@ -17,7 +27,7 @@ async function isGhCliAvailable(): Promise<boolean> {
   }
 }
 
-async function isAlreadyStarred(): Promise<boolean> {
+function isAlreadyStarred(): boolean {
   try {
     execSync(`gh api user/starred/${TEMPLATE_REPO}`, { stdio: "pipe" });
     return true;
@@ -26,27 +36,11 @@ async function isAlreadyStarred(): Promise<boolean> {
   }
 }
 
-async function promptForStar(): Promise<boolean> {
-  const result = await p.confirm({
-    message:
-      "If you're enjoying fullstack-starter, would you like to support the project by starring it on GitHub?",
-    initialValue: true,
-  });
-
-  if (p.isCancel(result)) {
-    return false;
-  }
-
-  return result === true;
-}
-
-async function starRepository(): Promise<boolean> {
-  try {
-    execSync(`gh api -X PUT /user/starred/${TEMPLATE_REPO}`, { stdio: "pipe" });
-    return true;
-  } catch {
-    return false;
-  }
+function getGhInstallCommand(): string {
+  const os = platform();
+  if (os === "darwin") return "brew install gh";
+  if (os === "win32") return "winget install GitHub.cli";
+  return "sudo apt install gh";
 }
 
 async function resolveTargetDirectory(directory?: string): Promise<string> {
@@ -89,20 +83,64 @@ function ensureTargetDirectoryIsAvailable(targetDir: string, resolvedPath: strin
 }
 
 async function maybePromptToStarRepository(): Promise<void> {
-  if (!(await isGhCliAvailable())) {
+  if (!isGhInstalled()) {
+    const installCmd = getGhInstallCommand();
+    const shouldInstall = await p.confirm({
+      message: `GitHub CLI (gh) is not installed. Install with ${chalk.cyan(installCmd)}?`,
+      initialValue: false,
+    });
+
+    if (p.isCancel(shouldInstall) || !shouldInstall) {
+      return;
+    }
+
+    const s = p.spinner();
+    s.start("Installing GitHub CLI...");
+    const result = spawnSync(installCmd, { shell: true, stdio: "pipe" });
+
+    if (result.status !== 0) {
+      s.stop("Installation failed.");
+      return;
+    }
+
+    s.stop("GitHub CLI installed!");
+  }
+
+  if (!isGhAuthenticated()) {
+    const shouldAuth = await p.confirm({
+      message: `GitHub CLI is not authenticated. Run ${chalk.cyan("gh auth login")}?`,
+      initialValue: false,
+    });
+
+    if (p.isCancel(shouldAuth) || !shouldAuth) {
+      return;
+    }
+
+    spawnSync("gh", ["auth", "login"], { stdio: "inherit" });
+
+    if (!isGhAuthenticated()) {
+      return;
+    }
+  }
+
+  if (isAlreadyStarred()) {
     return;
   }
 
-  if (await isAlreadyStarred()) {
+  const shouldStar = await p.confirm({
+    message: `Would you like to star ${chalk.cyan(TEMPLATE_REPO)} on GitHub?`,
+    initialValue: true,
+  });
+
+  if (p.isCancel(shouldStar) || !shouldStar) {
     return;
   }
 
-  if (!(await promptForStar())) {
-    return;
-  }
-
-  if (await starRepository()) {
+  try {
+    execSync(`gh api -X PUT /user/starred/${TEMPLATE_REPO}`, { stdio: "pipe" });
     p.log.message(chalk.yellow("Thanks for starring! ⭐"));
+  } catch {
+    p.log.warning("Failed to star the repository.");
   }
 }
 
