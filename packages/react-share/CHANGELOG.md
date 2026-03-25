@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/gracefullight/pkgs/compare/@gracefullight/react-share@0.1.4...@gracefullight/react-share@0.1.5) (2026-03-25)
+
+
+### Bug Fixes
+
+* resolve TS6 build errors across packages ([3644648](https://github.com/gracefullight/pkgs/commit/36446487995299b19ca4b20b7022fda3be514fe2))
+
 ## [0.1.4](https://github.com/gracefullight/pkgs/compare/@gracefullight/react-share@0.1.3...@gracefullight/react-share@0.1.4) (2026-02-13)
 
 
