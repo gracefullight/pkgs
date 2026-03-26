@@ -1,4 +1,5 @@
-experimental_monorepo_root = true
+[monorepo]
+config_roots = ["packages/*", "apps/*"]
 
 [settings]
 experimental = true
