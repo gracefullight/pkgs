@@ -194,7 +194,7 @@ afterAll(() => {
 
 function runBiomeLint(file: string): string {
   try {
-    const result = execSync(`npx @biomejs/biome lint ${file}`, {
+    const result = execSync(`npx @biomejs/biome lint ${file} 2>&1`, {
       cwd: tempDir,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],

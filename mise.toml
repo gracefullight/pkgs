@@ -7,3 +7,46 @@ experimental = true
 node = "24"
 bun = "1"
 dart = "3"
+
+[hooks]
+postinstall = """
+mkdir -p .git/hooks
+cat > .git/hooks/commit-msg << 'HOOK'
+#!/usr/bin/env bash
+mise run git:commit-msg "$1"
+HOOK
+chmod +x .git/hooks/commit-msg
+cat > .git/hooks/pre-commit << 'HOOK'
+#!/usr/bin/env bash
+mise run git:pre-commit
+HOOK
+chmod +x .git/hooks/pre-commit
+cat > .git/hooks/pre-push << 'HOOK'
+#!/usr/bin/env bash
+mise run git:pre-push
+HOOK
+chmod +x .git/hooks/pre-push
+"""
+
+[tasks."git:commit-msg"]
+description = "Validate commit message with commitlint"
+run = "bunx @commitlint/cli --edit $1"
+
+[tasks."git:pre-commit"]
+description = "Lint staged files before commit"
+run = "bun run lint"
+
+[tasks."git:pre-push"]
+description = "Validate branch name and run tests before push"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+bunx @gracefullight/validate-branch
+
+CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
+
+if echo "$CHANGED_FILES" | grep -q "^packages/"; then
+  bun run --filter './packages/*' test
+fi
+"""
