@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.2.2...@gracefullight/biome-plugin@0.2.3) (2026-03-29)
+
+
+### Bug Fixes
+
+* **biome-plugin:** use GritQL includes syntax for biome 2.4.x compat ([7f8b5e9](https://github.com/gracefullight/pkgs/commit/7f8b5e99d71753ee91bd3d03ff94a0a8e59a8bed))
+
 ## [0.2.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.2.1...@gracefullight/biome-plugin@0.2.2) (2026-01-22)
 
 
