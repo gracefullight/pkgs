@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
 import { parseArgs } from "node:util";
+import { aggregateToRfCsv } from "@/aggregate";
 import { extract } from "@/extract";
 import { TRPParser } from "@/trp-parser";
 import type { TRPMetadata } from "@/types";
@@ -126,6 +127,46 @@ function printMetadataJson(metadata: TRPMetadata): void {
   console.log(JSON.stringify(metadata, datetimeSerializer, 2));
 }
 
+function handleCommand(
+  trpFile: string,
+  values: Record<string, string | boolean | undefined>,
+): number {
+  if (values.aggregate && typeof values.aggregate === "string") {
+    aggregateToRfCsv(trpFile, values.aggregate);
+    return 0;
+  }
+
+  if (values.export && typeof values.export === "string") {
+    extract(trpFile, { output: values.export });
+    return 0;
+  }
+
+  const parser = new TRPParser(trpFile);
+
+  if (values.list) {
+    console.log("Files in TRP archive:");
+    for (const path of parser.listContents()) {
+      console.log(`  ${path}`);
+    }
+    return 0;
+  }
+
+  if (values.extract && typeof values.extract === "string") {
+    parser.extractTo(values.extract);
+    console.log(`Extracted to: ${values.extract}`);
+  }
+
+  const metadata = parser.parse();
+
+  if (values.json) {
+    printMetadataJson(metadata);
+  } else {
+    printMetadataText(metadata, trpFile);
+  }
+
+  return 0;
+}
+
 function main(): number {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
@@ -147,6 +188,9 @@ function main(): number {
       export: {
         type: "string",
       },
+      aggregate: {
+        type: "string",
+      },
       help: {
         type: "boolean",
         short: "h",
@@ -165,6 +209,7 @@ Options:
   -j, --json            Output metadata as JSON instead of text
   -l, --list            List all files in the TRP archive
   --export <file>       Export RF measurements to CSV/JSON/NDJSON file
+  --aggregate <file>    Aggregate a sparse extracted CSV into per-timestamp RF snapshots
   -h, --help            Show this help message
 
 Examples:
@@ -181,40 +226,12 @@ Examples:
   }
 
   try {
-    if (values.export) {
-      extract(trpFile, { output: values.export });
-      return 0;
-    }
-
-    const parser = new TRPParser(trpFile);
-
-    if (values.list) {
-      console.log("Files in TRP archive:");
-      for (const path of parser.listContents()) {
-        console.log(`  ${path}`);
-      }
-      return 0;
-    }
-
-    if (values.extract) {
-      parser.extractTo(values.extract);
-      console.log(`Extracted to: ${values.extract}`);
-    }
-
-    const metadata = parser.parse();
-
-    if (values.json) {
-      printMetadataJson(metadata);
-    } else {
-      printMetadataText(metadata, trpFile);
-    }
+    return handleCommand(trpFile, values);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error parsing TRP file: ${message}`);
     return 1;
   }
-
-  return 0;
 }
 
 const exitCode = main();

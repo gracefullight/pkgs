@@ -29,8 +29,17 @@ export const ALL_FIELD_IDS: Record<number, string> = {
   // Location
   // -------------------------------------------------------------------------
   537: "Location.QualityIndicator",
+  542: "Location.Speed",
+  543: "Location.Altitude",
+  544: "Location.Longitude",
+  545: "Location.Latitude",
+  550: "Location.Time",
+  551: "Location.Date",
+  552: "Location.NumberOfSatellites",
+  553: "Location.VerticalDilutionOfPrecision",
   3106708: "Pocket.Location.State",
   3106709: "Pocket.Location.Validity",
+  3107158: "Pocket.Location.SpeedInMetersPerSecond",
   // -------------------------------------------------------------------------
   // WiFi Measurements
   // -------------------------------------------------------------------------
@@ -426,6 +435,17 @@ export const RF_FIELD_IDS: Record<number, string> = {
   // Common
   3106730: "Common.Rssi",
   4145: "Radio.Common.Technology",
+  // Location / GPS
+  542: "Location.Speed",
+  543: "Location.Altitude",
+  544: "Location.Longitude",
+  545: "Location.Latitude",
+  550: "Location.Time",
+  551: "Location.Date",
+  552: "Location.NumberOfSatellites",
+  553: "Location.VerticalDilutionOfPrecision",
+  537: "Location.QualityIndicator",
+  3107158: "Pocket.Location.SpeedInMetersPerSecond",
 } as const;
 
 // =============================================================================
@@ -455,6 +475,10 @@ export const SIGNED_FIELD_IDS: Set<number> = new Set([
   2359, // WiFi RSSI
   // Common
   3106730, // Common RSSI
+  // Location (latitude/longitude can be negative)
+  543, // Altitude
+  544, // Longitude
+  545, // Latitude
   // Cell Statistics (Signal Quality/Strength)
   3109347, // SignalQuality
   3109363, // SignalStrength
