@@ -2,7 +2,7 @@ import { createWriteStream, existsSync, mkdirSync, statSync, writeFileSync } fro
 import { dirname, extname } from "node:path";
 import { inflateSync } from "node:zlib";
 import AdmZip from "adm-zip";
-import { RF_FIELD_IDS, SIGNED_FIELD_IDS, SIGNED_KEYWORDS } from "@/constants";
+import { SIGNED_KEYWORDS } from "@/constants";
 import type { ExtractOptions, OutputFormat, ParsedField, RFRecord, WireType } from "@/types";
 
 const MAX_MESSAGE_LENGTH = 64 * 1024 * 1024;
@@ -446,14 +446,6 @@ function resolveFieldInfo(
   fieldId: number,
   fieldNames: Map<number, string>,
 ): { fieldName: string | null; isSigned: boolean } {
-  const rfFieldName = RF_FIELD_IDS[fieldId];
-  if (rfFieldName !== undefined) {
-    return {
-      fieldName: rfFieldName,
-      isSigned: SIGNED_FIELD_IDS.has(fieldId),
-    };
-  }
-
   const fieldName = fieldNames.get(fieldId);
   if (!fieldName) {
     return { fieldName: null, isSigned: false };
@@ -590,20 +582,17 @@ function computeFieldnamesFromZip(zip: AdmZip): string[] {
   const { fieldNames } = extractFieldDefinitionsFromBytes(declData);
 
   const base = ["_msg_num", "timestamp_raw", "timestamp_us"];
-  const known = Object.values(RF_FIELD_IDS);
-
-  const generic = Array.from(fieldNames.values()).sort();
-  const rest: string[] = [];
   const seen = new Set(base);
+  const rest: string[] = [];
 
-  for (const f of [...known, ...generic]) {
+  for (const f of Array.from(fieldNames.values()).sort()) {
     if (!seen.has(f)) {
       seen.add(f);
       rest.push(f);
     }
   }
 
-  return [...base, ...rest.sort()];
+  return [...base, ...rest];
 }
 
 function escapeCSVField(field: string | number): string {

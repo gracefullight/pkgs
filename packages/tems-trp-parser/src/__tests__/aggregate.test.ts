@@ -36,10 +36,10 @@ describe("aggregateCsv", () => {
 
   it("should group by timestamp", () => {
     const csvFile = makeSparseCsv(tmpDir, [
-      { timestamp_raw: "100", "LTE.ServingCell.Rsrp": "-95.0" },
-      { timestamp_raw: "100", "LTE.ServingCell.RsSinr": "14.0" },
-      { timestamp_raw: "101", "LTE.ServingCell.Rsrp": "-100.0" },
-      { timestamp_raw: "101", "LTE.ServingCell.Rsrq": "-9.0" },
+      { timestamp_raw: "100", "Radio.Lte.ServingCell[8].Rsrp": "-95.0" },
+      { timestamp_raw: "100", "Radio.Lte.ServingCell[8].RsSinr": "14.0" },
+      { timestamp_raw: "101", "Radio.Lte.ServingCell[8].Rsrp": "-100.0" },
+      { timestamp_raw: "101", "Radio.Lte.ServingCell[8].Rsrq": "-9.0" },
     ]);
     const result = aggregateCsv(csvFile);
 
@@ -56,14 +56,14 @@ describe("aggregateCsv", () => {
     const csvFile = makeSparseCsv(tmpDir, [
       {
         timestamp_raw: "100",
-        "LTE.ServingCell.Rsrp": "-95.0",
-        "LTE.ServingCell.Rsrq": "-9.0",
-        "LTE.ServingCell.Rssi": "-74.0",
-        "LTE.ServingCell.RsSinr": "14.0",
-        "LTE.ServingCell.Pci": "253",
-        "LTE.ServingCell.DL.Earfcn": "3350",
-        "Common.DL.Throughput": "500.0",
-        "Common.UL.Throughput": "100.0",
+        "Radio.Lte.ServingCell[8].Rsrp": "-95.0",
+        "Radio.Lte.ServingCell[8].Rsrq": "-9.0",
+        "Radio.Lte.ServingCell[8].Rssi": "-74.0",
+        "Radio.Lte.ServingCell[8].RsSinr": "14.0",
+        "Radio.Lte.ServingCell[8].Pci": "253",
+        "Radio.Lte.ServingCell[8].Downlink.Earfcn": "3350",
+        "Pocket.Radio.Common.Downlink.Throughput": "500.0",
+        "Pocket.Radio.Common.Uplink.Throughput": "100.0",
         "Location.Latitude": "-34.035",
         "Location.Longitude": "151.085",
         "Location.Altitude": "73.7",
@@ -90,8 +90,8 @@ describe("aggregateCsv", () => {
     const csvFile = makeSparseCsv(tmpDir, [
       {
         timestamp_raw: "100",
-        "MRDC.Cell.Rsrp": "-103.0",
-        "MRDC.Cell.Sinr": "12.0",
+        "Radio.Common.Mrdc.Cell[64].Rsrp": "-103.0",
+        "Radio.Common.Mrdc.Cell[64].Sinr": "12.0",
       },
     ]);
     const result = aggregateCsv(csvFile, undefined, { minFields: 1 });
@@ -103,7 +103,7 @@ describe("aggregateCsv", () => {
 
   it("should filter by min_fields", () => {
     const csvFile = makeSparseCsv(tmpDir, [
-      { timestamp_raw: "100", "LTE.ServingCell.Rsrp": "-95.0" },
+      { timestamp_raw: "100", "Radio.Lte.ServingCell[8].Rsrp": "-95.0" },
       { timestamp_raw: "101" },
     ]);
 
@@ -118,8 +118,8 @@ describe("aggregateCsv", () => {
     const csvFile = makeSparseCsv(tmpDir, [
       {
         timestamp_raw: "100",
-        "LTE.ServingCell.Rsrp": "-95.0",
-        "LTE.ServingCell.RsSinr": "14.0",
+        "Radio.Lte.ServingCell[8].Rsrp": "-95.0",
+        "Radio.Lte.ServingCell[8].RsSinr": "14.0",
       },
     ]);
     const output = join(tmpDir, "output.csv");
@@ -137,7 +137,7 @@ describe("aggregateCsv", () => {
 
   it("should handle empty input", () => {
     const csvFile = join(tmpDir, "empty.csv");
-    writeFileSync(csvFile, "timestamp_raw,LTE.ServingCell.Rsrp\n");
+    writeFileSync(csvFile, "timestamp_raw,Radio.Lte.ServingCell[8].Rsrp\n");
     const result = aggregateCsv(csvFile);
     expect(result).toEqual([]);
   });
@@ -156,10 +156,13 @@ describe("aggregateToRfCsv", () => {
 
   it("should write with extra fields", () => {
     const csvFile = join(tmpDir, "sparse.csv");
-    writeFileSync(csvFile, "timestamp_raw,LTE.ServingCell.Rsrp,Wifi.Cell.Rssi\n100,-95.0,-87\n");
+    writeFileSync(
+      csvFile,
+      "timestamp_raw,Radio.Lte.ServingCell[8].Rsrp,Radio.Wifi.Cell[64].Rssi\n100,-95.0,-87\n",
+    );
     const output = join(tmpDir, "rf.csv");
     const result = aggregateToRfCsv(csvFile, output, {
-      extraFields: { WIFI_RSSI: ["Wifi.Cell.Rssi"] },
+      extraFields: { WIFI_RSSI: ["Radio.Wifi.Cell[64].Rssi"] },
     });
 
     expect(result).toBe(output);

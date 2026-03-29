@@ -6,9 +6,8 @@ export {
 } from "@/aggregate";
 export {
   ALL_FIELD_IDS,
-  RF_FIELD_IDS,
-  SIGNED_FIELD_IDS,
   SIGNED_KEYWORDS,
+  VARIABLE_FIELDS,
 } from "@/constants";
 export {
   decodeZigzag,
