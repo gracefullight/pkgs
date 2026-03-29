@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/tems-trp-parser@0.1.1...@gracefullight/tems-trp-parser@0.1.2) (2026-03-29)
+
+
+### Features
+
+* **tems-trp-parser:** add Location/GPS fields, aggregate module, and PATHLOSS/RANK support ([1f0ee31](https://github.com/gracefullight/pkgs/commit/1f0ee318e222cae69917733b5eda669e5f0bd5b9))
+
+
+### Bug Fixes
+
+* **tems-trp-parser:** correct field ID mappings from TRP declarations.cdf ([80ca27f](https://github.com/gracefullight/pkgs/commit/80ca27f12ee9b9daaca871ccaa469203a61d28b3))
+
 ## [0.1.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/tems-trp-parser@0.1.0...@gracefullight/tems-trp-parser@0.1.1) (2026-02-03)
 
 
