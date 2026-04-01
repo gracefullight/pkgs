@@ -23,7 +23,8 @@
     "dev": "tsx src/index.ts",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "test": "vitest run"
   },
   "keywords": [
     "create",

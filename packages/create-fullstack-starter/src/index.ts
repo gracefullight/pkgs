@@ -66,18 +66,32 @@ async function resolveTargetDirectory(directory?: string): Promise<string> {
   return result || ".";
 }
 
-function ensureTargetDirectoryIsAvailable(targetDir: string, resolvedPath: string): void {
+export function validateTargetDirectory(targetDir: string, resolvedPath: string): string | null {
   const isCurrentDir = targetDir === ".";
 
   if (!existsSync(resolvedPath)) {
-    return;
+    return null;
   }
 
   const files = readdirSync(resolvedPath);
+
+  if (files.includes(".git")) {
+    return `Directory "${targetDir}" contains a .git folder. Remove it first or choose another directory.`;
+  }
+
   const hasFiles = files.filter((f) => !f.startsWith(".")).length > 0;
 
   if (hasFiles && !isCurrentDir) {
-    p.cancel(`Directory "${targetDir}" is not empty.`);
+    return `Directory "${targetDir}" is not empty.`;
+  }
+
+  return null;
+}
+
+function ensureTargetDirectoryIsAvailable(targetDir: string, resolvedPath: string): void {
+  const error = validateTargetDirectory(targetDir, resolvedPath);
+  if (error) {
+    p.cancel(error);
     process.exit(1);
   }
 }

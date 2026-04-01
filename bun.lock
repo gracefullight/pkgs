@@ -118,7 +118,7 @@
     },
     "packages/create-fullstack-starter": {
       "name": "create-fullstack-starter",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "bin": {
         "create-fullstack-starter": "./dist/index.js",
       },
@@ -137,7 +137,7 @@
     },
     "packages/markdown": {
       "name": "@gracefullight/markdown",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "devDependencies": {
         "tsup": "^8.5.1",
         "typescript": "^6",
@@ -146,7 +146,7 @@
     },
     "packages/ng-daum-address": {
       "name": "@gracefullight/ng-daum-address",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "devDependencies": {
         "@analogjs/vite-plugin-angular": "^2.2.2",
         "@analogjs/vitest-angular": "^2.2.2",
@@ -172,7 +172,7 @@
     },
     "packages/react-share": {
       "name": "@gracefullight/react-share",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "dependencies": {
         "@types/facebook-js-sdk": "^3.3.12",
       },
@@ -241,7 +241,7 @@
     },
     "packages/validate-branch": {
       "name": "@gracefullight/validate-branch",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "bin": {
         "validate-branch": "./dist/cli.js",
       },
