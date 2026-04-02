@@ -1,11 +1,10 @@
 import { execSync, spawnSync } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
-import { platform } from "node:os";
+import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { platform, tmpdir } from "node:os";
 import path from "node:path";
 import * as p from "@clack/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
-import tiged from "tiged";
 
 const TEMPLATE_REPO = "first-fluke/fullstack-starter";
 
@@ -168,6 +167,24 @@ async function maybePromptToStarRepository(): Promise<void> {
   }
 }
 
+export function cloneTemplate(repo: string, dest: string, isCurrentDir: boolean): void {
+  const repoUrl = `https://github.com/${repo}.git`;
+
+  if (isCurrentDir) {
+    const tempDir = mkdtempSync(path.join(tmpdir(), "fullstack-starter-"));
+    try {
+      execSync(`git clone --depth 1 ${repoUrl} ${tempDir}`, { stdio: "pipe" });
+      rmSync(path.join(tempDir, ".git"), { recursive: true, force: true });
+      cpSync(tempDir, dest, { recursive: true });
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  } else {
+    execSync(`git clone --depth 1 ${repoUrl} ${dest}`, { stdio: "pipe" });
+    rmSync(path.join(dest, ".git"), { recursive: true, force: true });
+  }
+}
+
 function showNextSteps(targetDir: string, isCurrentDir: boolean): void {
   p.note(
     [
@@ -208,13 +225,7 @@ async function main(directory?: string) {
   s.start(`Cloning template from ${TEMPLATE_REPO}...`);
 
   try {
-    const emitter = tiged(TEMPLATE_REPO, {
-      disableCache: true,
-      force: isCurrentDir,
-      verbose: false,
-    });
-
-    await emitter.clone(resolvedPath);
+    cloneTemplate(TEMPLATE_REPO, resolvedPath, isCurrentDir);
     s.stop("Template cloned successfully!");
 
     await maybePromptToStarRepository();

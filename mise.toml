@@ -52,7 +52,7 @@ if echo "$CHANGED_FILES" | grep -q "^packages/"; then
     test_cmd=$(jq -r '.scripts.test // empty' "$pkg")
     if [ -n "$test_cmd" ]; then
       bin=$(echo "$test_cmd" | awk '{print $1}')
-      if ! jq -e "(.devDependencies[\"$bin\"] // .dependencies[\"$bin\"])" "$pkg" > /dev/null 2>&1; then
+      if ! jq -e --arg bin "$bin" '(.devDependencies[$bin] // .dependencies[$bin])' "$pkg" > /dev/null 2>&1; then
         echo "ERROR: $pkg uses '$bin' in test script but it's not in dependencies"
         exit 1
       fi
