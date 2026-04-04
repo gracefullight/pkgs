@@ -14,6 +14,20 @@ describe("preprocessMarkdown", () => {
     expect(preprocessMarkdown('**"text"**')).toBe('"**text**"');
   });
 
+  it("trims invalid spaces immediately inside bold markers", () => {
+    expect(
+      preprocessMarkdown(
+        "** 쇼핑몰 기본디자인 (base)**: 현재는 사용 중이지 않은 기본 디자인입니다.",
+      ),
+    ).toBe("**쇼핑몰 기본디자인 (base)**: 현재는 사용 중이지 않은 기본 디자인입니다.");
+  });
+
+  it("trims trailing spaces immediately before bold closing markers", () => {
+    expect(preprocessMarkdown("**쇼핑몰 기본디자인 (base) **입니다")).toBe(
+      "**쇼핑몰 기본디자인 (base)** 입니다",
+    );
+  });
+
   it("adds space between bold closing and Korean particle", () => {
     expect(preprocessMarkdown("**(text)**이며")).toBe("**(text)** 이며");
   });
