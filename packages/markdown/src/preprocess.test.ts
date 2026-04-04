@@ -22,6 +22,10 @@ describe("preprocessMarkdown", () => {
     ).toBe("**쇼핑몰 기본디자인 (base)**: 현재는 사용 중이지 않은 기본 디자인입니다.");
   });
 
+  it("trims invalid spaces inside short bold labels", () => {
+    expect(preprocessMarkdown("** 적용 사항:**")).toBe("**적용 사항:**");
+  });
+
   it("trims trailing spaces immediately before bold closing markers", () => {
     expect(preprocessMarkdown("**쇼핑몰 기본디자인 (base) **입니다")).toBe(
       "**쇼핑몰 기본디자인 (base)** 입니다",
