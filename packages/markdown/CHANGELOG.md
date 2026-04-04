@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.2...@gracefullight/markdown@0.1.3) (2026-04-04)
+
+
+### Bug Fixes
+
+* **markdown:** handle spaces inside bold markers ([e5e9a15](https://github.com/gracefullight/pkgs/commit/e5e9a153d1938b4309208dd788c92e6fe099b7cd))
+
 ## [0.1.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.1...@gracefullight/markdown@0.1.2) (2026-03-25)
 
 
