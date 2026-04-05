@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.3...@gracefullight/markdown@0.1.4) (2026-04-05)
+
+
+### Bug Fixes
+
+* **markdown:** preserve strong rendering with Korean text ([9d34823](https://github.com/gracefullight/pkgs/commit/9d34823d138a73ce9601c4612af13d38b75942f5))
+
 ## [0.1.3](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.2...@gracefullight/markdown@0.1.3) (2026-04-04)
 
 
