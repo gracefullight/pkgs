@@ -1,12 +1,13 @@
 /**
  * Preprocess markdown content to fix rendering issues with Korean text.
- * Version 0.1.3
+ * Version 0.2.0
  *
  * Handles:
  * 1. Trim invalid inner spaces around bold text: `** text **` → `**text**`
  * 2. Move quoted bold text outside markers when followed by Korean: `**'text'**에` → `'**text**'에`
  * 3. Move double-quoted bold text outside markers when followed by Korean: `**"text"**에` → `"**text**"에`
- * 4. Tilde escaping to prevent accidental strikethrough: `~` → `\~`
+ * 4. Move trailing punctuation outside bold markers when followed by Korean: `**text)**을` → `**text**)`을`
+ * 5. Tilde escaping to prevent accidental strikethrough: `~` → `\~`
  */
 export function preprocessMarkdown(content: string): string {
   if (!content) return "";
@@ -26,7 +27,12 @@ export function preprocessMarkdown(content: string): string {
   // **"text"**에 -> "**text**"에
   processed = processed.replace(/\*\*"([^"]+)"\*\*(?=[가-힣])/g, '"**$1**"');
 
-  // 4. Escape tildes to prevent accidental strikethrough
+  // 4. Move trailing punctuation outside bold markers when followed by Korean text
+  // Fixes CommonMark right-flanking delimiter: punct before closing ** + Korean after = no bold
+  // **text(등))**Korean → **text(등)**))Korean
+  processed = processed.replace(/\*\*([^*]+?)([)\]:;,.!?]+)\*\*(?=[가-힣])/g, "**$1**$2");
+
+  // 5. Escape tildes to prevent accidental strikethrough
   processed = processed.replace(/~/g, "\\~");
 
   return processed;
