@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.7](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.6...@gracefullight/markdown@0.1.7) (2026-04-05)
+
+
+### Bug Fixes
+
+* **markdown:** insert spaces around ** for CommonMark flanking fix ([19496dc](https://github.com/gracefullight/pkgs/commit/19496dc149a2cc8bb41c7fc02bdd94dc9db069d0))
+* **markdown:** use &lt;strong&gt; tags when CommonMark flanking rules fail ([aaeaf17](https://github.com/gracefullight/pkgs/commit/aaeaf17aeedb38fb2f58c89ec8468a728ba0a695))
+
 ## [0.1.6](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.5...@gracefullight/markdown@0.1.6) (2026-04-05)
 
 
