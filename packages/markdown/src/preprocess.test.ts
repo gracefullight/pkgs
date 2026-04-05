@@ -26,35 +26,49 @@ describe("preprocessMarkdown", () => {
     expect(preprocessMarkdown("** 적용 사항:**")).toBe("**적용 사항:**");
   });
 
-  it("trims trailing spaces immediately before bold closing markers", () => {
+  it("trims trailing spaces and preserves space after closing markers", () => {
     expect(preprocessMarkdown("**쇼핑몰 기본디자인 (base) **입니다")).toBe(
-      "**쇼핑몰 기본디자인 (base**)입니다",
+      "**쇼핑몰 기본디자인 (base)** 입니다",
     );
   });
 
-  it("moves closing paren outside bold markers when followed by Korean", () => {
-    expect(preprocessMarkdown("**(text)**이며")).toBe("**(text**)이며");
+  it("converts to strong when closing punct is followed by Korean", () => {
+    expect(preprocessMarkdown("**(text)**이며")).toBe("<strong>(text)</strong>이며");
   });
 
-  it("moves closing bracket outside bold markers when followed by Korean", () => {
-    const input = "관리자 페이지의 **[설정 > 일반]**에서 변경할 수 있습니다.";
-    const expected = "관리자 페이지의 **[설정 > 일반**]에서 변경할 수 있습니다.";
-    expect(preprocessMarkdown(input)).toBe(expected);
+  it("converts to strong when closing bracket is followed by Korean", () => {
+    expect(preprocessMarkdown("관리자 페이지의 **[설정 > 일반]**에서 변경할 수 있습니다.")).toBe(
+      "관리자 페이지의 <strong>[설정 > 일반]</strong>에서 변경할 수 있습니다.",
+    );
   });
 
-  it("moves trailing punctuation outside bold markers when followed by Korean", () => {
+  it("converts to strong when opening bracket is preceded by Korean", () => {
+    expect(preprocessMarkdown("관리자 화면에서**[디자인 관리 > 디자인 보관함]**에 있는 스킨")).toBe(
+      "관리자 화면에서<strong>[디자인 관리 > 디자인 보관함]</strong>에 있는 스킨",
+    );
+  });
+
+  it("converts to strong when closing paren is followed by Korean", () => {
     expect(
       preprocessMarkdown("**바꾸고 싶은 부분(색상, 레이아웃, 문구 등)**을 말씀해 주시면"),
-    ).toBe("**바꾸고 싶은 부분(색상, 레이아웃, 문구 등**)을 말씀해 주시면");
+    ).toBe("<strong>바꾸고 싶은 부분(색상, 레이아웃, 문구 등)</strong>을 말씀해 주시면");
   });
 
-  it("moves colon outside bold markers when followed by Korean", () => {
-    expect(preprocessMarkdown("**주의:**사항을 확인하세요")).toBe("**주의**:사항을 확인하세요");
+  it("converts to strong when colon is followed by Korean", () => {
+    expect(preprocessMarkdown("**주의:**사항을 확인하세요")).toBe(
+      "<strong>주의:</strong>사항을 확인하세요",
+    );
   });
 
-  it("moves colon outside bold markers when followed by digit", () => {
+  it("converts to strong when colon is followed by digit", () => {
     expect(preprocessMarkdown("**보강된 주요 속성:**1. 할인 효과 적용")).toBe(
-      "**보강된 주요 속성**:1. 할인 효과 적용",
+      "<strong>보강된 주요 속성:</strong>1. 할인 효과 적용",
+    );
+  });
+
+  it("converts to strong when opening paren is preceded by Korean", () => {
+    expect(preprocessMarkdown("결제에서**(할인 적용)**을 확인")).toBe(
+      "결제에서<strong>(할인 적용)</strong>을 확인",
     );
   });
 
@@ -92,7 +106,15 @@ describe("preprocessMarkdown", () => {
 
   it("handles mixed content correctly", () => {
     const input = "This is **'bold'** and this is **(parenthesis)**입니다.";
-    const expected = "This is **'bold'** and this is **(parenthesis**)입니다.";
+    const expected = "This is **'bold'** and this is <strong>(parenthesis)</strong>입니다.";
     expect(preprocessMarkdown(input)).toBe(expected);
+  });
+
+  it("preserves trailing space between trimmed bold and next word", () => {
+    const input =
+      "**단 한 줄도 수정되지 않았습니다. **시도했던 과정에서 코드에는**아무런 변화가 생기지 않았으니 안심하셔도 됩니다. **";
+    const result = preprocessMarkdown(input);
+    expect(result).toContain("**단 한 줄도 수정되지 않았습니다.** 시도했던");
+    expect(result).toContain("**아무런 변화가 생기지 않았으니 안심하셔도 됩니다.**");
   });
 });

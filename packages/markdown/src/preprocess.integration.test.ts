@@ -1,11 +1,14 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import Markdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { describe, expect, it } from "vitest";
 import { preprocessMarkdown } from "@/preprocess";
 
 function renderMarkdown(markdown: string): string {
-  return renderToStaticMarkup(React.createElement(Markdown, null, markdown));
+  return renderToStaticMarkup(
+    React.createElement(Markdown, { rehypePlugins: [rehypeRaw] }, markdown),
+  );
 }
 
 describe("preprocessMarkdown integration", () => {
@@ -33,45 +36,62 @@ describe("preprocessMarkdown integration", () => {
     );
   });
 
-  it("renders bold with trailing paren before Korean as strong tags", () => {
+  it("renders bold with closing paren before Korean as strong (paren inside)", () => {
     const input = "**바꾸고 싶은 부분(색상, 레이아웃, 문구 등)**을 말씀해 주시면";
 
     expect(renderMarkdown(preprocessMarkdown(input))).toBe(
-      "<p><strong>바꾸고 싶은 부분(색상, 레이아웃, 문구 등</strong>)을 말씀해 주시면</p>",
+      "<p><strong>바꾸고 싶은 부분(색상, 레이아웃, 문구 등)</strong>을 말씀해 주시면</p>",
     );
   });
 
-  it("renders bold with trailing bracket before Korean as strong tags", () => {
+  it("renders bold with brackets inside strong when preceded by Korean", () => {
+    const input = "관리자 화면에서**[디자인 관리 > 디자인 보관함]**에 있는 스킨";
+
+    expect(renderMarkdown(preprocessMarkdown(input))).toBe(
+      "<p>관리자 화면에서<strong>[디자인 관리 &gt; 디자인 보관함]</strong>에 있는 스킨</p>",
+    );
+  });
+
+  it("renders bold with brackets inside strong when preceded by space", () => {
     const input = "관리자 페이지의 **[설정 > 일반]**에서 변경할 수 있습니다.";
 
     expect(renderMarkdown(preprocessMarkdown(input))).toBe(
-      "<p>관리자 페이지의 <strong>[설정 &gt; 일반</strong>]에서 변경할 수 있습니다.</p>",
+      "<p>관리자 페이지의 <strong>[설정 &gt; 일반]</strong>에서 변경할 수 있습니다.</p>",
     );
   });
 
-  it("renders bold with trailing colon before Korean as strong tags", () => {
+  it("renders bold with trailing colon before Korean as strong", () => {
     const input = "**주의:**사항을 확인하세요";
 
     expect(renderMarkdown(preprocessMarkdown(input))).toBe(
-      "<p><strong>주의</strong>:사항을 확인하세요</p>",
+      "<p><strong>주의:</strong>사항을 확인하세요</p>",
     );
   });
 
-  it("renders bold with trailing colon before digit as strong tags", () => {
+  it("renders bold with trailing colon before digit as strong", () => {
     const input =
       "**보강된 주요 속성:**1. 할인 효과 적용 (심리적 가격): - 기존에는 판매가(15,000원)만 있었으나";
 
     expect(renderMarkdown(preprocessMarkdown(input))).toBe(
-      "<p><strong>보강된 주요 속성</strong>:1. 할인 효과 적용 (심리적 가격): - 기존에는 판매가(15,000원)만 있었으나</p>",
+      "<p><strong>보강된 주요 속성:</strong>1. 할인 효과 적용 (심리적 가격): - 기존에는 판매가(15,000원)만 있었으나</p>",
     );
   });
 
-  it("renders bold with space-trimmed trailing paren before Korean as strong tags", () => {
+  it("renders bold correctly when space is trimmed before closing markers", () => {
     const input =
       "**다른 디자인의 스타일을 수정하거나, 현재 디자인의 느낌을 완전히 바꿔볼까요? ** 원하시는 작업이 있다면 말씀해 주세요!";
 
     expect(renderMarkdown(preprocessMarkdown(input))).toBe(
       "<p><strong>다른 디자인의 스타일을 수정하거나, 현재 디자인의 느낌을 완전히 바꿔볼까요?</strong> 원하시는 작업이 있다면 말씀해 주세요!</p>",
     );
+  });
+
+  it("renders multiple broken bold segments correctly with preserved spacing", () => {
+    const input =
+      "**단 한 줄도 수정되지 않았습니다. **시도했던 과정에서 코드에는**아무런 변화가 생기지 않았으니 안심하셔도 됩니다. **";
+
+    const result = renderMarkdown(preprocessMarkdown(input));
+    expect(result).toContain("<strong>단 한 줄도 수정되지 않았습니다.</strong>");
+    expect(result).toContain("<strong>아무런 변화가 생기지 않았으니 안심하셔도 됩니다.</strong>");
   });
 });
