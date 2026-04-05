@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.4...@gracefullight/markdown@0.1.5) (2026-04-05)
+
+
+### Bug Fixes
+
+* **markdown:** move trailing punctuation outside bold markers for Korean text ([162e5ee](https://github.com/gracefullight/pkgs/commit/162e5ee6b18a4817d7b786eec8ef267357c62431))
+
 ## [0.1.4](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.3...@gracefullight/markdown@0.1.4) (2026-04-05)
 
 
