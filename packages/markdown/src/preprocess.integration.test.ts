@@ -57,6 +57,15 @@ describe("preprocessMarkdown integration", () => {
     );
   });
 
+  it("renders bold with trailing colon before digit as strong tags", () => {
+    const input =
+      "**보강된 주요 속성:**1. 할인 효과 적용 (심리적 가격): - 기존에는 판매가(15,000원)만 있었으나";
+
+    expect(renderMarkdown(preprocessMarkdown(input))).toBe(
+      "<p><strong>보강된 주요 속성</strong>:1. 할인 효과 적용 (심리적 가격): - 기존에는 판매가(15,000원)만 있었으나</p>",
+    );
+  });
+
   it("renders bold with space-trimmed trailing paren before Korean as strong tags", () => {
     const input =
       "**다른 디자인의 스타일을 수정하거나, 현재 디자인의 느낌을 완전히 바꿔볼까요? ** 원하시는 작업이 있다면 말씀해 주세요!";

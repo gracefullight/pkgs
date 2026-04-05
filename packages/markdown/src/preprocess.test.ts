@@ -52,6 +52,12 @@ describe("preprocessMarkdown", () => {
     expect(preprocessMarkdown("**주의:**사항을 확인하세요")).toBe("**주의**:사항을 확인하세요");
   });
 
+  it("moves colon outside bold markers when followed by digit", () => {
+    expect(preprocessMarkdown("**보강된 주요 속성:**1. 할인 효과 적용")).toBe(
+      "**보강된 주요 속성**:1. 할인 효과 적용",
+    );
+  });
+
   it("does not add space after any bold text followed by Korean", () => {
     expect(preprocessMarkdown("**볼드텍스트**입니다")).toBe("**볼드텍스트**입니다");
   });
