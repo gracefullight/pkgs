@@ -39,16 +39,23 @@ run = "bun run lint"
 
 [tasks."git:pre-push"]
 description = "Validate branch name, check deps, and run tests before push"
-run = """
+run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 
 bunx @gracefullight/validate-branch
 
 CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
+CHANGED_PACKAGES=$(
+  printf "%s\n" "$CHANGED_FILES" |
+    cut -d/ -f1,2 |
+    grep '^packages/' |
+    sort -u
+)
 
-if echo "$CHANGED_FILES" | grep -q "^packages/"; then
-  for pkg in packages/*/package.json; do
+if [ -n "$CHANGED_PACKAGES" ]; then
+  for pkg_dir in $CHANGED_PACKAGES; do
+    pkg="$pkg_dir/package.json"
     test_cmd=$(jq -r '.scripts.test // empty' "$pkg")
     if [ -n "$test_cmd" ]; then
       bin=$(echo "$test_cmd" | awk '{print $1}')
@@ -59,6 +66,13 @@ if echo "$CHANGED_FILES" | grep -q "^packages/"; then
     fi
   done
 
-  bun run --filter './packages/*' test
+  for pkg_dir in $CHANGED_PACKAGES; do
+    pkg="$pkg_dir/package.json"
+    test_cmd=$(jq -r '.scripts.test // empty' "$pkg")
+    if [ -n "$test_cmd" ]; then
+      echo "Running tests for $pkg_dir"
+      bun run --filter "./$pkg_dir" test
+    fi
+  done
 fi
-"""
+'''
