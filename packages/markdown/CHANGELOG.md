@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.5...@gracefullight/markdown@0.1.6) (2026-04-05)
+
+
+### Bug Fixes
+
+* **markdown:** broaden trailing-punct lookahead to all word characters ([6deb5af](https://github.com/gracefullight/pkgs/commit/6deb5af34d790bdb53c69914632aa7cea0e39e3e))
+
 ## [0.1.5](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.4...@gracefullight/markdown@0.1.5) (2026-04-05)
 
 
