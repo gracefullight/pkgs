@@ -44,6 +44,7 @@ run = '''
 set -euo pipefail
 
 bunx @gracefullight/validate-branch
+bun run lint
 
 CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
 CHANGED_PACKAGES=$(
