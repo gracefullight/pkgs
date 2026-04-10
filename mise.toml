@@ -50,7 +50,7 @@ CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff 
 CHANGED_PACKAGES=$(
   printf "%s\n" "$CHANGED_FILES" |
     cut -d/ -f1,2 |
-    grep '^packages/' |
+    grep '^packages/' || true |
     sort -u
 )
 
