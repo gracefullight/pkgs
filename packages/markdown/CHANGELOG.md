@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.7...@gracefullight/markdown@0.1.8) (2026-04-10)
+
+
+### Features
+
+* **markdown:** add markdown analysis and safer preprocessing ([a2791b4](https://github.com/gracefullight/pkgs/commit/a2791b4ccdb1dc2489f586db6d1c2973b31c2189))
+
 ## [0.1.7](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.6...@gracefullight/markdown@0.1.7) (2026-04-05)
 
 
