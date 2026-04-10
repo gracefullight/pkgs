@@ -1,5 +1,12 @@
 # @gracefullight/saju
 
+## [1.3.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.3.0...@gracefullight/saju@1.3.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* **saju:** support plain Date in date-fns adapter ([f802017](https://github.com/gracefullight/pkgs/commit/f8020174659f26f373b7024b436ae868aa700c9b))
+
 ## [1.3.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.2.0...@gracefullight/saju@1.3.0) (2026-02-21)
 
 
