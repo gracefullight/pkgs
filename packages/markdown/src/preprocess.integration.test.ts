@@ -116,4 +116,31 @@ describe("preprocessMarkdown integration", () => {
       "<p><strong>쇼핑몰 기본디자인 (base)</strong> 입니다</p>",
     );
   });
+
+  it("renders normalized double brackets as plain text", () => {
+    expect(renderMarkdown(preprocessMarkdown("참고 [[1]] 및 [[부록]]을 확인하세요."))).toBe(
+      "<p>참고 [1] 및 [부록]을 확인하세요.</p>",
+    );
+  });
+
+  it("preserves inline code while still fixing surrounding text", () => {
+    expect(renderMarkdown(preprocessMarkdown("`[[1]] . , ~x~` 바깥 [[2]]"))).toBe(
+      "<p><code>[[1]] . , ~x~</code> 바깥 [2]</p>",
+    );
+  });
+
+  it("preserves fenced code blocks verbatim", () => {
+    expect(renderMarkdown(preprocessMarkdown("```md\n[[1]]\n문장. , 다음\n~code~\n```"))).toBe(
+      '<pre><code class="language-md">[[1]]\n문장. , 다음\n~code~\n</code></pre>',
+    );
+  });
+
+  it("renders reduced excessive bold density without breaking markdown", () => {
+    const words = Array.from({ length: 50 }, (_, i) => `word${i}`).join(" ");
+    const input = `**bold1** ${words} **bold2** **bold3** **bold4**`;
+
+    expect(renderMarkdown(preprocessMarkdown(input))).toBe(
+      `<p><strong>bold1</strong> ${words} bold2 bold3 bold4</p>`,
+    );
+  });
 });
