@@ -1,11 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { DateAdapter } from "@/adapters/date-adapter";
-import { createDateFnsAdapter } from "@/adapters/date-fns";
-
-interface DateFnsDate {
-  date: Date;
-  timeZone: string;
-}
+import { createDateFnsAdapter, type DateFnsDate } from "@/adapters/date-fns";
 
 describe("date-fns Adapter", () => {
   let adapter: DateAdapter<DateFnsDate>;
@@ -15,6 +10,14 @@ describe("date-fns Adapter", () => {
   });
 
   describe("Basic date getters", () => {
+    it("should accept plain Date values", () => {
+      const dt = new Date(2000, 0, 1, 18, 0);
+      expect(adapter.getYear(dt)).toBe(2000);
+      expect(adapter.getMonth(dt)).toBe(1);
+      expect(adapter.getDay(dt)).toBe(1);
+      expect(adapter.getHour(dt)).toBe(18);
+    });
+
     it("should get year correctly", () => {
       const dt = { date: new Date(2000, 0, 1), timeZone: "Asia/Seoul" };
       expect(adapter.getYear(dt)).toBe(2000);
@@ -48,6 +51,11 @@ describe("date-fns Adapter", () => {
     it("should get zone name correctly", () => {
       const dt = { date: new Date(2000, 0, 1), timeZone: "Asia/Seoul" };
       expect(adapter.getZoneName(dt)).toBe("Asia/Seoul");
+    });
+
+    it("should fall back to system timezone for plain Date values", () => {
+      const dt = new Date(2000, 0, 1);
+      expect(adapter.getZoneName(dt)).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
     });
   });
 

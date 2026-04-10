@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
+import { createDateFnsAdapter } from "@/adapters/date-fns";
 import { createLuxonAdapter } from "@/adapters/luxon";
 import { getSaju, STANDARD_PRESET } from "@/index";
 
@@ -193,5 +194,32 @@ describe("getSaju integration", () => {
     expect(result.solarTerms.nextJieMillis).toBeGreaterThan(0);
     expect(result.solarTerms.prevJieDate).toBeDefined();
     expect(result.solarTerms.nextJieDate).toBeDefined();
+  });
+
+  it("accepts plain Date with the date-fns adapter (Issue #64 regression)", async () => {
+    const adapter = await createDateFnsAdapter();
+    const dt = new Date(1990, 1, 1, 12, 10);
+
+    expect(() =>
+      getSaju(dt, {
+        adapter,
+        longitudeDeg: 126.9778,
+        gender: "male",
+        preset: STANDARD_PRESET,
+      }),
+    ).not.toThrow();
+
+    const result = getSaju(dt, {
+      adapter,
+      longitudeDeg: 126.9778,
+      gender: "male",
+      preset: STANDARD_PRESET,
+    });
+
+    expect(result.pillars.year).toBeDefined();
+    expect(result.pillars.month).toBeDefined();
+    expect(result.pillars.day).toBeDefined();
+    expect(result.pillars.hour).toBeDefined();
+    expect(result.lunar.lunarYear).toBeGreaterThan(0);
   });
 });

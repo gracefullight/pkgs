@@ -1,8 +1,40 @@
 import type { DateAdapter } from "@/adapters/date-adapter";
 
-interface DateFnsDate {
+export interface ZonedDateFnsDate {
   date: Date;
   timeZone: string;
+}
+
+export type DateFnsDate = Date | ZonedDateFnsDate;
+
+function isZonedDate(date: DateFnsDate): date is ZonedDateFnsDate {
+  return (
+    typeof date === "object" &&
+    date !== null &&
+    "date" in date &&
+    date.date instanceof Date &&
+    typeof date.timeZone === "string"
+  );
+}
+
+function getNativeDate(date: DateFnsDate): Date {
+  return isZonedDate(date) ? date.date : date;
+}
+
+function getSystemTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+function getTimeZone(date: DateFnsDate): string {
+  return isZonedDate(date) ? date.timeZone : getSystemTimeZone();
+}
+
+function cloneWithTimeZone(date: Date, timeZone: string): ZonedDateFnsDate {
+  return { date, timeZone };
+}
+
+function preserveInputShape(input: DateFnsDate, date: Date): DateFnsDate {
+  return isZonedDate(input) ? cloneWithTimeZone(date, input.timeZone) : date;
 }
 
 export async function createDateFnsAdapter(): Promise<DateAdapter<DateFnsDate>> {
@@ -42,43 +74,27 @@ export async function createDateFnsAdapter(): Promise<DateAdapter<DateFnsDate>> 
   }
 
   return {
-    getYear: (dateFns) => getYear(dateFns.date),
-    getMonth: (dateFns) => getMonth(dateFns.date) + 1,
-    getDay: (dateFns) => getDate(dateFns.date),
-    getHour: (dateFns) => getHours(dateFns.date),
-    getMinute: (dateFns) => getMinutes(dateFns.date),
-    getSecond: (dateFns) => getSeconds(dateFns.date),
-    getZoneName: (dateFns) => dateFns.timeZone,
-    plusMinutes: (dateFns, minutes) => ({
-      date: addMinutes(dateFns.date, minutes),
-      timeZone: dateFns.timeZone,
-    }),
-    plusDays: (dateFns, days) => ({
-      date: addDays(dateFns.date, days),
-      timeZone: dateFns.timeZone,
-    }),
-    minusDays: (dateFns, days) => ({
-      date: subDays(dateFns.date, days),
-      timeZone: dateFns.timeZone,
-    }),
-    toUTC: (dateFns) => ({
-      date: fromZonedTime(dateFns.date, dateFns.timeZone),
-      timeZone: "UTC",
-    }),
-    toISO: (dateFns) => formatISO(dateFns.date),
-    toMillis: (dateFns) => dateFns.date.getTime(),
-    fromMillis: (millis, zone) => ({
-      date: new Date(millis),
-      timeZone: zone,
-    }),
-    createUTC: (year, month, day, hour, minute, second) => ({
-      date: new Date(Date.UTC(year, month - 1, day, hour, minute, second)),
-      timeZone: "UTC",
-    }),
-    setZone: (dateFns, zoneName) => ({
-      date: toZonedTime(dateFns.date, zoneName),
-      timeZone: zoneName,
-    }),
-    isGreaterThanOrEqual: (date1, date2) => date1.date >= date2.date,
+    getYear: (dateFns) => getYear(getNativeDate(dateFns)),
+    getMonth: (dateFns) => getMonth(getNativeDate(dateFns)) + 1,
+    getDay: (dateFns) => getDate(getNativeDate(dateFns)),
+    getHour: (dateFns) => getHours(getNativeDate(dateFns)),
+    getMinute: (dateFns) => getMinutes(getNativeDate(dateFns)),
+    getSecond: (dateFns) => getSeconds(getNativeDate(dateFns)),
+    getZoneName: (dateFns) => getTimeZone(dateFns),
+    plusMinutes: (dateFns, minutes) =>
+      preserveInputShape(dateFns, addMinutes(getNativeDate(dateFns), minutes)),
+    plusDays: (dateFns, days) => preserveInputShape(dateFns, addDays(getNativeDate(dateFns), days)),
+    minusDays: (dateFns, days) =>
+      preserveInputShape(dateFns, subDays(getNativeDate(dateFns), days)),
+    toUTC: (dateFns) =>
+      cloneWithTimeZone(fromZonedTime(getNativeDate(dateFns), getTimeZone(dateFns)), "UTC"),
+    toISO: (dateFns) => formatISO(getNativeDate(dateFns)),
+    toMillis: (dateFns) => getNativeDate(dateFns).getTime(),
+    fromMillis: (millis, zone) => cloneWithTimeZone(new Date(millis), zone),
+    createUTC: (year, month, day, hour, minute, second) =>
+      cloneWithTimeZone(new Date(Date.UTC(year, month - 1, day, hour, minute, second)), "UTC"),
+    setZone: (dateFns, zoneName) =>
+      cloneWithTimeZone(toZonedTime(getNativeDate(dateFns), zoneName), zoneName),
+    isGreaterThanOrEqual: (date1, date2) => getNativeDate(date1) >= getNativeDate(date2),
   };
 }

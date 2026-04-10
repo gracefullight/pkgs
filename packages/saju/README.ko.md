@@ -151,16 +151,20 @@ import { getFourPillars, STANDARD_PRESET } from "@gracefullight/saju";
 
 const adapter = await createDateFnsAdapter();
 
-const dt = {
-  date: new Date(1985, 4, 15, 14, 30), // 주의: 월은 0부터 시작
-  timeZone: "Asia/Seoul",
-};
+// 일반 Date를 바로 사용할 수 있습니다
+const dt = new Date(1985, 4, 15, 14, 30); // 주의: 월은 0부터 시작
 
 const result = getFourPillars(dt, {
   adapter,
   longitudeDeg: 126.9778,
   preset: STANDARD_PRESET,
 });
+
+// 명시적인 타임존 메타데이터가 필요하면 래퍼 객체도 계속 사용할 수 있습니다
+const zonedDt = {
+  date: new Date(1985, 4, 15, 14, 30),
+  timeZone: "Asia/Seoul",
+};
 ```
 
 ### 커스텀 날짜 어댑터

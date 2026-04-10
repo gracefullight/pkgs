@@ -151,16 +151,20 @@ import { getFourPillars, STANDARD_PRESET } from "@gracefullight/saju";
 
 const adapter = await createDateFnsAdapter();
 
-const dt = {
-  date: new Date(1985, 4, 15, 14, 30), // Note: month is 0-indexed
-  timeZone: "Asia/Seoul",
-};
+// Plain Date works directly
+const dt = new Date(1985, 4, 15, 14, 30); // Note: month is 0-indexed
 
 const result = getFourPillars(dt, {
   adapter,
   longitudeDeg: 126.9778,
   preset: STANDARD_PRESET,
 });
+
+// If you need explicit timezone metadata, you can still pass a wrapper object
+const zonedDt = {
+  date: new Date(1985, 4, 15, 14, 30),
+  timeZone: "Asia/Seoul",
+};
 ```
 
 ### Custom Date Adapter
