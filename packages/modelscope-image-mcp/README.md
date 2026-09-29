@@ -50,7 +50,7 @@ The only required environment variable is `MODELSCOPE_API_TOKEN` (`MODELSCOPE_SD
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--model` | `Qwen/Qwen-Image` | Model used when a tool call omits `model` |
+| `--model` | `Qwen/Qwen-Image-2.1` | Model used when a tool call omits `model` |
 | `--output-dir` | `generated-images` in the project | Directory for saved images. Without it, images go to `generated-images` under the client's workspace root ([MCP roots](https://modelcontextprotocol.io/specification/2025-06-18/client/roots)), or under the server's working directory if the client reports no roots |
 | `--base-url` | `https://api-inference.modelscope.ai` | API base URL. Use `https://api-inference.modelscope.cn` for ModelScope China |
 
@@ -102,7 +102,7 @@ import { generateImage, saveImage } from "@gracefullight/modelscope-image-mcp";
 
 const image = await generateImage(
   { apiKey: process.env.MODELSCOPE_API_TOKEN ?? "", baseUrl: "https://api-inference.modelscope.ai" },
-  { prompt: "a red apple on a white table", model: "Qwen/Qwen-Image", size: "1024x1024" },
+  { prompt: "a red apple on a white table", model: "Qwen/Qwen-Image-2.1", size: "1024x1024" },
 );
 
 const path = await saveImage("./generated-images", image.bytes, image.contentType, "apple");

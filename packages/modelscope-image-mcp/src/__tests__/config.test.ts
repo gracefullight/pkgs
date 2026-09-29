@@ -9,9 +9,10 @@ describe("resolveConfig", () => {
     expect(resolveConfig([], env, "/work")).toEqual({
       apiKey: "ms-test",
       baseUrl: DEFAULT_BASE_URL,
-      defaultModel: DEFAULT_MODEL,
+      defaultModel: "Qwen/Qwen-Image-2.1",
       cwd: "/work",
     });
+    expect(DEFAULT_MODEL).toBe("Qwen/Qwen-Image-2.1");
   });
 
   it("applies CLI flags", () => {

@@ -50,7 +50,7 @@ claude mcp add modelscope-image -e MODELSCOPE_API_TOKEN=ms-... -- npx -y @gracef
 
 | 옵션 | 기본값 | 설명 |
 |------|--------|------|
-| `--model` | `Qwen/Qwen-Image` | 도구 호출에 `model`이 없을 때 사용할 모델 |
+| `--model` | `Qwen/Qwen-Image-2.1` | 도구 호출에 `model`이 없을 때 사용할 모델 |
 | `--output-dir` | 프로젝트의 `generated-images` | 이미지 저장 디렉터리. 지정하지 않으면 클라이언트가 알려준 워크스페이스 루트([MCP roots](https://modelcontextprotocol.io/specification/2025-06-18/client/roots)) 아래 `generated-images`에 저장하고, 루트 정보가 없으면 서버 작업 디렉터리 아래에 저장 |
 | `--base-url` | `https://api-inference.modelscope.ai` | API 기본 URL. ModelScope 중국 사이트는 `https://api-inference.modelscope.cn` |
 
@@ -102,7 +102,7 @@ import { generateImage, saveImage } from "@gracefullight/modelscope-image-mcp";
 
 const image = await generateImage(
   { apiKey: process.env.MODELSCOPE_API_TOKEN ?? "", baseUrl: "https://api-inference.modelscope.ai" },
-  { prompt: "a red apple on a white table", model: "Qwen/Qwen-Image", size: "1024x1024" },
+  { prompt: "a red apple on a white table", model: "Qwen/Qwen-Image-2.1", size: "1024x1024" },
 );
 
 const path = await saveImage("./generated-images", image.bytes, image.contentType, "apple");

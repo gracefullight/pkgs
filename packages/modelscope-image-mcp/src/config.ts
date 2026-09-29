@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 export const DEFAULT_BASE_URL = "https://api-inference.modelscope.ai";
-export const DEFAULT_MODEL = "Qwen/Qwen-Image";
+export const DEFAULT_MODEL = "Qwen/Qwen-Image-2.1";
 export const DEFAULT_OUTPUT_DIR = "generated-images";
 
 /** The first key is canonical; the second keeps compatibility with the Python modelscope-image-mcp. */
