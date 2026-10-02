@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import { readFileSync } from "node:fs";
-import { resolve as resolvePath } from "node:path";
+import { dirname, resolve as resolvePath } from "node:path";
 import { cwd } from "node:process";
 import * as git from "isomorphic-git";
 
@@ -10,16 +10,27 @@ import * as git from "isomorphic-git";
 // throws "Could not find HEAD" inside a worktree and the current branch can
 // never be resolved. Resolving the gitdir explicitly fixes it.
 function resolveGitdir(startDir: string): string {
-  const dotGit = resolvePath(startDir, ".git");
-  const stat = fs.statSync(dotGit);
-  if (stat.isFile()) {
-    const content = readFileSync(dotGit, "utf-8");
-    const match = content.match(/gitdir:\s*(.+)/);
-    if (match) {
-      return resolvePath(match[1].trim());
+  let dir = resolvePath(startDir);
+  for (;;) {
+    const dotGit = resolvePath(dir, ".git");
+    try {
+      const stat = fs.statSync(dotGit);
+      if (stat.isFile()) {
+        const content = readFileSync(dotGit, "utf-8");
+        const match = content.match(/^gitdir:\s*(.+)$/m);
+        if (match) {
+          return resolvePath(dir, match[1].trim());
+        }
+      }
+      return dotGit;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
+
+    const parent = dirname(dir);
+    if (parent === dir) throw new Error("Not a git repository");
+    dir = parent;
   }
-  return dotGit;
 }
 
 export type Preset = "gitflow" | "jira";

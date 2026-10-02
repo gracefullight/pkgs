@@ -1,5 +1,11 @@
 # @gracefullight/validate-branch
 
+## 1.1.5 (2026-10-03)
+
+- Find Git repositories from subdirectories and resolve relative worktree metadata.
+- Read the CLI version from the package manifest.
+- Update dependencies to current compatible stable versions.
+
 ## [1.1.4](https://github.com/gracefullight/pkgs/compare/@gracefullight/validate-branch@1.1.3...@gracefullight/validate-branch@1.1.4) (2026-07-20)
 
 

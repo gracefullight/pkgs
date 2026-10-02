@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import packageJson from "@package" with { type: "json" };
 import chalk from "chalk";
 import { Command, Option } from "commander";
 import { loadConfig } from "@/load-config";
@@ -19,7 +20,7 @@ const program = new Command();
 program
   .name("validate-branch")
   .description("Git branch name validation tool")
-  .version("0.1.0", "-v, --version");
+  .version(packageJson.version, "-v, --version");
 
 program.addOption(
   new Option("-t, --test <branch>", "Test target branch name (uses current branch by default)"),

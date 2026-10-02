@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/validate-branch",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Git branch name validation tool with custom regexp support",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,10 +22,11 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/cli.ts",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "git",
@@ -64,15 +65,15 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^24.10.9",
+    "@types/node": "^24.19.1",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6",
-    "vitest": "^4.0.17"
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
   },
   "dependencies": {
-    "chalk": "^5.6.2",
-    "commander": "^14.0.2",
-    "isomorphic-git": "^1.36.1"
+    "chalk": "^6.0.1",
+    "commander": "^15.0.0",
+    "isomorphic-git": "^1.42.6"
   }
 }
