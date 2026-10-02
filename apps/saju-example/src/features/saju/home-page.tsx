@@ -169,7 +169,7 @@ export default function HomePage() {
                     onSelect={handleDateChange}
                     placeholder={t("form.select_date")}
                     fromYear={1920}
-                    toYear={2025}
+                    toYear={new Date().getFullYear()}
                     locale={locale}
                   />
                 </div>
@@ -454,9 +454,9 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
         </CardHeader>
         <CardContent>
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {result.majorLuck.pillars.map((luck, index) => (
+            {result.majorLuck.pillars.map((luck) => (
               <div
-                key={`${luck.pillar}-${index}`}
+                key={`${luck.pillar}-${luck.startAge}`}
                 className="flex-shrink-0 bg-secondary p-3 rounded-lg text-center min-w-[80px]"
               >
                 <p className="text-lg font-bold">{luck.pillar}</p>
@@ -539,9 +539,9 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
                             ? t("result.day_pillar")
                             : t("result.hour_pillar")}
                     </p>
-                    {pillarSinsals.map((sinsal, index) => (
+                    {pillarSinsals.map((sinsal) => (
                       <div
-                        key={`${sinsal.sinsal.key}-${sinsal.position}-${index}`}
+                        key={`${sinsal.sinsal.key}-${sinsal.position}`}
                         className={`p-3 rounded-lg text-center ${
                           sinsal.sinsal.type === "auspicious"
                             ? "bg-green-100 dark:bg-green-900/30"
@@ -584,9 +584,9 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
                   {t("result.stem_combine")}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {stemCombinations.map((combo, index) => (
+                  {stemCombinations.map((combo) => (
                     <span
-                      key={`${combo.pair.join("-")}-${index}`}
+                      key={`${combo.pair.join("-")}-${combo.positions.join("-")}`}
                       className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
                     >
                       {combo.pair[0]}-{combo.pair[1]}
@@ -601,9 +601,9 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
                   {t("result.branch_six_combine")}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {branchSixCombinations.map((combo, index) => (
+                  {branchSixCombinations.map((combo) => (
                     <span
-                      key={`${combo.pair.join("-")}-${index}`}
+                      key={`${combo.pair.join("-")}-${combo.positions.join("-")}`}
                       className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
                     >
                       {combo.pair[0]}-{combo.pair[1]}
@@ -618,9 +618,9 @@ function SajuResultDisplay({ result }: { result: SajuResult }) {
                   {t("result.clash")}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {result.relations.clashes.map((clash, index) => (
+                  {result.relations.clashes.map((clash) => (
                     <span
-                      key={`${clash.pair.join("-")}-${index}`}
+                      key={`${clash.pair.join("-")}-${clash.positions.join("-")}`}
                       className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm"
                     >
                       {clash.pair[0]}-{clash.pair[1]}

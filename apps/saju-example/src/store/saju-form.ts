@@ -1,6 +1,7 @@
 import type { Gender } from "@gracefullight/saju";
 import { atom } from "jotai";
 import { atomWithLocation } from "jotai-location";
+import { parseSajuQuery } from "@/store/parse-saju-query";
 
 export interface SajuFormData {
   year: number;
@@ -22,33 +23,11 @@ const DEFAULT_FORM: SajuFormData = {
   gender: "male",
 };
 
-function parseQueryToForm(searchParams: URLSearchParams): Partial<SajuFormData> {
-  const result: Partial<SajuFormData> = {};
-
-  const year = searchParams.get("year");
-  const month = searchParams.get("month");
-  const day = searchParams.get("day");
-  const hour = searchParams.get("hour");
-  const minute = searchParams.get("minute");
-  const gender = searchParams.get("gender");
-
-  if (year) result.year = Number.parseInt(year, 10);
-  if (month) result.month = Number.parseInt(month, 10);
-  if (day) result.day = Number.parseInt(day, 10);
-  if (hour) result.hour = Number.parseInt(hour, 10);
-  if (minute) result.minute = Number.parseInt(minute, 10);
-  if (gender && (gender === "male" || gender === "female")) {
-    result.gender = gender;
-  }
-
-  return result;
-}
-
 export const sajuFormAtom = atom(
   (get) => {
     const location = get(locationAtom);
     const searchParams = new URLSearchParams(location.searchParams?.toString() || "");
-    const fromUrl = parseQueryToForm(searchParams);
+    const fromUrl = parseSajuQuery(searchParams);
 
     return {
       ...DEFAULT_FORM,

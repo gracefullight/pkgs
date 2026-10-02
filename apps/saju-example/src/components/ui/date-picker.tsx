@@ -29,7 +29,7 @@ export function DatePicker({
   onSelect,
   placeholder = "날짜 선택",
   fromYear = 1920,
-  toYear = 2025,
+  toYear = new Date().getFullYear(),
   locale = "ko",
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
@@ -65,8 +65,8 @@ export function DatePicker({
             setOpen(false);
           }}
           captionLayout="dropdown"
-          fromYear={fromYear}
-          toYear={toYear}
+          startMonth={new Date(fromYear, 0, 1)}
+          endMonth={new Date(toYear, 11, 31)}
           defaultMonth={date}
           locale={dateFnsLocale}
         />

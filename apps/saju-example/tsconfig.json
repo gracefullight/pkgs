@@ -20,13 +20,16 @@
     ],
     "noUncheckedSideEffectImports": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@gracefullight/saju": ["../../packages/saju/src/index.ts"],
+      "@gracefullight/saju/adapters/*": ["../../packages/saju/src/adapters/*"],
+      "@/*": ["./src/*", "../../packages/saju/src/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "../../packages/saju/src/types/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
