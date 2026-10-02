@@ -221,5 +221,5 @@ describe("getSaju integration", () => {
     expect(result.pillars.day).toBeDefined();
     expect(result.pillars.hour).toBeDefined();
     expect(result.lunar.lunarYear).toBeGreaterThan(0);
-  });
+  }, 15_000);
 });

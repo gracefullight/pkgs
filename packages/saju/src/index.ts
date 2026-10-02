@@ -7,6 +7,7 @@ export {
   getFourPillars,
   hourPillar,
   monthPillar,
+  type PillarPreset,
   presetA,
   presetB,
   STANDARD_PRESET,
@@ -147,7 +148,7 @@ export {
 export type { Branch, Label, Pillar, PillarPosition, Stem } from "@/types";
 
 import type { DateAdapter } from "@/adapters/date-adapter";
-import { getFourPillars, type presetA } from "@/core/four-pillars";
+import { getFourPillars, type PillarPreset } from "@/core/four-pillars";
 import {
   calculateMajorLuck,
   calculateYearlyLuck,
@@ -196,7 +197,7 @@ export interface GetSajuOptions<T> {
   longitudeDeg?: number;
   gender: Gender;
   tzOffsetHours?: number;
-  preset?: typeof presetA;
+  preset?: PillarPreset;
   currentYear?: number;
   yearlyLuckRange?: { from: number; to: number };
 }

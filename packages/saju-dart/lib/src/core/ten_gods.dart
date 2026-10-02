@@ -1,4 +1,3 @@
-import '../types/hidden_stems.dart';
 import '../types/types.dart';
 
 /// Determines the ten god (십신) relationship between the day master and a target stem.
@@ -45,10 +44,7 @@ TenGod getTenGodKey(Stem dayMaster, Stem targetStem) {
 
 /// Ten god info for a stem
 class StemTenGod {
-  const StemTenGod({
-    required this.stem,
-    required this.tenGod,
-  });
+  const StemTenGod({required this.stem, required this.tenGod});
 
   final Stem stem;
   final TenGod tenGod;
@@ -69,10 +65,7 @@ class BranchTenGod {
 
 /// Pillar ten gods analysis
 class PillarTenGods {
-  const PillarTenGods({
-    required this.stem,
-    required this.branch,
-  });
+  const PillarTenGods({required this.stem, required this.branch});
 
   final StemTenGod stem;
   final BranchTenGod branch;
@@ -80,19 +73,14 @@ class PillarTenGods {
 
 /// Day master info (special case - not a ten god)
 class DayMasterInfo {
-  const DayMasterInfo({
-    required this.stem,
-  });
+  const DayMasterInfo({required this.stem});
 
   final Stem stem;
 }
 
 /// Day pillar ten gods (day stem is day master, not a ten god)
 class DayPillarTenGods {
-  const DayPillarTenGods({
-    required this.dayMaster,
-    required this.branch,
-  });
+  const DayPillarTenGods({required this.dayMaster, required this.branch});
 
   final DayMasterInfo dayMaster;
   final BranchTenGod branch;
@@ -122,10 +110,8 @@ PillarTenGods _analyzePillar(Stem dayMaster, Pillar pillar) {
   final hiddenStems = HiddenStems.forBranch(pillar.branch);
   final hiddenStemTenGods = hiddenStems
       .map(
-        (hs) => StemTenGod(
-          stem: hs.stem,
-          tenGod: getTenGodKey(dayMaster, hs.stem),
-        ),
+        (hs) =>
+            StemTenGod(stem: hs.stem, tenGod: getTenGodKey(dayMaster, hs.stem)),
       )
       .toList();
 
@@ -158,10 +144,8 @@ FourPillarsTenGods analyzeTenGods(FourPillars pillars) {
   final dayHiddenStems = HiddenStems.forBranch(pillars.day.branch);
   final dayHiddenStemTenGods = dayHiddenStems
       .map(
-        (hs) => StemTenGod(
-          stem: hs.stem,
-          tenGod: getTenGodKey(dayMaster, hs.stem),
-        ),
+        (hs) =>
+            StemTenGod(stem: hs.stem, tenGod: getTenGodKey(dayMaster, hs.stem)),
       )
       .toList();
 

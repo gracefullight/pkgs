@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4 (2026-10-03)
+
+- Align daily luck calculations with the four-pillar Julian day calculation.
+- Use timezone data for historic Korean daylight saving boundaries.
+- Preserve fractional solar-time adjustments at day and hour boundaries.
+- Update dependencies to current compatible stable versions.
+
 ## [0.1.3](https://github.com/gracefullight/pkgs/compare/saju-dart@0.1.2...saju-dart@0.1.3) (2026-02-21)
 
 

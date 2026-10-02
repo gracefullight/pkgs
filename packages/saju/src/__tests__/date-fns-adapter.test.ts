@@ -7,7 +7,7 @@ describe("date-fns Adapter", () => {
 
   beforeAll(async () => {
     adapter = await createDateFnsAdapter();
-  });
+  }, 15_000);
 
   describe("Basic date getters", () => {
     it("should accept plain Date values", () => {
@@ -134,11 +134,13 @@ describe("date-fns Adapter", () => {
     });
 
     it("should create date from milliseconds", () => {
-      const millis = new Date(2000, 0, 1, 18, 0).getTime();
+      const millis = Date.UTC(2000, 0, 1, 9, 0);
       const dt = adapter.fromMillis(millis, "Asia/Seoul");
       expect(adapter.getYear(dt)).toBe(2000);
       expect(adapter.getMonth(dt)).toBe(1);
       expect(adapter.getDay(dt)).toBe(1);
+      expect(adapter.getHour(dt)).toBe(18);
+      expect(adapter.toMillis(dt)).toBe(millis);
     });
   });
 

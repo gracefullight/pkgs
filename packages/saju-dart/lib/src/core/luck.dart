@@ -1,4 +1,5 @@
 import '../types/types.dart';
+import 'four_pillars.dart';
 
 /// Information about a single major luck (대운) pillar.
 ///
@@ -95,7 +96,11 @@ MajorLuckResult calculateMajorLuck({
 
   // Traditional rounding: if >= 6 months, add 1 year
   final startAge = months >= 6 ? years + 1 : years;
-  final startAgeDetail = StartAgeDetail(years: years, months: months, days: days);
+  final startAgeDetail = StartAgeDetail(
+    years: years,
+    months: months,
+    days: days,
+  );
 
   final monthIdx60 = monthPillar.index;
   final pillars = <LuckPillar>[];
@@ -166,9 +171,7 @@ List<YearlyLuckResult> calculateYearlyLuck(
     final pillar = Pillar.fromIndex(idx60);
     final age = year - birthYear + 1;
 
-    results.add(
-      YearlyLuckResult(year: year, pillar: pillar, age: age),
-    );
+    results.add(YearlyLuckResult(year: year, pillar: pillar, age: age));
   }
 
   return results;
@@ -279,25 +282,7 @@ List<DailyLuckResult> calculateDailyLuck(
   final results = <DailyLuckResult>[];
 
   for (var day = fromDay; day <= toDay; day++) {
-    // Use the dayPillarFromDate logic inline
-    var y = year;
-    var m = month;
-
-    if (m <= 2) {
-      y -= 1;
-      m += 12;
-    }
-
-    final a = y ~/ 100;
-    final b = 2 - a + (a ~/ 4);
-    final jdn = (365.25 * (y + 4716)).floor() +
-        (30.6001 * (m + 1)).floor() +
-        day +
-        b -
-        1525;
-
-    final idx60 = (((jdn - 11) % 60) + 60) % 60;
-    final pillar = Pillar.fromIndex(idx60);
+    final pillar = dayPillarFromDate(year, month, day);
 
     results.add(
       DailyLuckResult(year: year, month: month, day: day, pillar: pillar),

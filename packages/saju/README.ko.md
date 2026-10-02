@@ -160,12 +160,14 @@ const result = getFourPillars(dt, {
   preset: STANDARD_PRESET,
 });
 
-// 명시적인 타임존 메타데이터가 필요하면 래퍼 객체도 계속 사용할 수 있습니다
+// 래퍼는 Date의 로컬 날짜와 시간을 timeZone 지역의 시각으로 해석합니다.
 const zonedDt = {
   date: new Date(1985, 4, 15, 14, 30),
   timeZone: "Asia/Seoul",
 };
 ```
+
+래퍼의 UTC 변환, 타임존 변경, 비교와 타임스탬프 계산은 해당 지역 시각이 나타내는 실제 시점을 사용합니다. `fromMillis(millis, zone)`은 지정한 지역의 날짜와 시간을 반환합니다. 일반 `Date` 값은 시스템 타임존을 사용합니다.
 
 ### 커스텀 날짜 어댑터
 
@@ -245,7 +247,7 @@ function getSaju<T>(
     longitudeDeg?: number;
     gender: "male" | "female";  // 필수
     tzOffsetHours?: number;
-    preset?: typeof STANDARD_PRESET;
+    preset?: PillarPreset;
     currentYear?: number;  // 세운 기본 범위 계산용
     yearlyLuckRange?: { from: number; to: number };  // 세운 범위 직접 지정
   }

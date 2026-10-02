@@ -63,7 +63,9 @@ Pillar dayPillarFromDate(int year, int month, int day) {
 ({Pillar pillar, int solarYear}) yearPillar(tz.TZDateTime dtLocal) {
   final y = dtLocal.year;
   final lichunLocal = tz.TZDateTime.from(lichunUtc(y), dtLocal.location);
-  final solarYear = dtLocal.isAfter(lichunLocal) || dtLocal == lichunLocal ? y : y - 1;
+  final solarYear = dtLocal.isAfter(lichunLocal) || dtLocal == lichunLocal
+      ? y
+      : y - 1;
   final idx60 = (((solarYear - 1984) % 60) + 60) % 60;
   return (pillar: Pillar.fromIndex(idx60), solarYear: solarYear);
 }
@@ -75,18 +77,7 @@ int _monthBranchIndexFromSunLon(double lon) {
 
 /// Get first month stem index from year stem index
 int _firstMonthStemIndex(int yearStemIdx) {
-  const map = {
-    0: 2,
-    5: 2,
-    1: 4,
-    6: 4,
-    2: 6,
-    7: 6,
-    3: 8,
-    8: 8,
-    4: 0,
-    9: 0,
-  };
+  const map = {0: 2, 5: 2, 1: 4, 6: 4, 2: 6, 7: 6, 3: 8, 8: 8, 4: 0, 9: 0};
   return map[yearStemIdx] ?? 0;
 }
 
@@ -124,7 +115,11 @@ int _firstMonthStemIndex(int yearStemIdx) {
         'longitudeDeg required when useMeanSolarTimeForBoundary=true',
       );
     }
-    dtChk = applyMeanSolarTime(dtLocal, longitudeDeg, tzOffsetHours: tzOffsetHours);
+    dtChk = applyMeanSolarTime(
+      dtLocal,
+      longitudeDeg,
+      tzOffsetHours: tzOffsetHours,
+    );
   }
 
   var d = dtChk;
@@ -145,8 +140,12 @@ int _hourBranchIndexFromHour(int h) {
 }
 
 /// Calculate hour pillar from datetime
-({Pillar pillar, tz.TZDateTime adjustedDt, ({int year, int month, int day}) effectiveDate})
-    hourPillar(
+({
+  Pillar pillar,
+  tz.TZDateTime adjustedDt,
+  ({int year, int month, int day}) effectiveDate,
+})
+hourPillar(
   tz.TZDateTime dtLocal, {
   double? longitudeDeg,
   double tzOffsetHours = 9.0,
@@ -157,9 +156,15 @@ int _hourBranchIndexFromHour(int h) {
   var dtUsed = dtLocal;
   if (useMeanSolarTimeForHour) {
     if (longitudeDeg == null) {
-      throw ArgumentError('longitudeDeg required when useMeanSolarTimeForHour=true');
+      throw ArgumentError(
+        'longitudeDeg required when useMeanSolarTimeForHour=true',
+      );
     }
-    dtUsed = applyMeanSolarTime(dtLocal, longitudeDeg, tzOffsetHours: tzOffsetHours);
+    dtUsed = applyMeanSolarTime(
+      dtLocal,
+      longitudeDeg,
+      tzOffsetHours: tzOffsetHours,
+    );
   }
 
   final effDate = effectiveDayDate(
@@ -176,10 +181,7 @@ int _hourBranchIndexFromHour(int h) {
   final hb = _hourBranchIndexFromHour(dtUsed.hour);
   final hs = (dayStemIdx * 2 + hb) % 10;
 
-  final pillar = Pillar(
-    stem: Stem.values[hs],
-    branch: Branch.values[hb],
-  );
+  final pillar = Pillar(stem: Stem.values[hs], branch: Branch.values[hb]);
 
   return (pillar: pillar, adjustedDt: dtUsed, effectiveDate: effDate);
 }
@@ -213,21 +215,11 @@ class FourPillarsResult {
   final tz.TZDateTime adjustedDtForHour;
 }
 
-/// Korea DST period: 1987-05-10 02:00 ~ 1988-10-08 03:00 (UTC+10)
+/// Uses timezone data for Korean daylight saving and historical offsets.
 double _getEffectiveKSTOffset(tz.TZDateTime dtLocal) {
-  final y = dtLocal.year;
-  final m = dtLocal.month;
-  final d = dtLocal.day;
-  final h = dtLocal.hour;
-
-  final afterStart =
-      y > 1987 ||
-      (y == 1987 && (m > 5 || (m == 5 && (d > 10 || (d == 10 && h >= 2)))));
-  final beforeEnd =
-      y < 1988 ||
-      (y == 1988 && (m < 10 || (m == 10 && (d < 8 || (d == 8 && h < 3)))));
-
-  return afterStart && beforeEnd ? 10.0 : 9.0;
+  return dtLocal.location.name == 'Asia/Seoul'
+      ? dtLocal.timeZoneOffset.inMinutes / 60.0
+      : 9.0;
 }
 
 /// Calculates all four pillars (year, month, day, hour) from a datetime.
@@ -245,8 +237,9 @@ FourPillarsResult getFourPillars(
   double tzOffsetHours = 9.0,
   PillarPreset preset = standardPreset,
 }) {
-  final effectiveTzOffset =
-      tzOffsetHours == 9.0 ? _getEffectiveKSTOffset(dtLocal) : tzOffsetHours;
+  final effectiveTzOffset = tzOffsetHours == 9.0
+      ? _getEffectiveKSTOffset(dtLocal)
+      : tzOffsetHours;
   final effectiveLongitude = longitudeDeg ?? effectiveTzOffset * 15;
 
   final yearResult = yearPillar(dtLocal);

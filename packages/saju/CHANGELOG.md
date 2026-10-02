@@ -1,5 +1,11 @@
 # @gracefullight/saju
 
+## 1.3.2 (2026-10-03)
+
+- Correct timezone conversion and historic Korean daylight saving boundaries.
+- Accept every supported pillar preset through the public API.
+- Update dependencies to current compatible stable versions.
+
 ## [1.3.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.3.0...@gracefullight/saju@1.3.1) (2026-04-10)
 
 

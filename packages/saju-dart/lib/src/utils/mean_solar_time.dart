@@ -6,8 +6,10 @@ tz.TZDateTime applyMeanSolarTime(
   double longitudeDeg, {
   double tzOffsetHours = 9.0,
 }) {
-  final deltaMinutes = (4 * (longitudeDeg - 15 * tzOffsetHours)).round();
-  return dtLocal.add(Duration(minutes: deltaMinutes));
+  final deltaMicroseconds =
+      (4 * (longitudeDeg - 15 * tzOffsetHours) * Duration.microsecondsPerMinute)
+          .round();
+  return dtLocal.add(Duration(microseconds: deltaMicroseconds));
 }
 
 /// Get timezone offset hours from location name

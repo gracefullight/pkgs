@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/saju",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Four Pillars (四柱) calculator with flexible date adapter support",
   "type": "module",
   "main": "./dist/index.js",
@@ -8,16 +8,16 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./adapters/luxon": {
-      "import": "./dist/adapters/luxon.js",
-      "types": "./dist/adapters/luxon.d.ts"
+      "types": "./dist/adapters/luxon.d.ts",
+      "import": "./dist/adapters/luxon.js"
     },
     "./adapters/date-fns": {
-      "import": "./dist/adapters/date-fns.js",
-      "types": "./dist/adapters/date-fns.d.ts"
+      "types": "./dist/adapters/date-fns.d.ts",
+      "import": "./dist/adapters/date-fns.js"
     }
   },
   "files": [
@@ -26,12 +26,13 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "dev": "tsx src/index.ts",
-    "test": "vitest",
+    "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "saju",
@@ -85,14 +86,14 @@
     }
   },
   "devDependencies": {
-    "@types/luxon": "^3.7.1",
-    "@vitest/coverage-v8": "^4.0.17",
-    "@vitest/ui": "^4.0.17",
-    "date-fns": "^4.1.0",
+    "@types/luxon": "^3.7.6",
+    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/ui": "^5.0.3",
+    "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
     "luxon": "^3.7.2",
-    "tsc-alias": "^1.8.16",
-    "vitest": "^4.0.17"
+    "tsc-alias": "^1.9.7",
+    "vitest": "^5.0.3"
   },
   "dependencies": {
     "lunar-javascript": "^1.7.7"

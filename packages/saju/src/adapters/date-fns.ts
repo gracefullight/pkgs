@@ -1,6 +1,7 @@
 import type { DateAdapter } from "@/adapters/date-adapter";
 
 export interface ZonedDateFnsDate {
+  /** Wall-clock components, interpreted in timeZone rather than the system timezone. */
   date: Date;
   timeZone: string;
 }
@@ -48,6 +49,7 @@ export async function createDateFnsAdapter(): Promise<DateAdapter<DateFnsDate>> 
   let getMinutes: typeof import("date-fns").getMinutes;
   let getSeconds: typeof import("date-fns").getSeconds;
   let formatISO: typeof import("date-fns").formatISO;
+  let formatInTimeZone: typeof import("date-fns-tz").formatInTimeZone;
   let fromZonedTime: typeof import("date-fns-tz").fromZonedTime;
   let toZonedTime: typeof import("date-fns-tz").toZonedTime;
 
@@ -65,6 +67,7 @@ export async function createDateFnsAdapter(): Promise<DateAdapter<DateFnsDate>> 
     getMinutes = dateFns.getMinutes;
     getSeconds = dateFns.getSeconds;
     formatISO = dateFns.formatISO;
+    formatInTimeZone = dateFnsTz.formatInTimeZone;
     fromZonedTime = dateFnsTz.fromZonedTime;
     toZonedTime = dateFnsTz.toZonedTime;
   } catch {
@@ -72,6 +75,11 @@ export async function createDateFnsAdapter(): Promise<DateAdapter<DateFnsDate>> 
       "date-fns or date-fns-tz is not installed. Install with: npm install date-fns date-fns-tz",
     );
   }
+
+  const getInstant = (date: DateFnsDate): Date =>
+    isZonedDate(date) ? fromZonedTime(date.date, date.timeZone) : date;
+  const fromInstant = (date: Date, zone: string): ZonedDateFnsDate =>
+    cloneWithTimeZone(toZonedTime(date, zone), zone);
 
   return {
     getYear: (dateFns) => getYear(getNativeDate(dateFns)),
@@ -86,15 +94,16 @@ export async function createDateFnsAdapter(): Promise<DateAdapter<DateFnsDate>> 
     plusDays: (dateFns, days) => preserveInputShape(dateFns, addDays(getNativeDate(dateFns), days)),
     minusDays: (dateFns, days) =>
       preserveInputShape(dateFns, subDays(getNativeDate(dateFns), days)),
-    toUTC: (dateFns) =>
-      cloneWithTimeZone(fromZonedTime(getNativeDate(dateFns), getTimeZone(dateFns)), "UTC"),
-    toISO: (dateFns) => formatISO(getNativeDate(dateFns)),
-    toMillis: (dateFns) => getNativeDate(dateFns).getTime(),
-    fromMillis: (millis, zone) => cloneWithTimeZone(new Date(millis), zone),
+    toUTC: (dateFns) => fromInstant(getInstant(dateFns), "UTC"),
+    toISO: (dateFns) =>
+      isZonedDate(dateFns)
+        ? formatInTimeZone(getInstant(dateFns), dateFns.timeZone, "yyyy-MM-dd'T'HH:mm:ssXXX")
+        : formatISO(dateFns),
+    toMillis: (dateFns) => getInstant(dateFns).getTime(),
+    fromMillis: (millis, zone) => fromInstant(new Date(millis), zone),
     createUTC: (year, month, day, hour, minute, second) =>
-      cloneWithTimeZone(new Date(Date.UTC(year, month - 1, day, hour, minute, second)), "UTC"),
-    setZone: (dateFns, zoneName) =>
-      cloneWithTimeZone(toZonedTime(getNativeDate(dateFns), zoneName), zoneName),
-    isGreaterThanOrEqual: (date1, date2) => getNativeDate(date1) >= getNativeDate(date2),
+      fromInstant(new Date(Date.UTC(year, month - 1, day, hour, minute, second)), "UTC"),
+    setZone: (dateFns, zoneName) => fromInstant(getInstant(dateFns), zoneName),
+    isGreaterThanOrEqual: (date1, date2) => getInstant(date1) >= getInstant(date2),
   };
 }

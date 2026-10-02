@@ -56,6 +56,74 @@ void main() {
       final hourResult1 = hourPillar(dt1);
       expect(hourResult1.pillar.branch, equals(Branch.chou));
     });
+
+    test('uses standard time between Korean daylight saving seasons', () {
+      final location = tz.getLocation('Asia/Seoul');
+      for (final (year, month, day) in [
+        (1987, 12, 15),
+        (1988, 1, 15),
+        (1988, 5, 1),
+        (1988, 10, 9),
+      ]) {
+        final birth = tz.TZDateTime(location, year, month, day, 12);
+        final result = getFourPillars(birth, longitudeDeg: 135);
+
+        expect(result.adjustedDtForHour, birth);
+      }
+    });
+
+    test('uses the actual end date of Korean daylight saving', () {
+      final birth = tz.TZDateTime(
+        tz.getLocation('Asia/Seoul'),
+        1988,
+        10,
+        8,
+        12,
+      );
+      final result = getFourPillars(birth, longitudeDeg: 135);
+
+      expect(
+        result.adjustedDtForHour,
+        birth.subtract(const Duration(hours: 1)),
+      );
+    });
+
+    test('does not apply Korean daylight saving in Tokyo', () {
+      final birth = tz.TZDateTime(
+        tz.getLocation('Asia/Tokyo'),
+        1988,
+        6,
+        15,
+        12,
+      );
+      final result = getFourPillars(birth, longitudeDeg: 135);
+
+      expect(result.adjustedDtForHour, birth);
+    });
+
+    test(
+      'preserves solar correction seconds at the traditional day boundary',
+      () {
+        final birth = tz.TZDateTime(
+          tz.getLocation('Asia/Seoul'),
+          2000,
+          1,
+          1,
+          23,
+          32,
+        );
+        final result = getFourPillars(
+          birth,
+          longitudeDeg: 126.9778,
+          preset: traditionalPreset,
+        );
+
+        expect(result.effectiveDayDate, (year: 2000, month: 1, day: 1));
+        expect(result.adjustedDtForHour.hour, 22);
+        expect(result.adjustedDtForHour.minute, 59);
+        expect(result.adjustedDtForHour.second, 54);
+      },
+    );
   });
 
   group('Pillar class', () {

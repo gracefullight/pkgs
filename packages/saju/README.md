@@ -160,12 +160,14 @@ const result = getFourPillars(dt, {
   preset: STANDARD_PRESET,
 });
 
-// If you need explicit timezone metadata, you can still pass a wrapper object
+// The wrapper interprets the Date's local components as wall-clock time in timeZone.
 const zonedDt = {
   date: new Date(1985, 4, 15, 14, 30),
   timeZone: "Asia/Seoul",
 };
 ```
+
+For wrappers, UTC conversion, timezone changes, comparisons, and epoch timestamps use the instant represented by those wall-clock components. `fromMillis(millis, zone)` returns wall-clock components in the requested zone. Plain `Date` values use the system timezone.
 
 ### Custom Date Adapter
 
@@ -245,7 +247,7 @@ function getSaju<T>(
     longitudeDeg?: number;
     gender: "male" | "female";  // Required
     tzOffsetHours?: number;
-    preset?: typeof STANDARD_PRESET;
+    preset?: PillarPreset;
     currentYear?: number;  // For default yearly luck range
     yearlyLuckRange?: { from: number; to: number };  // Specify yearly luck range directly
   }

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Saju Example',
       builder: (context, child) =>
-          FTheme(data: FThemes.zinc.light, child: child!),
+          FTheme(data: FTheme.neutral.light.touch, child: child!),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -51,12 +51,15 @@ class _SajuPageState extends State<SajuPage> {
   }
 
   void _calculate() {
-    // Basic example uses Seoul
     final location = tz.getLocation('Asia/Seoul');
-
-    // Create TZDateTime from the selected local date
-    // Note: In a real app, you'd handle timezone selection more carefully
-    final birthDateTime = tz.TZDateTime.from(_selectedDate, location);
+    final birthDateTime = tz.TZDateTime(
+      location,
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _selectedDate.hour,
+      _selectedDate.minute,
+    );
 
     setState(() {
       _result = getSaju(birthDateTime, gender: _gender);
@@ -65,21 +68,8 @@ class _SajuPageState extends State<SajuPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Fallback to Scaffold if FScaffold structure is unknown, but trying common mapping
-    // If FScaffold fails, use Scaffold.
-    // The analyzer said 'header' and 'content' are undefined.
     return Scaffold(
-      // temporarily switching to Scaffold to be safe, or use FScaffold with body?
-      // Let's use FScaffold with body if it exists, but analyzer said content undefined.
-      // I'll stick to FScaffold but use 'body' as it is standard in Flutter.
-      // And 'appBar' instead of header.
-      appBar: AppBar(
-        title: const Text('Saju Example'),
-        // Using standard AppBar inside FScaffold? No FScaffold expects FAppBar usually?
-        // Let's purely use Scaffold for the outer shell if FScaffold is tricky without docs.
-        // But user asked to use forui.
-        // I will try FScaffold with body.
-      ),
+      appBar: AppBar(title: const Text('Saju Example')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -87,11 +77,7 @@ class _SajuPageState extends State<SajuPage> {
           children: [
             const Text('Birth Date: 2000-01-01 18:00 (Fixed for demo)'),
             const SizedBox(height: 20),
-            FButton(
-              onPress: _calculate,
-              child: const Text('Calculate'),
-              // style removed
-            ),
+            FButton(onPress: _calculate, child: const Text('Calculate')),
             const SizedBox(height: 20),
             if (_result != null) ...[
               _buildPillarsCard(),
@@ -106,9 +92,14 @@ class _SajuPageState extends State<SajuPage> {
 
   Widget _buildPillarsCard() {
     return FCard(
-      title: const Text('Four Pillars (사주)'),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'Four Pillars (사주)',
+            style: context.theme.cardStyle.titleTextStyle,
+          ),
+          const SizedBox(height: 16),
           _buildPillarRow('Year (년주)', _result!.pillars.year),
           const SizedBox(height: 8),
           _buildPillarRow('Month (월주)', _result!.pillars.month),
@@ -144,10 +135,11 @@ class _SajuPageState extends State<SajuPage> {
 
   Widget _buildInfoCard() {
     return FCard(
-      title: const Text('Analysis'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('Analysis', style: context.theme.cardStyle.titleTextStyle),
+          const SizedBox(height: 16),
           Text('Strength (신강약): ${_result!.strength.level.korean}'),
           const SizedBox(height: 8),
           Text('Yongshen (용신): ${_result!.yongShen.primary.korean}'),

@@ -2,15 +2,21 @@ import type { DateAdapter } from "@/adapters/date-adapter";
 import { getLunarDate, type LunarDate } from "@/core/lunar";
 import { BRANCHES, jdnFromDate, pillarFromIndex, STEMS } from "@/utils";
 
-export { STEMS, BRANCHES };
+export { BRANCHES, STEMS };
 
-export const STANDARD_PRESET = {
+export interface PillarPreset {
+  dayBoundary: "midnight" | "zi23";
+  useMeanSolarTimeForHour: boolean;
+  useMeanSolarTimeForBoundary: boolean;
+}
+
+export const STANDARD_PRESET: PillarPreset = {
   dayBoundary: "midnight" as const,
   useMeanSolarTimeForHour: true,
   useMeanSolarTimeForBoundary: false,
 };
 
-export const TRADITIONAL_PRESET = {
+export const TRADITIONAL_PRESET: PillarPreset = {
   dayBoundary: "zi23" as const,
   useMeanSolarTimeForHour: true,
   useMeanSolarTimeForBoundary: true,
@@ -20,23 +26,20 @@ export const presetA = STANDARD_PRESET;
 export const presetB = TRADITIONAL_PRESET;
 
 /**
- * Korea DST period: 1987-05-10 02:00 ~ 1988-10-08 03:00 (UTC+10)
- * Returns the effective timezone offset in hours for a Korean datetime.
+ * Uses the adapter's timezone data for Korean daylight saving and historical offsets.
  */
 function getEffectiveKSTOffset<T>(adapter: DateAdapter<T>, dtLocal: T): number {
-  const y = adapter.getYear(dtLocal);
-  const m = adapter.getMonth(dtLocal);
-  const d = adapter.getDay(dtLocal);
-  const h = adapter.getHour(dtLocal);
+  if (adapter.getZoneName(dtLocal) !== "Asia/Seoul") return 9;
 
-  // KDT start: 1987-05-10 02:00 KST (becomes 03:00 KDT)
-  // KDT end: 1988-10-08 03:00 KDT (becomes 02:00 KST)
-  const afterStart =
-    y > 1987 || (y === 1987 && (m > 5 || (m === 5 && (d > 10 || (d === 10 && h >= 2)))));
-  const beforeEnd =
-    y < 1988 || (y === 1988 && (m < 10 || (m === 10 && (d < 8 || (d === 8 && h < 3)))));
-
-  return afterStart && beforeEnd ? 10 : 9;
+  const wallClockUtc = adapter.createUTC(
+    adapter.getYear(dtLocal),
+    adapter.getMonth(dtLocal),
+    adapter.getDay(dtLocal),
+    adapter.getHour(dtLocal),
+    adapter.getMinute(dtLocal),
+    adapter.getSecond(dtLocal),
+  );
+  return Math.round((adapter.toMillis(wallClockUtc) - adapter.toMillis(dtLocal)) / 60000) / 60;
 }
 
 /**
@@ -334,7 +337,7 @@ export function getFourPillars<T>(
     adapter: DateAdapter<T>;
     longitudeDeg?: number;
     tzOffsetHours?: number;
-    preset?: typeof presetA | typeof presetB;
+    preset?: PillarPreset;
   },
 ): {
   year: string;
