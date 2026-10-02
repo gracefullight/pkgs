@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 (2026-10-03)
+
+- Coordinate shared Daum Postcode script loading across component instances.
+- Match the exported module filename and resolve declaration aliases for consumers.
+- Update dependencies to current compatible stable versions.
+
 ## [1.0.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/ng-daum-address@1.0.1...@gracefullight/ng-daum-address@1.0.2) (2026-03-25)
 
 

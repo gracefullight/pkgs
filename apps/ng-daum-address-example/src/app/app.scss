@@ -127,6 +127,9 @@ h1 {
   background: white;
 
   .close-btn {
+    padding: 0;
+    border: 0;
+    background: transparent;
     cursor: pointer;
     position: absolute;
     right: 0;
@@ -145,6 +148,9 @@ h1 {
   overflow: hidden;
 
   .fold-btn {
+    padding: 0;
+    border: 0;
+    background: transparent;
     cursor: pointer;
     position: absolute;
     right: 0;

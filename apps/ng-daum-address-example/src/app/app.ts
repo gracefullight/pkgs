@@ -1,9 +1,10 @@
-import { Component, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { type DaumAddressResult, NgDaumAddressComponent } from "@gracefullight/ng-daum-address";
 
 @Component({
   selector: "app-root",
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, NgDaumAddressComponent],
   templateUrl: "./app.html",
   styleUrl: "./app.scss",

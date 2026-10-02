@@ -11,7 +11,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: "NgDaumAddress",
-      fileName: "ng-daum-address",
+      fileName: () => "ng-daum-address.mjs",
       formats: ["es"],
     },
     rollupOptions: {

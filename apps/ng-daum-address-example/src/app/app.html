@@ -33,7 +33,9 @@
       }"
     ></ng-daum-address>
     <div id="layerTarget" class="layer-target">
-      <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" alt="Close" class="close-btn">
+      <button type="button" id="btnCloseLayer" aria-label="Close" class="close-btn">
+        <img src="https://t1.daumcdn.net/postcode/resource/images/close.png" alt="">
+      </button>
     </div>
     @if (layerResult()) {
       <div class="result-box">
@@ -57,7 +59,9 @@
       }"
     ></ng-daum-address>
     <div id="inlineTarget" class="inline-target">
-      <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnFoldWrap" alt="Fold" class="fold-btn">
+      <button type="button" id="btnFoldWrap" aria-label="Fold" class="fold-btn">
+        <img src="https://t1.daumcdn.net/postcode/resource/images/close.png" alt="">
+      </button>
     </div>
     @if (inlineResult()) {
       <div class="result-box">

@@ -2,13 +2,12 @@ import { DOCUMENT, isPlatformBrowser, NgClass } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   input,
   output,
   PLATFORM_ID,
-  Renderer2,
-  signal,
 } from "@angular/core";
 import type {
   DaumAddressOptions,
@@ -20,8 +19,7 @@ import {
   getLayerPositionDefaults,
   transformPostcodeData,
 } from "@/lib/daum-address.utils";
-
-const DAUM_POSTCODE_SCRIPT_URL = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+import { loadDaumPostcodeScript } from "@/lib/daum-postcode-script";
 
 /**
  * Angular component for Daum Postcode address search
@@ -61,7 +59,6 @@ export class NgDaumAddressComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly renderer = inject(Renderer2);
 
   /**
    * Configuration options for the address search
@@ -73,29 +70,10 @@ export class NgDaumAddressComponent {
    */
   readonly result = output<DaumAddressResult>();
 
-  protected readonly buttonClasses = signal<string | string[]>("");
-  protected readonly buttonText = signal("주소 검색");
+  protected readonly buttonClasses = computed(() => this.options().class ?? "");
+  protected readonly buttonText = computed(() => this.options().buttonText ?? "주소 검색");
 
-  private scriptLoaded = false;
   private scriptLoading = false;
-  private loadCallbacks: Array<() => void> = [];
-
-  constructor() {
-    // Initialize button styling
-    this.destroyRef.onDestroy(() => {
-      this.loadCallbacks = [];
-    });
-  }
-
-  ngOnInit(): void {
-    const opts = this.options();
-    if (opts.class) {
-      this.buttonClasses.set(opts.class);
-    }
-    if (opts.buttonText) {
-      this.buttonText.set(opts.buttonText);
-    }
-  }
 
   /**
    * Opens the Daum Postcode address search
@@ -105,45 +83,22 @@ export class NgDaumAddressComponent {
       return;
     }
 
-    this.loadScript(() => {
+    if (this.scriptLoading) return;
+    if (this.document.defaultView?.daum?.Postcode) {
       this.executePostcode();
-    });
-  }
-
-  private loadScript(callback: () => void): void {
-    if (this.scriptLoaded) {
-      callback();
       return;
     }
-
-    this.loadCallbacks.push(callback);
-
-    if (this.scriptLoading) {
-      return;
-    }
-
     this.scriptLoading = true;
-
-    const script = this.renderer.createElement("script") as HTMLScriptElement;
-    script.type = "text/javascript";
-    script.src = DAUM_POSTCODE_SCRIPT_URL;
-    script.async = true;
-
-    script.onload = () => {
-      this.scriptLoaded = true;
-      this.scriptLoading = false;
-      for (const cb of this.loadCallbacks) {
-        cb();
-      }
-      this.loadCallbacks = [];
-    };
-
-    script.onerror = () => {
-      this.scriptLoading = false;
-      console.error("[ng-daum-address] Failed to load Daum Postcode script");
-    };
-
-    this.renderer.appendChild(this.document.body, script);
+    void loadDaumPostcodeScript(this.document)
+      .then(() => {
+        if (!this.destroyRef.destroyed) this.executePostcode();
+      })
+      .catch((error: unknown) => {
+        console.error("[ng-daum-address] Failed to load Daum Postcode script", error);
+      })
+      .finally(() => {
+        this.scriptLoading = false;
+      });
   }
 
   private executePostcode(): void {
@@ -159,7 +114,7 @@ export class NgDaumAddressComponent {
         this.handleComplete(data);
       },
       onresize: (size) => {
-        if (opts.type === "layer" && opts.target) {
+        if ((opts.type === "layer" || opts.type === "inline") && opts.target) {
           const layer = this.document.getElementById(opts.target);
           if (layer) {
             layer.style.height = `${size.height}px`;
