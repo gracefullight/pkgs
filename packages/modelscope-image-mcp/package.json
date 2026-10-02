@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/modelscope-image-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "MCP server for ModelScope API-Inference image generation with async task polling and LoRA model support",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,8 +25,8 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/cli.ts",
-    "test": "vitest",
-    "typecheck": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
     "format": "biome format --write src"
@@ -63,14 +63,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "^2.0.0",
-    "zod": "^4.2.0"
+    "@modelcontextprotocol/server": "^2.2.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@types/node": "^24.10.9",
+    "@types/node": "^24.19.1",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6",
-    "vitest": "^4.0.17"
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
   }
 }

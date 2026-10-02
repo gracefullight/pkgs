@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (2026-10-03)
+
+- Update dependencies to current compatible stable versions.
+
 ## [0.1.1](https://github.com/gracefullight/pkgs/compare/@gracefullight/modelscope-image-mcp@0.1.0...@gracefullight/modelscope-image-mcp@0.1.1) (2026-09-10)
 
 
