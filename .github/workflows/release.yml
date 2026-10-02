@@ -43,14 +43,14 @@ jobs:
         id: check-npm
         run: |
           PATHS='${{ needs.release-please.outputs.paths_released }}'
-          HAS_NPM=$(echo "$PATHS" | jq -r '[.[] | select(endswith("-dart") | not)] | length > 0')
-          echo "has_npm_packages=$HAS_NPM" >> $GITHUB_OUTPUT
+          HAS_NPM=$(echo "$PATHS" | jq -r '[.[] | select((endswith("-dart") | not) and . != "packages/zotero-plugin-uts")] | length > 0')
+          echo "has_npm_packages=$HAS_NPM" >> "$GITHUB_OUTPUT"
 
       - name: Setup Bun
         if: steps.check-npm.outputs.has_npm_packages == 'true'
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: "1.4.2"
 
       - name: Setup Node.js
         if: steps.check-npm.outputs.has_npm_packages == 'true'
@@ -72,7 +72,7 @@ jobs:
         run: |
           PATHS='${{ needs.release-please.outputs.paths_released }}'
           for pkg in $(echo "$PATHS" | jq -r '.[]'); do
-            if [[ "$pkg" == packages/* ]] && [[ "$pkg" != *"-dart" ]]; then
+            if [[ "$pkg" == packages/* ]] && [[ "$pkg" != *"-dart" ]] && [[ "$pkg" != "packages/zotero-plugin-uts" ]]; then
                echo "Publishing $pkg..."
                cd "$pkg"
                bun publish --access public
@@ -96,20 +96,24 @@ jobs:
           PATHS='${{ needs.release-please.outputs.paths_released }}'
           DART_PACKAGES=$(echo "$PATHS" | jq -c '[.[] | select(endswith("-dart"))]')
           COUNT=$(echo "$DART_PACKAGES" | jq 'length')
-          echo "packages=$DART_PACKAGES" >> $GITHUB_OUTPUT
-          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "packages=$DART_PACKAGES" >> "$GITHUB_OUTPUT"
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
 
       - name: Setup Flutter
         if: steps.dart-packages.outputs.count != '0'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.5'
 
       - name: Setup pub.dev credentials
         if: steps.dart-packages.outputs.count != '0'
+        env:
+          PUB_CREDENTIALS: ${{ secrets.PUB_CREDENTIALS }}
         run: |
-          mkdir -p $XDG_CONFIG_HOME/dart
-          echo '${{ secrets.PUB_CREDENTIALS }}' > "$XDG_CONFIG_HOME/dart/pub-credentials.json"
+          PUB_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dart"
+          mkdir -p "$PUB_CONFIG_DIR"
+          printf '%s' "$PUB_CREDENTIALS" > "$PUB_CONFIG_DIR/pub-credentials.json"
 
       - name: Publish Dart packages
         if: steps.dart-packages.outputs.count != '0'
@@ -139,13 +143,13 @@ jobs:
         run: |
           PATHS='${{ needs.release-please.outputs.paths_released }}'
           HAS_ZOTERO=$(echo "$PATHS" | jq -r '[.[] | select(. == "packages/zotero-plugin-uts")] | length > 0')
-          echo "has_zotero_package=$HAS_ZOTERO" >> $GITHUB_OUTPUT
+          echo "has_zotero_package=$HAS_ZOTERO" >> "$GITHUB_OUTPUT"
 
       - name: Setup Bun
         if: steps.check-zotero.outputs.has_zotero_package == 'true'
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: "1.4.2"
 
       - name: Install dependencies
         if: steps.check-zotero.outputs.has_zotero_package == 'true'
@@ -156,8 +160,8 @@ jobs:
         if: steps.check-zotero.outputs.has_zotero_package == 'true'
         run: |
           VERSION=$(node -p "require('./packages/zotero-plugin-uts/package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=zotero-plugin-uts@$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=zotero-plugin-uts@$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build .xpi file
         if: steps.check-zotero.outputs.has_zotero_package == 'true'

@@ -5,9 +5,10 @@ config_roots = ["packages/*", "apps/*"]
 experimental = true
 
 [tools]
-node = "24"
-bun = "1"
-dart = "3"
+node = "24.21.0"
+bun = "1.4.2"
+dart = "3.13.4"
+flutter = "3.47.5-stable"
 
 [hooks]
 postinstall = """
@@ -31,7 +32,11 @@ chmod +x .git/hooks/pre-push
 
 [tasks."git:commit-msg"]
 description = "Validate commit message with commitlint"
-run = "bunx @commitlint/cli --edit $1"
+usage = 'arg "<file>"'
+run = '''
+bunx @commitlint/cli --edit "$usage_file"
+.githooks/commit-msg "$usage_file"
+'''
 
 [tasks."git:pre-commit"]
 description = "Lint staged files before commit"
@@ -49,14 +54,14 @@ bun run lint
 CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
 CHANGED_PACKAGES=$(
   printf "%s\n" "$CHANGED_FILES" |
-    cut -d/ -f1,2 |
-    grep '^packages/' || true |
+    sed -n 's#^\(packages/[^/]*\)/.*#\1#p' |
     sort -u
 )
 
 if [ -n "$CHANGED_PACKAGES" ]; then
   for pkg_dir in $CHANGED_PACKAGES; do
     pkg="$pkg_dir/package.json"
+    if [ ! -f "$pkg" ]; then continue; fi
     test_cmd=$(jq -r '.scripts.test // empty' "$pkg")
     if [ -n "$test_cmd" ]; then
       bin=$(echo "$test_cmd" | awk '{print $1}')
@@ -69,6 +74,7 @@ if [ -n "$CHANGED_PACKAGES" ]; then
 
   for pkg_dir in $CHANGED_PACKAGES; do
     pkg="$pkg_dir/package.json"
+    if [ ! -f "$pkg" ]; then continue; fi
     test_cmd=$(jq -r '.scripts.test // empty' "$pkg")
     if [ -n "$test_cmd" ]; then
       echo "Running tests for $pkg_dir"

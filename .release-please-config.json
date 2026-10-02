@@ -35,7 +35,7 @@
     "packages/zotero-plugin-uts": {
       "release-type": "node",
       "component": "zotero-plugin-uts",
-      "extra-files": ["updates.json", "addon/manifest.json"]
+      "extra-files": ["addon/manifest.json"]
     },
     "packages/react-share": {
       "release-type": "node",

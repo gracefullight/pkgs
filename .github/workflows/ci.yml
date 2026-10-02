@@ -16,7 +16,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: "1.4.2"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,5 +29,8 @@ jobs:
       - name: Lint
         run: bun run lint
 
-      - name: Test all packages
-        run: bun run --filter './packages/*' test
+      - name: Test packages and examples
+        run: bun run test
+
+      - name: Typecheck all workspaces
+        run: bun run typecheck

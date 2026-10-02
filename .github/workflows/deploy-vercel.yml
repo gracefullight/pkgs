@@ -26,7 +26,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: "1.4.2"
 
       - uses: actions/setup-node@v4
         with:
@@ -42,18 +42,18 @@ jobs:
 
       - name: Vercel Pull
         run: |
-          npx vercel pull --yes \
+          bunx vercel pull --yes \
             --environment=${{ github.ref_name == 'main' && 'production' || 'preview' }} \
             --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Vercel Build
         run: |
-          npx vercel build \
+          bunx vercel build \
             ${{ github.ref_name == 'main' && '--prod' || '' }} \
             --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Vercel Deploy
         run: |
-          npx vercel deploy --prebuilt \
+          bunx vercel deploy --prebuilt \
             ${{ github.ref_name == 'main' && '--prod' || '' }} \
             --token=${{ secrets.VERCEL_TOKEN }}

@@ -5,11 +5,13 @@ on:
     branches: [main, develop]
     paths:
       - 'packages/saju-dart/**'
+      - 'apps/saju-example-dart/**'
       - '**/pubspec.yaml'
   pull_request:
     branches: [main, develop]
     paths:
       - 'packages/saju-dart/**'
+      - 'apps/saju-example-dart/**'
       - '**/pubspec.yaml'
 
 jobs:
@@ -23,9 +25,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.5'
 
       - name: Test Dart packages
         run: |
+          FLUTTER_ROOT="$(dirname "$(dirname "$(command -v flutter)")")"
+          export FLUTTER_ROOT
           for dir in packages/*-dart; do
             if [ -d "$dir" ]; then
               echo "Testing $dir..."
@@ -36,3 +41,10 @@ jobs:
               cd -
             fi
           done
+
+      - name: Check Flutter example
+        working-directory: apps/saju-example-dart
+        run: |
+          flutter pub get
+          flutter analyze --no-pub
+          flutter test --no-pub
