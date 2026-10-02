@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/ng-daum-address@1.0.3...@gracefullight/ng-daum-address@1.1.0) (2026-10-02)
+
+
+### Features
+
+* add ng-daum-address package and example app with tests ([8ffb490](https://github.com/gracefullight/pkgs/commit/8ffb4906c876a459a1ddad1c3e8471144913b489))
+* rename `ng-daum-address` package to `@gracefullight/ng-daum-address` ([2806f63](https://github.com/gracefullight/pkgs/commit/2806f6387db822bea3d912645b310747ddd95c06))
+
+
+### Bug Fixes
+
+* apply consistent code formatting and update various package configurations and tools across the monorepo ([7783641](https://github.com/gracefullight/pkgs/commit/7783641e0b3a8c9de191441c4f05bb3070af4e69))
+* **ng-daum-address:** coordinate script loading and package exports ([5c38aee](https://github.com/gracefullight/pkgs/commit/5c38aeee95b5fccad285cd7d816a874c2454ae5b))
+* resolve TS6 build errors across packages ([3644648](https://github.com/gracefullight/pkgs/commit/36446487995299b19ca4b20b7022fda3be514fe2))
+
 ## 1.0.3 (2026-10-03)
 
 - Coordinate shared Daum Postcode script loading across component instances.

@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.5](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.2.4...@gracefullight/biome-plugin@0.2.5) (2026-10-02)
+
+
+### Features
+
+* **biome-plugin:** improve no-relative-imports rule and add debugging docs ([a658e1f](https://github.com/gracefullight/pkgs/commit/a658e1f47fd4c0ef0a95753d912c3793e41c92e3))
+* introduce biome-plugin with a `no-relative-imports` GritQL rule and its associated tests and documentation ([055d0e9](https://github.com/gracefullight/pkgs/commit/055d0e93c3eb5ffef950f7e11b6ded0198061160))
+
+
+### Bug Fixes
+
+* apply consistent code formatting and update various package configurations and tools across the monorepo ([7783641](https://github.com/gracefullight/pkgs/commit/7783641e0b3a8c9de191441c4f05bb3070af4e69))
+* **biome-plugin:** use GritQL includes syntax for biome 2.4.x compat ([7f8b5e9](https://github.com/gracefullight/pkgs/commit/7f8b5e99d71753ee91bd3d03ff94a0a8e59a8bed))
+* correct Biome plugin path ([30d62bb](https://github.com/gracefullight/pkgs/commit/30d62bbd301f53fad971d6e04cdf898430e682aa))
+* resolve 9 lint issues including auto-fixable code style and type safety ([b21a32c](https://github.com/gracefullight/pkgs/commit/b21a32c0dc0455393f88ac159e9a2d41f0c6b959))
+
+
+### Performance Improvements
+
+* **biome-plugin:** use the installed binary in tests ([7423a71](https://github.com/gracefullight/pkgs/commit/7423a71fadadb51673da19c8c7f3ac451b552f06))
+
 ## 0.2.4 (2026-10-03)
 
 - Run tests against the installed Biome binary.

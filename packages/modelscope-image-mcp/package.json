@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/modelscope-image-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "MCP server for ModelScope API-Inference image generation with async task polling and LoRA model support",
   "type": "module",
   "main": "./dist/index.js",

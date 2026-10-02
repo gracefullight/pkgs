@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.7](https://github.com/gracefullight/pkgs/compare/@gracefullight/react-share@0.1.6...@gracefullight/react-share@0.1.7) (2026-10-02)
+
+
+### Features
+
+* make Kakao share strategy asynchronous and update the Kakao SDK URL ([e0b5d3f](https://github.com/gracefullight/pkgs/commit/e0b5d3f5b279e20959d0740b4d12321c03e9b482))
+* **react-share:** add FormatTextFunction type for custom share text formatting ([68d1e16](https://github.com/gracefullight/pkgs/commit/68d1e1671a833e8700c45e725039d03035dd8eab))
+* **react-share:** add headless social sharing library with strategy pattern ([2eacbab](https://github.com/gracefullight/pkgs/commit/2eacbabd4d066879b9959274ff826a1c0145ec4a))
+* **react-share:** update formatShareText and formatTweetText to support custom formatter ([3653fca](https://github.com/gracefullight/pkgs/commit/3653fca04148f950bd5828d4b981339b6a90d48f))
+* **react-share:** update share strategies to support formatText option ([5ab989b](https://github.com/gracefullight/pkgs/commit/5ab989b3265ea8a13d3a4f05e04d742318319caf))
+
+
+### Bug Fixes
+
+* **react-share:** handle SDK loading and cancelled sharing ([4d356ea](https://github.com/gracefullight/pkgs/commit/4d356eab74c96f5258e9abcc8484cc6c74386b4a))
+* **react-share:** refactor native strategy to reduce cognitive complexity ([e3c2b85](https://github.com/gracefullight/pkgs/commit/e3c2b854ebecde09072a6a9fefff98232e86b4bf))
+* **react-share:** resolve TypeScript errors for SDK types ([0ac59f1](https://github.com/gracefullight/pkgs/commit/0ac59f192c7cf063de8001a1b410b02ec5252f8d))
+* resolve TS6 build errors across packages ([3644648](https://github.com/gracefullight/pkgs/commit/36446487995299b19ca4b20b7022fda3be514fe2))
+
 ## 0.1.6 (2026-10-03)
 
 - Wait for shared SDK scripts to finish loading before reporting readiness.

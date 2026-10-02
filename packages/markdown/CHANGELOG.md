@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.1.10](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.9...@gracefullight/markdown@0.1.10) (2026-10-02)
+
+
+### Features
+
+* **markdown:** add @gracefullight/markdown package ([4558e21](https://github.com/gracefullight/pkgs/commit/4558e21228bc67109d9fb7f2bafb7fa3696dc3ea))
+* **markdown:** add markdown analysis and safer preprocessing ([a2791b4](https://github.com/gracefullight/pkgs/commit/a2791b4ccdb1dc2489f586db6d1c2973b31c2189))
+* **markdown:** add yarn install command ([a15dfc1](https://github.com/gracefullight/pkgs/commit/a15dfc155c98ce0ee376e5c853d6f50310532880))
+* **markdown:** update documentation ([2655c1b](https://github.com/gracefullight/pkgs/commit/2655c1b04105475ac20da85f061bba0cfa0870bc))
+
+
+### Bug Fixes
+
+* **markdown:** broaden trailing-punct lookahead to all word characters ([6deb5af](https://github.com/gracefullight/pkgs/commit/6deb5af34d790bdb53c69914632aa7cea0e39e3e))
+* **markdown:** handle spaces inside bold markers ([e5e9a15](https://github.com/gracefullight/pkgs/commit/e5e9a153d1938b4309208dd788c92e6fe099b7cd))
+* **markdown:** insert spaces around ** for CommonMark flanking fix ([19496dc](https://github.com/gracefullight/pkgs/commit/19496dc149a2cc8bb41c7fc02bdd94dc9db069d0))
+* **markdown:** move trailing punctuation outside bold markers for Korean text ([162e5ee](https://github.com/gracefullight/pkgs/commit/162e5ee6b18a4817d7b786eec8ef267357c62431))
+* **markdown:** preserve code and document structure ([a183702](https://github.com/gracefullight/pkgs/commit/a183702f1d4c728bb06a8448e27b9d96d7d173c2))
+* **markdown:** preserve strong rendering with Korean text ([9d34823](https://github.com/gracefullight/pkgs/commit/9d34823d138a73ce9601c4612af13d38b75942f5))
+* **markdown:** use &lt;strong&gt; tags when CommonMark flanking rules fail ([aaeaf17](https://github.com/gracefullight/pkgs/commit/aaeaf17aeedb38fb2f58c89ec8468a728ba0a695))
+* resolve TS6 build errors across packages ([3644648](https://github.com/gracefullight/pkgs/commit/36446487995299b19ca4b20b7022fda3be514fe2))
+
 ## 0.1.9 (2026-10-03)
 
 - Preserve indentation, hard line breaks, code fences, and inline code during preprocessing.
