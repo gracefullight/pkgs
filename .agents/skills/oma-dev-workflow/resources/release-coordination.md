@@ -31,11 +31,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v4
+      - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
-          package-name: oh-my-agent
 ```
 
 ## Mise Tasks for Release Management
@@ -46,29 +45,29 @@ jobs:
 node = "24"
 bun = "latest"
 
-[tasks.release:check]
+[tasks."release:check"]
 description = "Check release-please status"
 run = '''
 #!/usr/bin/env bash
-echo "🔍 Checking release status..."
+echo "Checking release status..."
 echo ""
 echo "Open release PRs:"
-bunx gh pr list --label "autorelease: pending" --state open
+gh pr list --label "autorelease: pending" --state open
 echo ""
 echo "Latest releases:"
-bunx gh release list --limit 5
+gh release list --limit 5
 '''
 
-[tasks.release:manifest]
+[tasks."release:manifest"]
 description = "Show current release manifest"
 run = "cat .release-please-manifest.json"
 
-[tasks.release:changelog]
+[tasks."release:changelog"]
 description = "Preview changelog (local dry-run)"
 run = '''
 #!/usr/bin/env bash
-echo "📋 Recent conventional commits:"
-git log --pretty=format:"%s" $(git describe --tags --abbrev=0)..HEAD | grep -E "^(feat|fix|docs|style|refactor|test|chore|ci)(\(.+\))?:"
+echo "Recent conventional commits:"
+git log --pretty=format:"%s" $(git describe --tags --abbrev=0)..HEAD | grep -E "^(feat|fix|perf|build|revert|docs|style|refactor|test|chore|ci)(\(.+\))?:"
 '''
 ```
 
@@ -115,8 +114,8 @@ Release Please recognizes these commit types:
 ### 1. Develop Features
 ```bash
 # Make changes with conventional commits
-git commit -m "feat(cli): add infrastructure skills category"
-git commit -m "fix(cli): correct skill installation path"
+git commit -m "feat(infra): add infrastructure skills category"
+git commit -m "fix(shared): correct skill installation path"
 git commit -m "docs: update installation guide"
 ```
 
@@ -131,30 +130,25 @@ Automatically creates a PR like:
 - Includes updated CHANGELOG.md
 - Includes version bump in package.json
 
-### 4. Review and Merge
+### 4. Automatic merge
+`.github/workflows/release-please.yml` squash-merges every open pull request labeled `autorelease: pending`. `GITHUB_TOKEN` does not emit a push event, so the same job syncs `prompt-manifest.json` and dispatches the workflow again. That second run tags the release and publishes.
+
 ```bash
-# Check the release PR
-bunx gh pr list --label "autorelease: pending"
-
-# Review changes
-git fetch origin
-git diff origin/main...release-please--branches--main
-
-# Merge via GitHub (creates release)
+gh pr list --label "autorelease: pending"
 ```
 
 ### 5. Verify Release
 ```toml
-[tasks.release:verify]
+[tasks."release:verify"]
 description = "Verify latest release"
 run = '''
 #!/usr/bin/env bash
-echo "✅ Latest release:"
-bunx gh release view --json tagName,name,createdAt
+echo "Latest release:"
+gh release view --json tagName,name,createdAt
 
 echo ""
-echo "📦 Assets:"
-bunx gh release view --json assets
+echo "Assets:"
+gh release view --json assets
 '''
 ```
 
@@ -163,11 +157,11 @@ bunx gh release view --json assets
 If needed, manually trigger release-please:
 
 ```toml
-[tasks.release:trigger]
+[tasks."release:trigger"]
 description = "Manually trigger release-please (CI will handle)"
 run = '''
 #!/usr/bin/env bash
-echo "🚀 Triggering release-please..."
+echo "Triggering release-please..."
 echo "Push to main will trigger the workflow automatically"
 echo ""
 echo "Current status:"
@@ -178,11 +172,11 @@ mise run release:check
 ## Post-Release Tasks
 
 ```toml
-[tasks.release:cleanup]
+[tasks."release:cleanup"]
 description = "Cleanup after release"
 run = '''
 #!/usr/bin/env bash
-echo "🧹 Post-release cleanup..."
+echo "Post-release cleanup..."
 
 # Pull latest changes with tags
 git pull origin main --tags
@@ -197,22 +191,22 @@ echo "Latest tag:"
 git describe --tags --abbrev=0
 
 echo ""
-echo "✅ Release cleanup complete"
+echo "Release cleanup complete"
 '''
 ```
 
 ## Troubleshooting
 
 ```toml
-[tasks.release:debug]
+[tasks."release:debug"]
 description = "Debug release issues"
 run = '''
 #!/usr/bin/env bash
-echo "🔍 Release Debugging"
+echo "Release Debugging"
 echo ""
 
 echo "1. Conventional commits since last tag:"
-git log --pretty=format:"%s" $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD | grep -E "^(feat|fix|docs|style|refactor|test|chore|ci)(\(.+\))?:" || echo "  No conventional commits found"
+git log --pretty=format:"%s" $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD | grep -E "^(feat|fix|perf|build|revert|docs|style|refactor|test|chore|ci)(\(.+\))?:" || echo "  No conventional commits found"
 
 echo ""
 echo "2. Release Please config files:"
@@ -220,11 +214,11 @@ ls -la .release-please*.json 2>/dev/null || echo "  Config files not found"
 
 echo ""
 echo "3. GitHub Actions status:"
-bunx gh run list --workflow=release-please.yml --limit 5 2>/dev/null || echo "  No runs found"
+gh run list --workflow=release-please.yml --limit 5 2>/dev/null || echo "  No runs found"
 
 echo ""
 echo "4. Open release PRs:"
-bunx gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release PRs"
+gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release PRs"
 '''
 ```
 
@@ -234,11 +228,12 @@ bunx gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release
 2. **Release Please config** (`.release-please-config.json`)
 3. **Release Please manifest** (`.release-please-manifest.json`)
 4. **Conventional commits** (already configured via commitlint)
+5. **GitHub CLI** (`gh`) installed for the release tasks — `brew install gh` or `mise use gh` (it is a Go binary, not an npm package; `bunx gh` resolves an unrelated deprecated package)
 
 ## Benefits
 
-- ✅ Automated versioning based on commits
-- ✅ Auto-generated CHANGELOG.md
-- ✅ GitHub releases with notes
-- ✅ No manual version bumping
-- ✅ Integrated with GitHub PR workflow
+- Automated versioning based on commits
+- Auto-generated CHANGELOG.md
+- GitHub releases with notes
+- No manual version bumping
+- Integrated with GitHub PR workflow

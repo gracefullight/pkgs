@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "serena": {
+      "command": "oma",
+      "args": [
+        "bridge",
+        "--context",
+        "oma"
+      ],
+      "env": {
+        "SERENA_LOG_LEVEL": "info"
+      }
+    },
+    "aside": {
+      "type": "stdio",
+      "command": "aside",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

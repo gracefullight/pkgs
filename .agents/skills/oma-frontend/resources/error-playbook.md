@@ -1,7 +1,21 @@
 # Frontend Agent - Error Recovery Playbook
 
 When you encounter a failure, find the matching scenario and follow the recovery steps.
-Do NOT stop or ask for help until you have exhausted the playbook.
+Use the relevant recovery steps. If required information or authority is missing, pause the dependent action and continue independent work.
+
+---
+
+## False Positive: `proxy.ts` flagged as dead code or `middleware.ts` demanded
+
+<!-- oma-docs:ignore-start -->
+**Symptoms**: Reviewer claims `src/proxy.ts` won't be picked up, demands rename to `src/middleware.ts`, or flags the auth gate as not wired.
+<!-- oma-docs:ignore-end -->
+
+1. Check the installed Next.js version and the project's request interception convention.
+2. For a project using the Next.js 16+ proxy convention, inspect `proxy.ts` in the root or `src/` and its `proxy` export.
+3. Verify location, configuration, and relevant tests. A framework entry point need not have application imports.
+4. Correct a finding based only on an outdated filename assumption; retain any wiring or authorization defect supported by evidence.
+5. Reference: https://nextjs.org/docs/messages/middleware-to-proxy
 
 ---
 
@@ -9,12 +23,12 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `TS2322`, `TS2345`, `Type X is not assignable to type Y`
 
-1. Read the error — which file, which line, which types conflict
+1. Read the error: which file, which line, which types conflict
 2. Check: is the interface/type definition correct?
 3. Check: is the API response type matching the expected shape?
 4. If API mismatch: update the type to match actual response (don't cast with `as any`)
 5. If generic issue: use explicit type parameter `<Type>` instead of inference
-6. **NEVER do this**: `@ts-ignore`, `as any` — hides type issues without resolving them
+6. **NEVER do this**: `@ts-ignore`, `as any` (hides type issues without resolving them)
 
 ---
 
@@ -22,11 +36,11 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `next build` fails, `Module not found`, `SyntaxError`
 
-1. Read the full error — which module, which file
-2. If missing dependency: note in result as "requires `npm install X`" — do NOT install yourself
+1. Read the full error: which module, which file
+2. If missing dependency: note in result as "requires `npm install X`"; do NOT install yourself
 3. If import path wrong: use `search_for_pattern("export.*ComponentName")` to find actual path
 4. If dynamic import issue: ensure component is client-side (`'use client'`)
-5. Re-run build after fix to confirm
+5. Re-run the build only if the user explicitly requested a build; otherwise use relevant non-build checks and report the verification limit.
 
 ---
 
@@ -34,7 +48,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `vitest` FAILED, `expect(X).toBe(Y)` assertion errors
 
-1. Read the error — expected vs received, which test file
+1. Read the error: expected vs received, which test file
 2. `find_symbol("ComponentName")` to check current implementation
 3. Determine: test outdated or implementation wrong?
    - Test expects old behavior → update test
@@ -62,8 +76,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `Network Error`, `CORS`, `401 Unauthorized`, wrong data shape
 
-1. **CORS**: Check backend CORS config — is frontend origin allowed?
-2. **401**: Check token — is it in the header? is it expired?
+1. **CORS**: Check backend CORS config; is frontend origin allowed?
+2. **401**: Check token; is it in the header? is it expired?
 3. **Wrong data**: Log `response.data` and compare with expected type
 4. **Network Error**: Is the backend running? Correct port?
 5. If backend isn't your responsibility: document the expected API contract in result
@@ -74,30 +88,33 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Component renders but looks wrong, responsive breakpoint fails
 
-1. Check Tailwind classes — typo? wrong breakpoint prefix?
-2. Check parent container — is it blocking layout? (`overflow-hidden`, fixed width)
+1. Check Tailwind classes: typo? wrong breakpoint prefix?
+2. Check parent container: is it blocking layout? (`overflow-hidden`, fixed width)
 3. Test at specific breakpoints: 320px, 768px, 1024px, 1440px
 4. Use browser DevTools to inspect computed styles
 5. If dark mode issue: check `dark:` variants applied
 
 ---
 
-## Rate Limit / Quota Error (Gemini API)
+## Rate Limit / Quota Error (LLM runtime)
 
-**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
+**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded` (any vendor runtime: Claude, Codex, etc.)
 
-1. **Stop immediately** — do not make additional API calls
+1. **Stop immediately**: do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
 4. Specify remaining tasks
 
 ---
 
-## Serena Memory Unavailable
+## Workflow State Unavailable
 
-1. Retry once
-2. If 2 consecutive failures: use local file `/tmp/progress-{agent-id}[-{sessionId}].md`
-3. Add `memory_fallback: true` flag to result
+Follow `../../_shared/runtime/memory-protocol.md`; state storage is independent of the code-intelligence provider.
+
+1. Use the injected progress/result paths and session/task identity.
+2. If a file operation fails, retry once when the failure may be transient.
+3. Preserve work and report the failed path and error to the coordinator. Do not silently redirect artifacts to `/tmp` or mark a missing result as completed.
+4. For read-only tasks, return the result through the runtime's response channel as required by the dispatch contract.
 
 ---
 
@@ -105,4 +122,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **After 3 failures**: If same approach fails 3 times, must try a different method
 - **Blocked**: If no progress after 5 turns, save current state and record `Status: blocked`
-- **Out of scope**: If you find backend issues, only record in result — do not modify directly
+- **Out of scope**: If you find backend issues, only record in result; do not modify directly

@@ -1,7 +1,7 @@
 # Backend Agent - Error Recovery Playbook
 
 When you encounter a failure, find the matching scenario and follow the recovery steps.
-Do NOT stop or ask for help until you have exhausted the playbook.
+Use the relevant recovery steps. If required information or authority is missing, pause the dependent action and continue independent work.
 
 ---
 
@@ -9,9 +9,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Module/package not found errors
 
-1. Check the import path — typo? wrong package name?
+1. Check the import path: typo? wrong package name?
 2. Verify the dependency exists in your package manifest
-3. If missing: note it in your result as "requires install the missing dependency" — do NOT install yourself
+3. If missing: note it in your result as "requires install the missing dependency"; do NOT install yourself
 4. If it's a local module: check the directory structure with `get_symbols_overview`
 5. If the path changed: use `search_for_pattern("class ClassName")` to find the new location
 
@@ -21,13 +21,13 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: test runner returns FAILED, assertion errors
 
-1. Read the full error output — which test, which assertion, expected vs actual
+1. Read the full error output: which test, which assertion, expected vs actual
 2. `find_symbol("test_function_name")` to read the test code
 3. Determine: is the test wrong or is the implementation wrong?
    - Test expects old behavior → update test
    - Implementation has a bug → fix implementation
 4. Run the specific failing test with verbose output
-5. After fix, run full test suite to check for regressions
+5. After the fix, run affected regression tests; run a broader suite only when impact or project requirements justify it
 6. **After 3 failures**: Try a different approach. Record current attempt in progress and implement alternative
 
 ---
@@ -36,7 +36,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Migration command fails, `IntegrityError`, duplicate column
 
-1. Read the error — is it a conflict with existing migration?
+1. Read the error; is it a conflict with existing migration?
 2. Check current DB state: Check current migration state
 3. If migration conflicts: Rollback one migration step then fix migration script
 4. If schema mismatch: compare model with actual DB schema
@@ -68,26 +68,25 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Rate Limit / Quota Error (Gemini API)
+## Rate Limit / Quota Error (LLM runtime)
 
-**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
+**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded` (any vendor runtime — Gemini, Claude, Codex, etc.)
 
-1. **Stop immediately** — do not make additional API calls
+1. **Stop immediately**; do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
 4. Specify remaining tasks so orchestrator can retry later
 
 ---
 
-## Serena Memory Unavailable
+## Workflow State Unavailable
 
-**Symptoms**: `write_memory` / `read_memory` failure, timeout
+Follow `../../_shared/runtime/memory-protocol.md`; state storage is independent of the code-intelligence provider.
 
-1. Retry once (may be transient error)
-2. If 2 consecutive failures: fall back to local files
-   - progress → write to `/tmp/progress-{agent-id}[-{sessionId}].md`
-   - result → write to `/tmp/result-{agent-id}[-{sessionId}].md`
-3. Add `memory_fallback: true` flag to result
+1. Use the injected progress/result paths and session/task identity.
+2. If a file operation fails, retry once when the failure may be transient.
+3. Preserve work and report the failed path and error to the coordinator. Do not silently redirect artifacts to `/tmp` or mark a missing result as completed.
+4. For read-only tasks, return the result through the runtime's response channel as required by the dispatch contract.
 
 ---
 
@@ -95,4 +94,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **After 3 failures**: If same approach fails 3 times, must try a different method
 - **Blocked**: If no progress after 5 turns, save current state and record `Status: blocked` in result
-- **Out of scope**: If you find issues in another agent's domain, only record in result — do not modify directly
+- **Out of scope**: If you find issues in another agent's domain, only record in result; do not modify directly

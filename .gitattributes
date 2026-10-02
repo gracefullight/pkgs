@@ -1,0 +1,2 @@
+# Preserve Markdown hard line breaks during Git whitespace checks.
+*.md whitespace=-blank-at-eol

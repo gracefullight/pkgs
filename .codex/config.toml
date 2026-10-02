@@ -1,4 +1,20 @@
-
-
 [features]
-codex_hooks = true
+goals = true
+
+[mcp_servers.serena]
+command = "oma"
+args = [ "bridge", "--context", "oma" ]
+startup_timeout_sec = 90
+
+[mcp_servers.serena.env]
+SERENA_LOG_LEVEL = "info"
+
+[mcp_servers.aside]
+command = "aside"
+args = [ "mcp" ]
+
+[analytics]
+enabled = false
+
+[feedback]
+enabled = false

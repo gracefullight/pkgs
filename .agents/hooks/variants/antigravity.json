@@ -1,0 +1,49 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "antigravity",
+  "hookDir": ".agents/hooks/core",
+  "settingsFile": ".agents/hooks.json",
+  "projectDirEnv": null,
+  "runtime": "bun",
+  "homeOnly": true,
+  "events": {
+    "PreInvocation": [
+      {
+        "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "skill-injector.ts",
+        "timeout": 3
+      },
+      {
+        "hook": "code-intelligence-primer.ts",
+        "timeout": 3
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hook": "refactor-guard.ts",
+        "matcher": "write_to_file|replace_file_content|notebook_edit",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "hook": "persistent-mode.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "refactor-guard.ts",
+        "timeout": 5
+      }
+    ]
+  },
+  "statusLine": {
+    "hook": "hud.ts"
+  }
+}

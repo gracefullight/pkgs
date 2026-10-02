@@ -3,7 +3,7 @@
 ## Security Checklist
 
 ### Authentication & Authorization
-- [ ] Passwords hashed with bcrypt/argon2 (not MD5/SHA1)
+- [ ] Passwords hashed with Argon2id (scrypt/bcrypt acceptable; never MD5/SHA1)
 - [ ] Password strength requirements enforced (min 8 chars)
 - [ ] JWT tokens properly signed and validated
 - [ ] Refresh tokens implemented (if long sessions needed)
@@ -87,7 +87,7 @@
 
 ---
 
-## Accessibility Checklist (WCAG 2.1 AA)
+## Accessibility Checklist (WCAG 2.2 AA)
 
 ### Perceivable
 - [ ] All images have alt text
@@ -127,7 +127,8 @@
 ## Testing Checklist
 
 ### Unit Tests
-- [ ] Test coverage > 80%
+- [ ] Coverage meets the project's declared baseline or changed-code target when coverage is applicable; otherwise record risk-focused tests or alternative verification and its limits
+- [ ] Tasks marked `test_approach: tdd` have a `TDD_EVIDENCE` block in the implementation result (focused test command, RED failure, GREEN pass) — see `../../_shared/core/test-approach.md`; do not require this evidence for `test_after` / `not_applicable` tasks
 - [ ] All business logic functions tested
 - [ ] Edge cases covered
 - [ ] Error handling tested
@@ -270,8 +271,8 @@
 - [ ] No data loss scenarios
 
 ### Important (Should Pass)
-- [ ] Test coverage > 80%
-- [ ] Accessibility WCAG 2.1 AA
+- [ ] Applicable coverage target or documented alternative verification met
+- [ ] Accessibility WCAG 2.2 AA
 - [ ] Code quality metrics met
 - [ ] Documentation complete
 
@@ -284,25 +285,25 @@
 
 ## Issue Prioritization
 
-### 🔴 CRITICAL (Block Deployment)
+### CRITICAL (Block Deployment)
 - Security vulnerabilities (SQL injection, XSS, auth bypass)
 - Data loss bugs
 - Application crashes
 - Complete feature breakage
 
-### 🟠 HIGH (Fix Before Launch)
+### HIGH (Fix Before Launch)
 - Performance issues (> 5s load time)
 - Major accessibility violations
 - Missing auth checks
 - Broken core functionality
 
-### 🟡 MEDIUM (Fix in Sprint)
+### MEDIUM (Fix in Sprint)
 - Minor bugs
 - Code quality issues
 - Missing tests
 - Minor accessibility issues
 
-### 🔵 LOW (Backlog)
+### LOW (Backlog)
 - Refactoring opportunities
 - Performance optimizations
 - Nice-to-have features
@@ -313,8 +314,8 @@
 ## Notes
 
 - Run automated tools FIRST: `npm audit`, `bandit`, `lighthouse`
-- Use Serena MCP for code analysis patterns
-- Use Chrome DevTools MCP (`new_page` with `isolatedContext: "qa-test"`) for runtime verification and E2E testing
+- Use configured code intelligence or the documented native fallback for code analysis patterns
+- Browser verification follows `mcp.devtools_browsers`: Aside (`aside`, default), Chrome DevTools MCP (`chrome`), and Firefox DevTools MCP (`firefox`). Multiple selections are supported; change them with `oma update mcp`. Discover the selected server’s tools before use. Chrome-specific calls below are examples only; use supported equivalents for Aside and Firefox. An empty selection disables browser MCP verification; report unverified UI checks.
 - Document all findings with file:line references
 - Provide remediation code examples
 - Estimate fix time for each issue
@@ -326,13 +327,13 @@
 Record results in the structured table format defined in `execution-protocol.md` Step 2.5 (Recording Results).
 
 - [ ] Application starts without errors
-- [ ] All modified endpoints return expected status codes — `list_network_requests()` to verify
-- [ ] Form submissions produce correct database state — `fill_form()` + `list_network_requests()`
-- [ ] Error states render user-friendly messages (not stack traces) — `take_snapshot()` on error paths
-- [ ] Empty/loading/error UI states all handled — `navigate_page()` to empty state routes + `take_snapshot()`
-- [ ] Interactive elements respond to input (not display-only) — `click(uid)` + `take_snapshot()` before/after
-- [ ] Auth flows work end-to-end (register → login → protected route → logout) — sequential `fill()` + `click()` + `list_network_requests()`
-- [ ] Rate limiting / throttling triggers at configured thresholds — rapid `evaluate_script(fetch)` calls
-- [ ] File upload/download actually transfers data (not stubbed) — `upload_file(uid, filePath)` + verify response
-- [ ] Pagination returns correct pages (not always page 1) — `click()` page 2 + `take_snapshot()` to verify different content
-- [ ] Zero JS console errors on critical paths — `list_console_messages(types: ["error"])`
+- [ ] All modified endpoints return expected status codes; verify with `list_network_requests()`
+- [ ] Form submissions produce correct database state; verify with `fill_form()` + `list_network_requests()`
+- [ ] Error states render user-friendly messages (not stack traces); verify with `take_snapshot()` on error paths
+- [ ] Empty/loading/error UI states all handled; verify with `navigate_page()` to empty state routes + `take_snapshot()`
+- [ ] Interactive elements respond to input (not display-only); verify with `click(uid)` + `take_snapshot()` before/after
+- [ ] Auth flows work end-to-end (register → login → protected route → logout); verify with sequential `fill()` + `click()` + `list_network_requests()`
+- [ ] Rate limiting / throttling triggers at configured thresholds; verify with rapid `evaluate_script(fetch)` calls
+- [ ] File upload/download actually transfers data (not stubbed); verify with `upload_file(uid, filePath)` + response check
+- [ ] Pagination returns correct pages (not always page 1); verify with `click()` page 2 + `take_snapshot()` to confirm different content
+- [ ] Zero JS console errors on critical paths; verify with `list_console_messages(types: ["error"])`

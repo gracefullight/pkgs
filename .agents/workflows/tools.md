@@ -1,11 +1,11 @@
 ---
-description: Manage MCP tools with natural language commands — list, enable, disable tools and tool groups
+name: tools
+description: Manage MCP tools with natural language commands to list, enable, and disable tools and tool groups
+disable-model-invocation: true
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 1 in order.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - **Read configuration files BEFORE making changes.**
 
 ---
@@ -14,47 +14,17 @@ description: Manage MCP tools with natural language commands — list, enable, d
 
 ---
 
-## Step 1: Show Current Status
+## Step 1: Parse User Command
 
-1. Read `.agents/mcp.json` (project configuration)
-2. Read `~/.gemini/settings.json` if exists (Gemini CLI global settings) — optional
-3. Display status for each MCP server:
-   - `available_tools: null` → "All enabled (no restrictions)"
-   - `available_tools: [...]` → "N tools enabled" + list
-4. If `toolGroups` is defined, display available group list
-
-**Output example:**
-```
-📋 Current MCP Tool Status
-
-[serena]
-- Status: All enabled (no restrictions)
-- Available tools: 15
-
-📦 Available Tool Groups:
-- memory: read_memory, write_memory, edit_memory, list_memories, delete_memory
-- code-analysis: get_symbols_overview, find_symbol, find_referencing_symbols, search_for_pattern
-- code-edit: replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol
-- file-ops: list_dir, find_file
-- all: All tools (no restrictions)
-
-What would you like to change?
-```
-
----
-
-## Step 2: Parse User Command
-
-Parse natural language commands:
+Parse the request once. With no arguments, treat `/tools` as a status query:
 
 | Command Pattern | Interpretation |
 |-----------------|----------------|
-| "current status", "list", "show" | Re-execute Step 1 |
+| No arguments, "current status", "list", "show" | Query: display status in Step 2, then end |
 | "memory tools only", "enable only {group}" | Set only that group's tools in `available_tools` |
 | "disable {tool}", "turn off {tool}" | Remove that tool from `available_tools` |
 | "enable all", "turn on all", "reset" | Set `available_tools: null` |
 | "enable only {tool1}, {tool2}" | Set only specified tools in `available_tools` |
-| "temporarily", "--temp" | Apply for session only (Step 3b) |
 
 **Group combination support:**
 - "memory + file tools" → Merge `memory` + `file-ops` groups
@@ -62,74 +32,64 @@ Parse natural language commands:
 
 ---
 
-## Step 3: Update Configuration
+## Step 2: Read Configuration & Route
 
-### Step 3a: Permanent Modification (Default)
+1. Read `.agents/mcp.json` (project configuration)
+2. Read `~/.gemini/settings.json` if exists (Gemini CLI global settings); optional
+3. Resolve the target server, tools, and groups from the parsed request. Handle the conditional input cases below before any update.
+4. For a query, display status for each requested MCP server:
+   - `available_tools: null` → "All enabled (no restrictions)"
+   - `available_tools: [...]` → "N tools enabled" + list
+5. For a query, display available groups if `toolGroups` is defined, then end the workflow. For a change request, proceed to Step 3 without printing a separate status report.
+
+**Output example:**
+```
+Current MCP Tool Status
+
+[serena]
+- Status: All enabled (no restrictions)
+- Available tools: 15
+
+Available Tool Groups:
+- memory: read_memory, write_memory, edit_memory, list_memories, delete_memory
+- code-analysis: get_symbols_overview, find_symbol, find_referencing_symbols, search_for_pattern
+- code-edit: replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol
+- file-ops: list_dir, find_file
+- all: All tools (no restrictions)
+```
+
+---
+
+## Step 3: Update Configuration
 
 1. **Show before/after diff:**
    ```
-   📝 Pending mcp.json changes:
+   Pending mcp.json changes:
 
    Before:
    - serena.available_tools: null (all)
 
    After:
    - serena.available_tools: ["read_memory", "write_memory", "edit_memory", "list_memories", "delete_memory"]
-
-   Apply changes? (Y/N)
    ```
 
-2. **After user confirmation**, modify `.agents/mcp.json`
+2. Apply the execution policy: reuse an explicit tool-change request; ask only if the target or intended restriction is unresolved. If the proposed configuration is unchanged, report that and end. Otherwise modify `.agents/mcp.json` and read back the affected values to verify the update.
 
 3. **Completion message:**
    ```
-   ✅ Done! serena can now only use memory tools.
+   Done! serena can now only use memory tools.
 
-   ⚠️ Note: Changes will fully apply after IDE/CLI restart.
+   Note: Changes will fully apply after IDE/CLI restart.
    Previous settings may continue to apply in current session.
-   ```
-
-### Step 3b: Temporary Application (`--temp` or "temporarily")
-
-Temporary settings that apply only during the session:
-
-1. Create `.serena/memories/tool-overrides.md` using `write_memory`:
-   ```markdown
-   # Tool Overrides (Temporary)
-
-   ## Session
-   Created: {ISO timestamp}
-   Expires: Session end
-
-   ## Overrides
-   ```json
-   {
-     "serena": {
-       "available_tools": ["read_memory", "write_memory"]
-     }
-   }
-   ```
-
-   ## Note
-   This file contains temporary settings. It will be ignored in the next session.
-   To apply permanently, run the `/tools` workflow without `--temp`.
-   ```
-
-2. **Completion message:**
-   ```
-   ✅ Temporarily applied!
-
-   serena will only use memory tools for this session.
-   To apply permanently, run `/tools enable memory only` (without --temp).
    ```
 
 ---
 
-## Step 4: Handle Special Cases
+## Conditional Input Handling (before updates)
 
 ### Unknown Tool Name
 ```
-⚠️ '{tool_name}' is an unknown tool.
+'{tool_name}' is an unknown tool.
 
 Similar tools:
 - read_memory
@@ -139,9 +99,9 @@ Please enter the exact tool name.
 ```
 
 ### Server Conflict
-When multiple MCP servers are configured:
+When multiple MCP servers are configured and the request does not identify the target:
 ```
-📋 Multiple MCP servers detected:
+Multiple MCP servers detected:
 - serena
 - custom-memory
 
@@ -152,8 +112,9 @@ Which server's tools would you like to modify?
 ```
 
 ### Empty Tool List
+If disabling all tools was explicitly requested, apply that request. Otherwise explain the empty-list consequence and clarify before writing:
 ```
-⚠️ Setting available_tools to an empty array will disable all tools for that server.
+Setting available_tools to an empty array will disable all tools for that server.
 Are you sure you want to continue? (Y/N)
 ```
 
@@ -169,17 +130,8 @@ Are you sure you want to continue? (Y/N)
 | `/tools all` | Enable all tools (reset) |
 | `/tools read_memory, write_memory only` | Enable only specified tools |
 | `/tools disable code edit` | Remove that group |
-| `/tools memory only --temp` | Apply temporarily (this session only) |
 
 ---
-
-## Runtime Override Protocol
-
-How other workflows check tool restrictions:
-
-1. **At workflow start:** Check `read_memory("tool-overrides.md")`
-2. **If override exists:** Apply that setting with priority
-3. **If not present or expired:** Use `mcp.json` settings
 
 **Note:** If IDE/CLI doesn't directly support `available_tools`,
 tool usage must be self-restricted at the workflow level.

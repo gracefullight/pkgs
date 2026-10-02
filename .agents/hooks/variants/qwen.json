@@ -1,0 +1,74 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "qwen",
+  "hookDir": ".qwen/hooks",
+  "settingsFile": ".qwen/settings.json",
+  "projectDirEnv": "QWEN_PROJECT_DIR",
+  "runtime": "bun",
+  "events": {
+    "UserPromptSubmit": [
+      {
+        "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "skill-injector.ts",
+        "timeout": 3
+      },
+      {
+        "hook": "code-intelligence-primer.ts",
+        "timeout": 3
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hook": "scm-guard.ts",
+        "matcher": "run_shell_command",
+        "timeout": 3
+      },
+      {
+        "hook": "code-intelligence-guard.ts",
+        "matcher": "run_shell_command",
+        "timeout": 2
+      },
+      {
+        "hook": "test-filter.ts",
+        "matcher": "run_shell_command",
+        "timeout": 5
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hook": "refactor-guard.ts",
+        "matcher": "write_file|replace",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "hook": "persistent-mode.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "refactor-guard.ts",
+        "timeout": 5
+      }
+    ]
+  },
+  "statusLine": {
+    "hook": "hud.ts"
+  },
+  "statusLineKey": "ui",
+  "extra": {
+    "hooksConfig": {
+      "enabled": true
+    },
+    "permissions": {
+      "allow": ["Bash(ls *)", "Bash(oma *)"]
+    }
+  }
+}

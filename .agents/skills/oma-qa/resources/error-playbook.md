@@ -1,7 +1,7 @@
 # QA Agent - Error Recovery Playbook
 
 When you encounter a failure during review, follow these recovery steps.
-Do NOT stop or ask for help until you have exhausted the playbook.
+Use the relevant recovery steps. If required information or authority is missing, pause the dependent action and continue independent work.
 
 ---
 
@@ -12,8 +12,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 1. Check: is the tool installed? Note missing tool in result
 2. Check: are you in the correct directory?
 3. If `npm audit`: try `npm audit --production` to skip devDependencies
-4. If `bandit`: check Python path — may need `python -m bandit`
-5. If `lighthouse`: requires a running server — note if server not available
+4. If `bandit`: check Python path; may need `python -m bandit`
+5. If `lighthouse`: requires a running server; note if server not available
 6. **If tool unavailable**: Fall back to manual review, record `tool_unavailable: ["tool_name"]` in result
 
 ---
@@ -22,22 +22,23 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Finding looks like a vulnerability but might be safe
 
-1. Trace the data flow — does user input actually reach the dangerous operation?
+1. Trace the data flow: does user input actually reach the dangerous operation?
 2. Check: is there validation/sanitization upstream?
 3. Check: is the framework handling this automatically? (e.g., ORM prevents SQL injection)
 4. If uncertain: mark severity as `MEDIUM` with note "verify manually"
-5. **NEVER do this**: Mark as CRITICAL without certainty — false alarms erode trust
+5. **NEVER do this**: Mark as CRITICAL without certainty (false alarms erode trust)
 
 ---
 
 ## Cannot Access Source Code
 
-**Symptoms**: Serena `find_symbol` returns nothing, file not found
+**Symptoms**: configured code-intelligence tool returns nothing, times out, or a file is not found
 
-1. Check: correct file path? Use `search_for_pattern` with broader terms
-2. Check: is the code in a different directory or monorepo?
-3. Use `get_symbols_overview` on parent directories to find the structure
-4. If truly inaccessible: review what you CAN access and note gaps in report
+1. Check the configured provider's discovered tools and the file path.
+2. Use the documented native scoped-search fallback; do not install, initialize,
+   track, or silently switch providers.
+3. Check whether code is in another package or monorepo directory.
+4. If truly inaccessible: review what you can access and record the coverage gap.
 
 ---
 
@@ -73,7 +74,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
 
-1. **Stop immediately** — do not make additional API calls
+1. **Stop immediately**: do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
 4. Specify remaining tasks
@@ -92,4 +93,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **False positive prevention**: If finding is uncertain, lower severity and mark "verify manually"
 - **Blocked**: If no progress after 5 turns, save current state, `Status: blocked`
-- **No code modification**: QA only reports — delegate code changes to the appropriate agent
+- **No code modification**: QA only reports; delegate code changes to the appropriate agent
