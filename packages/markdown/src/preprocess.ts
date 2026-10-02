@@ -9,7 +9,7 @@ const PUNCTUATION_PATTERNS = [
   { pattern: "! ,", fix: "! ", description: "orphaned comma after exclamation mark" },
 ] as const;
 
-const PROTECTED_SEGMENT_REGEX = /```[\s\S]*?```|`[^`\n]+`/g;
+const PROTECTED_SEGMENT_REGEX = /^[ \t]{0,3}(`{3,}|~{3,})[^\n]*(?:\n|$)|(`+)/gm;
 const DOUBLE_BRACKET_REGEX = /\[\[([^[\]]+)\]\]/g;
 const BOLD_PATTERN_REGEX = /\*\*[^*]+\*\*/g;
 const DETAILS_BLOCK_REGEX = /<details[\s\S]*?<\/details>/gi;
@@ -48,18 +48,46 @@ interface Segment {
   value: string;
 }
 
+function findProtectedSegmentEnd(
+  content: string,
+  match: RegExpExecArray,
+  start: number,
+): number | null {
+  if (match[1]) {
+    const fence = match[1];
+    const closing = new RegExp(`^[ \\t]{0,3}${fence[0]}{${fence.length},}[ \\t]*\\r?$`, "gm");
+    closing.lastIndex = start;
+    const close = closing.exec(content);
+    return close ? close.index + close[0].length : content.length;
+  }
+
+  const ticks = /`+/g;
+  ticks.lastIndex = start;
+  for (const close of content.matchAll(ticks)) {
+    if (close[0].length === match[2]?.length) {
+      return close.index + close[0].length;
+    }
+  }
+  return null;
+}
+
 function splitSegments(content: string): Segment[] {
   const segments: Segment[] = [];
   let lastIndex = 0;
 
-  for (const match of content.matchAll(PROTECTED_SEGMENT_REGEX)) {
-    const index = match.index ?? 0;
+  const pattern = new RegExp(PROTECTED_SEGMENT_REGEX);
+  for (let match = pattern.exec(content); match; match = pattern.exec(content)) {
+    const index = match.index;
+    const end = findProtectedSegmentEnd(content, match, pattern.lastIndex);
+    if (end === null) continue;
+
     if (index > lastIndex) {
       segments.push({ protected: false, value: content.slice(lastIndex, index) });
     }
 
-    segments.push({ protected: true, value: match[0] });
-    lastIndex = index + match[0].length;
+    segments.push({ protected: true, value: content.slice(index, end) });
+    lastIndex = end;
+    pattern.lastIndex = end;
   }
 
   if (lastIndex < content.length) {
@@ -134,7 +162,13 @@ function fixPunctuationNoise(content: string): string {
     }
   }
 
-  return result.replace(/ {2,}/g, " ");
+  return result.replace(/[^\r\n]+/g, (line) =>
+    line.replace(
+      /^(\s*)(.*?)(\s*)$/,
+      (_match, leading: string, text: string, trailing: string) =>
+        `${leading}${text.replace(/ {2,}/g, " ")}${trailing}`,
+    ),
+  );
 }
 
 function normalizeDoubleBrackets(content: string): string {
@@ -173,12 +207,13 @@ function shouldReduceBold(
 }
 
 function reduceExcessiveBold(content: string, maxBoldPer100Words: number): string {
-  const boldSegmentCount = countBoldSegments(content);
-  if (!shouldReduceBold(content, boldSegmentCount, maxBoldPer100Words)) {
+  const inspectable = getUnprotectedContent(content);
+  const boldSegmentCount = countBoldSegments(inspectable);
+  if (!shouldReduceBold(inspectable, boldSegmentCount, maxBoldPer100Words)) {
     return content;
   }
 
-  const allowedBold = getAllowedBoldCount(content, maxBoldPer100Words);
+  const allowedBold = getAllowedBoldCount(inspectable, maxBoldPer100Words);
   let seen = 0;
 
   return splitSegments(content)
@@ -197,7 +232,7 @@ function reduceExcessiveBold(content: string, maxBoldPer100Words: number): strin
 }
 
 function escapeTildes(content: string): string {
-  return content.replace(/~/g, "\\~");
+  return content.replace(/\\*~/g, (match) => (match.length % 2 === 0 ? match : `\\${match}`));
 }
 
 function countKoreanRatio(content: string): number {

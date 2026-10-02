@@ -3,5 +3,5 @@ export type {
   MarkdownAnalysisResult,
   MarkdownIssue,
   MarkdownPreprocessOptions,
-} from "./preprocess";
-export { analyzeMarkdown, preprocessMarkdown } from "./preprocess";
+} from "@/preprocess";
+export { analyzeMarkdown, preprocessMarkdown } from "@/preprocess";

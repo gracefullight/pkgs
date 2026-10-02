@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/markdown",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Markdown preprocessing utilities for Korean text rendering",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,10 +18,11 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
-    "format": "biome format --write src"
+    "format": "biome format --write src",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "markdown",
@@ -54,11 +55,11 @@
     "access": "public"
   },
   "devDependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-markdown": "^10.1.0",
     "tsup": "^8.5.1",
-    "typescript": "^6",
-    "vitest": "^4.0.17"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
   }
 }

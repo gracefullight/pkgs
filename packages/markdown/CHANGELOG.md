@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.9 (2026-10-03)
+
+- Preserve indentation, hard line breaks, code fences, and inline code during preprocessing.
+- Make escaping idempotent.
+- Update dependencies to current compatible stable versions.
+
 ## [0.1.8](https://github.com/gracefullight/pkgs/compare/@gracefullight/markdown@0.1.7...@gracefullight/markdown@0.1.8) (2026-04-10)
 
 
