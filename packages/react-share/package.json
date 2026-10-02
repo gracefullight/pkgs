@@ -1,6 +1,6 @@
 {
   "name": "@gracefullight/react-share",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A lightweight, headless social sharing library for React",
   "type": "module",
   "main": "./dist/index.js",
@@ -8,8 +8,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "files": [
@@ -23,7 +23,8 @@
     "test:coverage": "vitest --coverage",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "react",
@@ -76,19 +77,19 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
-    "@types/facebook-js-sdk": "^3.3.12"
+    "@types/facebook-js-sdk": "^3.3.13",
+    "type-fest": "^5.10.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.1",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
-    "happy-dom": "^16.8.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tsup": "^8.3.6",
-    "type-fest": "^4.33.0",
-    "vitest": "^4.0.18"
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/ui": "^5.0.3",
+    "happy-dom": "^20.14.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsup": "^8.5.1",
+    "vitest": "^5.0.3"
   }
 }

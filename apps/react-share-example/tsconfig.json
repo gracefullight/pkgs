@@ -20,13 +20,15 @@
     ],
     "noUncheckedSideEffectImports": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@gracefullight/react-share": ["../../packages/react-share/src/index.ts"],
+      "@/*": ["./src/*", "../../packages/react-share/src/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "../../packages/react-share/src/types/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

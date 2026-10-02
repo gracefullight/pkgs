@@ -15,8 +15,9 @@ export async function copyToClipboard(text: string): Promise<void> {
   }
 
   // Fallback: use document.execCommand (deprecated but widely supported)
+  const textArea = document.createElement("textarea");
+  const previouslyFocused = document.activeElement;
   try {
-    const textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.style.position = "fixed";
     textArea.style.left = "-999999px";
@@ -26,7 +27,6 @@ export async function copyToClipboard(text: string): Promise<void> {
     textArea.select();
 
     const successful = document.execCommand("copy");
-    document.body.removeChild(textArea);
 
     if (!successful) {
       throw new Error("execCommand('copy') returned false");
@@ -35,5 +35,10 @@ export async function copyToClipboard(text: string): Promise<void> {
     throw new Error(
       `Failed to copy to clipboard: ${error instanceof Error ? error.message : String(error)}`,
     );
+  } finally {
+    textArea.remove();
+    if (previouslyFocused instanceof HTMLElement) {
+      previouslyFocused.focus();
+    }
   }
 }

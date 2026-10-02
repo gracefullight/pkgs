@@ -27,11 +27,7 @@ export function formatShareText(
     ? truncateText(description, descriptionMaxLength)
     : undefined;
 
-  if (truncatedDescription && title) {
-    return `${title}${separator}${truncatedDescription}${separator}${url}`;
-  }
-
-  return `${title || ""}${separator}${url}`.trim();
+  return [title, truncatedDescription, url].filter(Boolean).join(separator).trim();
 }
 
 export function formatTweetText(
@@ -56,5 +52,5 @@ export function formatTweetText(
     return `${title} - ${truncatedDescription}`;
   }
 
-  return title || "";
+  return title || truncatedDescription || "";
 }

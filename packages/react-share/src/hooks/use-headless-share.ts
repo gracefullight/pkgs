@@ -24,42 +24,66 @@ const strategyRegistry = new Map<SharePlatform, ShareStrategy>([
   ["whatsapp", whatsappStrategy],
 ]);
 
-function useExternalScript(src: string | undefined) {
-  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+function useExternalScript(src: string | undefined, sdkAvailable: boolean) {
+  type ScriptStatus = "idle" | "loading" | "ready" | "error";
+  const [state, setState] = useState<{ src?: string; status: ScriptStatus }>({
+    src,
+    status: src ? "loading" : "idle",
+  });
 
   useEffect(() => {
+    const updateStatus = (status: ScriptStatus) => setState({ src, status });
     if (!src || typeof document === "undefined") {
-      setStatus(src ? "error" : "idle");
+      updateStatus(src ? "error" : "idle");
       return;
     }
 
-    const existingScript = document.querySelector(`script[src="${src}"]`);
-    if (existingScript) {
-      setStatus("ready");
+    if (sdkAvailable) {
+      updateStatus("ready");
       return;
     }
 
-    setStatus("loading");
+    let script = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+    const isNewScript = !script;
+    if (!script) {
+      script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      script.dataset.headlessShareStatus = "loading";
+      const trackedScript = script;
+      script.addEventListener(
+        "load",
+        () => {
+          trackedScript.dataset.headlessShareStatus = "ready";
+        },
+        { once: true },
+      );
+      script.addEventListener(
+        "error",
+        () => {
+          trackedScript.dataset.headlessShareStatus = "error";
+        },
+        { once: true },
+      );
+    }
 
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
+    const storedStatus = script.dataset.headlessShareStatus;
+    updateStatus(storedStatus === "ready" || storedStatus === "error" ? storedStatus : "loading");
 
-    const handleLoad = () => setStatus("ready");
-    const handleError = () => setStatus("error");
-
+    const handleLoad = () => updateStatus("ready");
+    const handleError = () => updateStatus("error");
     script.addEventListener("load", handleLoad);
     script.addEventListener("error", handleError);
 
-    document.body.appendChild(script);
+    if (isNewScript) document.body.appendChild(script);
 
     return () => {
       script.removeEventListener("load", handleLoad);
       script.removeEventListener("error", handleError);
     };
-  }, [src]);
+  }, [src, sdkAvailable]);
 
-  return status;
+  return state.src === src ? state.status : src ? "loading" : "idle";
 }
 
 export interface UseHeadlessShareProps {
@@ -88,15 +112,18 @@ export function useHeadlessShare({
     return undefined;
   })();
 
-  const scriptStatus = useExternalScript(sdkUrl);
-  const isSdkReady = sdkUrl ? scriptStatus === "ready" : true;
-  const hasScriptError = scriptStatus === "error";
-
   useEffect(() => {
-    if (isFacebook && scriptStatus === "ready") {
+    if (isFacebook) {
       setupFacebookSDK(options?.facebook?.appId);
     }
-  }, [isFacebook, scriptStatus, options?.facebook?.appId]);
+  }, [isFacebook, options?.facebook?.appId]);
+
+  const sdkAvailable =
+    typeof window !== "undefined" &&
+    Boolean(isKakao ? window.Kakao : isFacebook ? window.FB : false);
+  const scriptStatus = useExternalScript(sdkUrl, sdkAvailable);
+  const isSdkReady = sdkUrl ? scriptStatus === "ready" : true;
+  const hasScriptError = scriptStatus === "error";
 
   useEffect(() => {
     if (hasScriptError) {

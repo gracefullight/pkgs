@@ -2,8 +2,8 @@ export type {
   HeadlessShareButtonChildren,
   HeadlessShareButtonProps,
   HeadlessShareButtonRenderProps,
-} from "./components";
-export type { HeadlessShareData, ShareData } from "./data";
+} from "@/types/components";
+export type { HeadlessShareData, ShareData } from "@/types/data";
 export type {
   FacebookOptions,
   KakaoOptions,
@@ -11,8 +11,8 @@ export type {
   PinterestOptions,
   TwitterOptions,
   WhatsAppOptions,
-} from "./options";
-export type { SharePlatform } from "./platform";
+} from "@/types/options";
+export type { SharePlatform } from "@/types/platform";
 export type {
   FormatTextFunction,
   HeadlessShareListeners,
@@ -22,4 +22,4 @@ export type {
   PlatformOptions,
   PlatformOptionsRegistry,
   ShareStrategy,
-} from "./props";
+} from "@/types/props";

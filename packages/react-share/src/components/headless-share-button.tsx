@@ -69,6 +69,7 @@ export function HeadlessShareButton({
       disabled: child.props.disabled || isLoading,
       onClick: (e: SyntheticEvent) => {
         child.props.onClick?.(e);
+        if (e.defaultPrevented || child.props.disabled) return;
         void handleShareClick();
       },
     });

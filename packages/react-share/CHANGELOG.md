@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6 (2026-10-03)
+
+- Wait for shared SDK scripts to finish loading before reporting readiness.
+- Preserve descriptions without titles and remove clipboard fallback elements on failure.
+- Include the dependency required by exported TypeScript declarations.
+- Update dependencies to current compatible stable versions.
+
 ## [0.1.5](https://github.com/gracefullight/pkgs/compare/@gracefullight/react-share@0.1.4...@gracefullight/react-share@0.1.5) (2026-03-25)
 
 

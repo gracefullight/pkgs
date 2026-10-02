@@ -16,6 +16,26 @@ describe("HeadlessShareButton", () => {
     url: "https://example.com/recipe/1",
   };
 
+  it("respects a child click handler cancelling the share", async () => {
+    const { useHeadlessShare } = await import("@/hooks/use-headless-share");
+    const mockShare = vi.fn();
+    (useHeadlessShare as unknown as Mock).mockReturnValue({
+      isSdkReady: true,
+      share: mockShare,
+    });
+    render(
+      <HeadlessShareButton data={defaultData} type="twitter">
+        <button type="button" onClick={(event) => event.preventDefault()}>
+          Cancel share
+        </button>
+      </HeadlessShareButton>,
+    );
+
+    fireEvent.click(screen.getByText("Cancel share"));
+
+    expect(mockShare).not.toHaveBeenCalled();
+  });
+
   it("should render and handle click with function children", async () => {
     const { useHeadlessShare } = await import("@/hooks/use-headless-share");
     const mockShare = vi.fn();
