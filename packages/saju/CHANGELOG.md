@@ -1,5 +1,44 @@
 # @gracefullight/saju
 
+## [2.0.0](https://github.com/gracefullight/pkgs/compare/@gracefullight/saju@1.3.2...@gracefullight/saju@2.0.0) (2026-10-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **saju:** All public API functions now take datetime as the first argument and adapter as part of the options object.
+* **saju:** remove deprecated APIs and add alternativeBalance to YongShen
+* **saju:** STANDARD_PRESET now applies longitude-based solar time correction for hour pillar calculation by default (useMeanSolarTimeForHour: true). This matches the behavior of popular Korean fortune-telling services like 포스텔러.
+
+### Features
+
+* add GitHub Sponsors funding link to npm packages ([c68dfee](https://github.com/gracefullight/pkgs/commit/c68dfeebe02e4b3e2cc2aaaaec525b8037edb6d1))
+* **example:** add Next.js 15 demo app with GitHub Pages deployment ([f782b9b](https://github.com/gracefullight/pkgs/commit/f782b9b62596687de1295246b85245517f0db8a4))
+* saju calculator with lunar-javascript integration ([b882131](https://github.com/gracefullight/pkgs/commit/b882131b91bda76bc91a2509a0654a211f58a64d))
+* **saju,saju-dart:** add sinsals, nayin, solar term monthly luck, and parity fixes ([fe6922c](https://github.com/gracefullight/pkgs/commit/fe6922cf05bf2b55d4c4b19ffe0d1d3f21b3046b))
+* **saju:** add comprehensive saju analysis features ([27642dd](https://github.com/gracefullight/pkgs/commit/27642dd6711eebeb168548bc41cfd929d3467b03))
+* **saju:** add getTenGodForStem function ([ba68298](https://github.com/gracefullight/pkgs/commit/ba68298700f94199a453be820b45d49bb4941086))
+* **saju:** add solar terms and update getSaju() API ([0598bfb](https://github.com/gracefullight/pkgs/commit/0598bfb0d4bb01d7905321a834b1695499523f78))
+* **saju:** add twelve stages, sinsals, monthly/daily luck and refactor to types/utils ([07639f5](https://github.com/gracefullight/pkgs/commit/07639f51288ebf89b5dd3d9911a37725e6e50918))
+* **saju:** enable mean solar time correction by default in STANDARD_PRESET ([a887261](https://github.com/gracefullight/pkgs/commit/a88726130f008f483756b19d73c2411f9ad98e67))
+* **saju:** implement Gongmang, Wonjin and activate other Sinsals ([78264c2](https://github.com/gracefullight/pkgs/commit/78264c24be2df38a3715107efcb2361b2a87d404))
+* **saju:** introduce Label objects across all analysis modules ([06c5dfc](https://github.com/gracefullight/pkgs/commit/06c5dfcb76ac55e5f602b3e28e5df82b486acfde))
+* **saju:** make longitudeDeg and preset optional in getFourPillars and getSaju ([eb45156](https://github.com/gracefullight/pkgs/commit/eb4515605d5c43f9fb461255747f70775c9fdf65))
+* **saju:** move adapter from first argument to options object ([cae129e](https://github.com/gracefullight/pkgs/commit/cae129ef37eec451240e83e5345684f7fe8a8245))
+* **saju:** remove deprecated APIs and add alternativeBalance to YongShen ([b0b1c09](https://github.com/gracefullight/pkgs/commit/b0b1c09c363334214c3e0e779333cc493df71c33))
+
+
+### Bug Fixes
+
+* add publishConfig for scoped packages ([579250d](https://github.com/gracefullight/pkgs/commit/579250d9ffc103d474f6c5aac8c4c8ef6e32e2f8))
+* apply consistent code formatting and update various package configurations and tools across the monorepo ([7783641](https://github.com/gracefullight/pkgs/commit/7783641e0b3a8c9de191441c4f05bb3070af4e69))
+* resolve 9 lint issues including auto-fixable code style and type safety ([b21a32c](https://github.com/gracefullight/pkgs/commit/b21a32c0dc0455393f88ac159e9a2d41f0c6b959))
+* **saju:** add currentYear to test for deterministic yearly luck range ([442f1d8](https://github.com/gracefullight/pkgs/commit/442f1d8cdd3eb29bb8b7df66d45bbd1ffa05a4e4))
+* **saju:** apply expert fortune teller review feedback ([860fbc0](https://github.com/gracefullight/pkgs/commit/860fbc0740d1c79e9b2f91ddf884518039a318ad))
+* **saju:** correct timezone and day boundary calculations ([b4584c5](https://github.com/gracefullight/pkgs/commit/b4584c5527d92444235d0fb5dc7b3f505e3b3634))
+* **saju:** hour pillar calculation regression ([7f72fe7](https://github.com/gracefullight/pkgs/commit/7f72fe71e502e6a1643f2c74b23656e94d6aee54))
+* **saju:** revert version to 0.4.2 for changeset workflow ([71e5732](https://github.com/gracefullight/pkgs/commit/71e5732221785cea5b36bed7393ee37f52a9c4f8))
+* **saju:** support plain Date in date-fns adapter ([f802017](https://github.com/gracefullight/pkgs/commit/f8020174659f26f373b7024b436ae868aa700c9b))
+
 ## 1.3.2 (2026-10-03)
 
 - Correct timezone conversion and historic Korean daylight saving boundaries.
