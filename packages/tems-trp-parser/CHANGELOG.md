@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 (2026-10-03)
+
+- Preserve large protobuf varints and timestamps without 32-bit truncation.
+- Finish CSV and JSONL writes before returning and honor explicit output paths.
+- Reject output paths that overwrite the input archive, including linked paths.
+- Bundle package entry points to resolve source aliases for consumers.
+- Update dependencies to current compatible stable versions.
+
 ## [0.1.2](https://github.com/gracefullight/pkgs/compare/@gracefullight/tems-trp-parser@0.1.1...@gracefullight/tems-trp-parser@0.1.2) (2026-03-29)
 
 

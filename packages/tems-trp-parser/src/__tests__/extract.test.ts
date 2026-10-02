@@ -9,6 +9,23 @@ import {
 } from "@/extract";
 
 describe("readVarint", () => {
+  it("preserves unsigned 32-bit values", () => {
+    expect(readVarint(new Uint8Array([0xff, 0xff, 0xff, 0xff, 0x0f]), 0).value).toBe(0xffffffff);
+  });
+
+  it("preserves integers above 32 bits", () => {
+    expect(readVarint(new Uint8Array([0x80, 0x80, 0x80, 0x80, 0x10]), 0).value).toBe(2 ** 32);
+  });
+
+  it("rejects an incomplete varint", () => {
+    expect(() => readVarint(new Uint8Array([0x80]), 0)).toThrow("incomplete varint");
+  });
+
+  it("rejects integers that cannot be represented exactly", () => {
+    expect(() =>
+      readVarint(new Uint8Array([0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x10]), 0),
+    ).toThrow("safe integer");
+  });
   it("should read single-byte varint", () => {
     const data = new Uint8Array([0x01]);
     const { value, newPos } = readVarint(data, 0);
@@ -46,6 +63,10 @@ describe("readVarint", () => {
 });
 
 describe("decodeZigzag", () => {
+  it("decodes signed values above 32 bits", () => {
+    expect(decodeZigzag(2 ** 32)).toBe(2 ** 31);
+    expect(decodeZigzag(2 ** 32 + 1)).toBe(-(2 ** 31) - 1);
+  });
   it("should decode zero", () => {
     expect(decodeZigzag(0)).toBe(0);
   });
@@ -72,6 +93,13 @@ describe("decodeZigzag", () => {
 });
 
 describe("parseField", () => {
+  it("rejects an incomplete varint value", () => {
+    expect(parseField(new Uint8Array([0x08, 0x80]), 0)).toBeNull();
+  });
+
+  it("rejects field number zero", () => {
+    expect(parseField(new Uint8Array([0x00, 0x01]), 0)).toBeNull();
+  });
   it("should parse varint field (wire type 0)", () => {
     const data = new Uint8Array([0x08, 0x96, 0x01]);
     const result = parseField(data, 0);
@@ -98,7 +126,7 @@ describe("parseField", () => {
     expect(result).not.toBeNull();
     expect(result?.fieldNum).toBe(1);
     expect(result?.wireType).toBe(1);
-    expect((result?.value as Uint8Array).length).toBe(8);
+    expect(result?.value).toHaveLength(8);
     expect(result?.endPos).toBe(9);
   });
 
@@ -108,7 +136,7 @@ describe("parseField", () => {
     expect(result).not.toBeNull();
     expect(result?.fieldNum).toBe(1);
     expect(result?.wireType).toBe(5);
-    expect((result?.value as Uint8Array).length).toBe(4);
+    expect(result?.value).toHaveLength(4);
     expect(result?.endPos).toBe(5);
   });
 
@@ -183,6 +211,10 @@ describe("tryReadVarint", () => {
 });
 
 describe("iterLengthPrefixedMessages", () => {
+  it("rejects lengths that previously wrapped to a negative 32-bit value", () => {
+    const chunks = [new Uint8Array([0xff, 0xff, 0xff, 0xff, 0x0f])];
+    expect(() => [...iterLengthPrefixedMessages(chunks)]).toThrow("message too large");
+  });
   it("should extract single length-prefixed message", () => {
     const chunks = [new Uint8Array([0x03, 0x61, 0x62, 0x63])];
     const messages = [...iterLengthPrefixedMessages(chunks)];

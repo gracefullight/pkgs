@@ -1,5 +1,13 @@
-import { createWriteStream, existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
-import { dirname, extname } from "node:path";
+import {
+  closeSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  statSync,
+  writeFileSync,
+  writeSync,
+} from "node:fs";
+import { basename, dirname, extname, join } from "node:path";
 import { inflateSync } from "node:zlib";
 import AdmZip from "adm-zip";
 import { SIGNED_KEYWORDS } from "@/constants";
@@ -8,25 +16,13 @@ import type { ExtractOptions, OutputFormat, ParsedField, RFRecord, WireType } fr
 const MAX_MESSAGE_LENGTH = 64 * 1024 * 1024;
 
 export function readVarint(data: Uint8Array, pos: number): { value: number; newPos: number } {
-  let result = 0;
-  let shift = 0;
-  let currentPos = pos;
-
-  while (currentPos < data.length) {
-    const byte = data[currentPos];
-    if (byte === undefined) break;
-    result |= (byte & 0x7f) << shift;
-    currentPos++;
-    shift += 7;
-    if (!(byte & 0x80)) {
-      break;
-    }
-  }
-  return { value: result, newPos: currentPos };
+  const result = tryReadVarint(data, pos);
+  if (!result) throw new Error("incomplete varint");
+  return result;
 }
 
 export function decodeZigzag(n: number): number {
-  return (n >>> 1) ^ -(n & 1);
+  return n % 2 === 0 ? n / 2 : -(n + 1) / 2;
 }
 
 export function parseField(data: Uint8Array, pos: number): ParsedField | null {
@@ -36,6 +32,7 @@ export function parseField(data: Uint8Array, pos: number): ParsedField | null {
     const { value: tag, newPos: afterTag } = readVarint(data, pos);
     const fieldNum = tag >>> 3;
     const wireType = (tag & 0x07) as WireType;
+    if (fieldNum === 0 || tag > 0xffffffff) return null;
 
     if (wireType === 0) {
       const { value, newPos } = readVarint(data, afterTag);
@@ -101,13 +98,16 @@ export function tryReadVarint(buf: Uint8Array, pos = 0): { value: number; newPos
   while (i < buf.length) {
     const byte = buf[i];
     if (byte === undefined) return null;
-    result |= (byte & 0x7f) << shift;
+    result += (byte & 0x7f) * 2 ** shift;
+    if (!Number.isSafeInteger(result)) {
+      throw new Error("varint exceeds safe integer range");
+    }
     i++;
     if (!(byte & 0x80)) {
       return { value: result, newPos: i };
     }
     shift += 7;
-    if (shift > 70) {
+    if (i - pos >= 10) {
       throw new Error("varint too long / corrupt stream");
     }
   }
@@ -597,14 +597,14 @@ function computeFieldnamesFromZip(zip: AdmZip): string[] {
 
 function escapeCSVField(field: string | number): string {
   const str = String(field);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+  if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
 }
 
 function inferFormatFromOutputExtension(outputPath: string): OutputFormat | null {
-  const ext = extname(outputPath).slice(1);
+  const ext = extname(outputPath).slice(1).toLowerCase();
   if (!ext) return null;
   if (!["csv", "json", "jsonl", "ndjson"].includes(ext)) return null;
   return ext === "ndjson" ? "jsonl" : (ext as OutputFormat);
@@ -615,11 +615,7 @@ function buildOutputPathFromDirectory(
   outputDir: string,
   format: OutputFormat,
 ): string {
-  const basename = trpPath
-    .split("/")
-    .pop()
-    ?.replace(/\.trp$/i, "");
-  return `${outputDir}/${basename}.${format}`;
+  return join(outputDir, `${basename(trpPath).replace(/\.trp$/i, "")}.${format}`);
 }
 
 function resolveOutputTarget(
@@ -631,7 +627,7 @@ function resolveOutputTarget(
   if (output === undefined) {
     const resolvedFormat = format ?? "csv";
     return {
-      outputPath: trpPath.replace(/\.trp$/i, `.${resolvedFormat}`),
+      outputPath: `${trpPath.replace(/\.trp$/i, "")}.${resolvedFormat}`,
       format: resolvedFormat,
     };
   }
@@ -644,15 +640,9 @@ function resolveOutputTarget(
     };
   }
 
-  const inferredFormat = inferFormatFromOutputExtension(output);
-  if (inferredFormat && !format) {
-    return { outputPath: output, format: inferredFormat };
-  }
-
-  const resolvedFormat = format ?? "csv";
   return {
-    outputPath: trpPath.replace(/\.trp$/i, `.${resolvedFormat}`),
-    format: resolvedFormat,
+    outputPath: output,
+    format: format ?? inferFormatFromOutputExtension(output) ?? "csv",
   };
 }
 
@@ -665,19 +655,21 @@ function ensureParentDirectory(filePath: string): void {
 
 function writeCsvFromZip(zip: AdmZip, outputPath: string): number {
   const fieldnames = computeFieldnamesFromZip(zip);
-  const stream = createWriteStream(outputPath);
-  stream.write(`${fieldnames.join(",")}\n`);
-
+  const fd = openSync(outputPath, "w");
   let count = 0;
-  for (const record of iterRecordsFromZip(zip)) {
-    const row = fieldnames.map((f) => {
-      const val = record[f];
-      return val !== undefined ? escapeCSVField(val) : "";
-    });
-    stream.write(`${row.join(",")}\n`);
-    count++;
+  try {
+    writeSync(fd, `${fieldnames.map(escapeCSVField).join(",")}\n`);
+    for (const record of iterRecordsFromZip(zip)) {
+      const row = fieldnames.map((f) => {
+        const val = record[f];
+        return val !== undefined ? escapeCSVField(val) : "";
+      });
+      writeSync(fd, `${row.join(",")}\n`);
+      count++;
+    }
+  } finally {
+    closeSync(fd);
   }
-  stream.end();
 
   return count;
 }
@@ -692,14 +684,16 @@ function writeJsonFromZip(zip: AdmZip, outputPath: string): number {
 }
 
 function writeJsonlFromZip(zip: AdmZip, outputPath: string): number {
-  const stream = createWriteStream(outputPath);
+  const fd = openSync(outputPath, "w");
   let count = 0;
-
-  for (const record of iterRecordsFromZip(zip)) {
-    stream.write(`${JSON.stringify(record)}\n`);
-    count++;
+  try {
+    for (const record of iterRecordsFromZip(zip)) {
+      writeSync(fd, `${JSON.stringify(record)}\n`);
+      count++;
+    }
+  } finally {
+    closeSync(fd);
   }
-  stream.end();
 
   return count;
 }
@@ -717,6 +711,14 @@ function writeRecordsFromZip(zip: AdmZip, outputPath: string, format: OutputForm
 export function extract(trpPath: string, options: ExtractOptions = {}): string {
   const target = resolveOutputTarget(trpPath, options);
   const { outputPath, format } = target;
+
+  if (existsSync(outputPath)) {
+    const inputStat = statSync(trpPath);
+    const outputStat = statSync(outputPath);
+    if (inputStat.dev === outputStat.dev && inputStat.ino === outputStat.ino) {
+      throw new Error("Output path must differ from the input archive");
+    }
+  }
 
   ensureParentDirectory(outputPath);
 
