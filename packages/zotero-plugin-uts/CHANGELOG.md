@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 (2026-10-03)
+
+- Restore the documented keyboard shortcut and clean up its listener on Zotero 8.
+- Update Citation.js test configuration and provide accessible icon titles.
+- Update dependencies to current compatible stable versions.
+
 ## [0.1.2](https://github.com/gracefullight/pkgs/compare/zotero-plugin-uts@0.1.1...zotero-plugin-uts@0.1.2) (2026-01-28)
 
 

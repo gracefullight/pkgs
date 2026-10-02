@@ -13,7 +13,7 @@ const cslTemplate = readFileSync(cslPath, "utf-8");
 describe("UTS APA 7th CSL Formatting", () => {
   beforeAll(() => {
     const config = plugins.config.get("@csl");
-    config.templates.add("uts-apa-7th", cslTemplate);
+    config.styles.add("uts-apa-7th", cslTemplate);
   });
 
   describe("Journal Article", () => {
@@ -35,7 +35,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -47,7 +47,7 @@ describe("UTS APA 7th CSL Formatting", () => {
       expect(bibliography).toContain("45");
       expect(bibliography).toContain("3");
       expect(bibliography).toContain("123–145");
-    });
+    }, 15_000);
 
     it("should format a journal article with 3-20 authors correctly", () => {
       const input = {
@@ -67,7 +67,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -96,7 +96,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -118,7 +118,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -144,7 +144,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -168,7 +168,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -198,7 +198,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -226,7 +226,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -247,7 +247,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -275,7 +275,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -301,7 +301,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -325,7 +325,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -350,7 +350,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -371,7 +371,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 
@@ -389,7 +389,7 @@ describe("UTS APA 7th CSL Formatting", () => {
 
       const cite = new Cite(input);
       const bibliography = cite.format("bibliography", {
-        template: "uts-apa-7th",
+        style: "uts-apa-7th",
         lang: "en-US",
       });
 

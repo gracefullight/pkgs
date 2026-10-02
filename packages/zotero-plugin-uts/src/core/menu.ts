@@ -42,12 +42,19 @@ function registerMenusV8(onCommand: () => Promise<void>): void {
     commandListener: onCommand,
   });
 
+  for (const win of Zotero.getMainWindows()) {
+    addKeyboardShortcut(win.document as XULDocument, onCommand);
+  }
+
   Zotero.debug("UTS Citation: Registered menus via Zotero 8 API");
 }
 
 function unregisterMenusV8(): void {
   Zotero.Menu?.unregisterMenu(PLUGIN_ID, MENU_ID);
   Zotero.Menu?.unregisterMenu(PLUGIN_ID, TOOLS_MENU_ID);
+  for (const win of Zotero.getMainWindows()) {
+    win.document.getElementById(KEY_ID)?.remove();
+  }
   Zotero.debug("UTS Citation: Unregistered menus via Zotero 8 API");
 }
 
@@ -148,13 +155,17 @@ function createMenuItem(document: XULDocument): Element {
 }
 
 export function addToWindow(window: Window, onCommand: () => Promise<void>): void {
-  if (!Zotero.Menu) {
+  if (Zotero.Menu) {
+    addKeyboardShortcut(window.document as XULDocument, onCommand);
+  } else {
     addMenusToWindow(window, onCommand);
   }
 }
 
 export function removeFromWindow(window: Window): void {
-  if (!Zotero.Menu) {
+  if (Zotero.Menu) {
+    window.document.getElementById(KEY_ID)?.remove();
+  } else {
     removeMenusFromWindow(window);
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "zotero-plugin-uts",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Zotero plugin to copy bibliography in UTS APA 7th format",
   "author": {
@@ -32,16 +32,17 @@
   ],
   "scripts": {
     "build": "tsup",
-    "build:xpi": "npm run build && cd addon && zip -r ../zotero-plugin-uts@$(node -p \"require('../package.json').version\").xpi .",
-    "test": "vitest"
+    "build:xpi": "bun run build && cd addon && zip -r ../zotero-plugin-uts@$(node -p \"require('../package.json').version\").xpi .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@citation-js/core": "^0.7.21",
-    "@citation-js/plugin-csl": "^0.7.22",
-    "tsup": "^8.0.0",
-    "typescript": "^6",
-    "vitest": "^4.0.17",
-    "zotero-types": "^4.1.0-beta.4"
+    "@citation-js/core": "^0.9.0",
+    "@citation-js/plugin-csl": "^0.9.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3",
+    "zotero-types": "^4.1.3"
   },
   "dependencies": {}
 }
