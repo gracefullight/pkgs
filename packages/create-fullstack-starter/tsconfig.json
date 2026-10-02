@@ -12,7 +12,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "ignoreDeprecations": "6.0",
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@package": ["./package.json"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

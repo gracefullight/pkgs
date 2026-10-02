@@ -1,5 +1,11 @@
 # create-fullstack-starter
 
+## 0.2.6 (2026-10-03)
+
+- Clone destinations using command arguments to preserve spaces and prevent shell injection.
+- Reject file targets and allow importing the CLI without parsing arguments.
+- Update dependencies to current compatible stable versions.
+
 ## [0.2.5](https://github.com/gracefullight/pkgs/compare/create-fullstack-starter@0.2.4...create-fullstack-starter@0.2.5) (2026-04-02)
 
 

@@ -1,8 +1,18 @@
-import { execSync, spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { execFileSync, execSync, spawnSync } from "node:child_process";
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { platform, tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as p from "@clack/prompts";
+import packageJson from "@package" with { type: "json" };
 import chalk from "chalk";
 import { Command } from "commander";
 
@@ -51,7 +61,7 @@ async function resolveTargetDirectory(directory?: string): Promise<string> {
     message: "Project directory:",
     placeholder: ".",
     validate: (value) => {
-      if (!value.trim()) {
+      if (!value?.trim()) {
         return "Directory name cannot be empty";
       }
     },
@@ -70,6 +80,10 @@ export function validateTargetDirectory(targetDir: string, resolvedPath: string)
 
   if (!existsSync(resolvedPath)) {
     return null;
+  }
+
+  if (!statSync(resolvedPath).isDirectory()) {
+    return `Target "${targetDir}" is not a directory.`;
   }
 
   const files = readdirSync(resolvedPath);
@@ -173,14 +187,16 @@ export function cloneTemplate(repo: string, dest: string, isCurrentDir: boolean)
   if (isCurrentDir) {
     const tempDir = mkdtempSync(path.join(tmpdir(), "fullstack-starter-"));
     try {
-      execSync(`git clone --depth 1 ${repoUrl} ${tempDir}`, { stdio: "pipe" });
+      execFileSync("git", ["clone", "--depth", "1", "--", repoUrl, tempDir], {
+        stdio: "pipe",
+      });
       rmSync(path.join(tempDir, ".git"), { recursive: true, force: true });
-      cpSync(tempDir, dest, { recursive: true });
+      cpSync(tempDir, dest, { recursive: true, force: false });
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }
   } else {
-    execSync(`git clone --depth 1 ${repoUrl} ${dest}`, { stdio: "pipe" });
+    execFileSync("git", ["clone", "--depth", "1", "--", repoUrl, dest], { stdio: "pipe" });
     rmSync(path.join(dest, ".git"), { recursive: true, force: true });
   }
 }
@@ -205,7 +221,7 @@ const program = new Command();
 program
   .name("create-fullstack-starter")
   .description("Scaffold a fullstack-starter template from GitHub")
-  .version("0.1.0", "-v, --version")
+  .version(packageJson.version, "-v, --version")
   .argument("[directory]", "Target directory for the project")
   .action(async (directory?: string) => {
     await main(directory);
@@ -242,4 +258,10 @@ async function main(directory?: string) {
   }
 }
 
-program.parse();
+if (
+  process.argv[1] &&
+  existsSync(process.argv[1]) &&
+  realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  program.parse();
+}
