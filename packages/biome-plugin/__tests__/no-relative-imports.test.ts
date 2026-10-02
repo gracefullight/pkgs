@@ -1,22 +1,18 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const rulesDir = resolve(import.meta.dirname, "../rules");
+const biomePath = createRequire(import.meta.url).resolve("@biomejs/biome/bin/biome");
 let tempDir: string;
 
 beforeAll(() => {
   tempDir = mkdtempSync(join(tmpdir(), "biome-plugin-test-"));
 
   cpSync(rulesDir, join(tempDir, "rules"), { recursive: true });
-
-  const ruleContent = require("node:fs").readFileSync(
-    join(tempDir, "rules/no-relative-imports.grit"),
-    "utf-8",
-  );
-  console.log("DEBUG: RULE CONTENT:\n", ruleContent);
 
   writeFileSync(
     join(tempDir, "biome.json"),
@@ -194,7 +190,7 @@ afterAll(() => {
 
 function runBiomeLint(file: string): string {
   try {
-    const result = execSync(`npx @biomejs/biome lint ${file} 2>&1`, {
+    const result = execFileSync(process.execPath, [biomePath, "lint", file], {
       cwd: tempDir,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
@@ -213,12 +209,6 @@ describe("no-relative-imports", () => {
       expect(output).toContain("./utils");
       expect(output).toContain("Avoid relative import path");
     });
-    it("detects static import with ./", () => {
-      const output = runBiomeLint("relative-imports.ts");
-      expect(output).toContain("./utils");
-      expect(output).toContain("Avoid relative import path");
-    });
-
     it("detects static import with ../", () => {
       const output = runBiomeLint("relative-imports.ts");
       expect(output).toContain("../components");
@@ -404,12 +394,10 @@ describe("no-relative-imports", () => {
       expect(output).toContain("Avoid relative import path");
     });
 
-    // TODO: Uncomment when Biome fixes GritQL pattern matching for `export { } from`
-    // See: https://github.com/biomejs/biome/issues/XXXX
-    // it("detects deeply nested export paths", () => {
-    //   const output = runBiomeLint("deep-relative-exports.ts");
-    //   expect(output).toContain("../../exports");
-    //   expect(output).toContain("Avoid relative export path");
-    // });
+    it("detects deeply nested export paths", () => {
+      const output = runBiomeLint("deep-relative-exports.ts");
+      expect(output).toContain("../../exports");
+      expect(output).toContain("Avoid relative export path");
+    });
   });
 });

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4 (2026-10-03)
+
+- Run tests against the installed Biome binary.
+- Update dependencies to current compatible stable versions.
+
 ## [0.2.3](https://github.com/gracefullight/pkgs/compare/@gracefullight/biome-plugin@0.2.2...@gracefullight/biome-plugin@0.2.3) (2026-03-29)
 
 
