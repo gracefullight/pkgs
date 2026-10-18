@@ -1,8 +1,6 @@
-import * as fs from "node:fs";
-import { readFileSync } from "node:fs";
-import { dirname, resolve as resolvePath } from "node:path";
+import { readFileSync, statSync } from "node:fs";
+import { dirname, join, resolve as resolvePath } from "node:path";
 import { cwd } from "node:process";
-import * as git from "isomorphic-git";
 
 // Resolve the real git directory, following the `.git` pointer file that git
 // creates for worktrees (e.g. `gitdir: /repo/.git/worktrees/<name>`).
@@ -14,7 +12,7 @@ function resolveGitdir(startDir: string): string {
   for (;;) {
     const dotGit = resolvePath(dir, ".git");
     try {
-      const stat = fs.statSync(dotGit);
+      const stat = statSync(dotGit);
       if (stat.isFile()) {
         const content = readFileSync(dotGit, "utf-8");
         const match = content.match(/^gitdir:\s*(.+)$/m);
@@ -62,14 +60,9 @@ export function validateBranchName(
 
 export async function getCurrentBranchName(): Promise<string | null> {
   try {
-    const gitdir = resolveGitdir(cwd());
-    const branch = await git.currentBranch({
-      fs,
-      gitdir,
-      fullname: false,
-    });
-
-    return branch ?? null;
+    const head = readFileSync(join(resolveGitdir(cwd()), "HEAD"), "utf-8").trim();
+    const named = /^ref: refs\/heads\/(.+)$/.exec(head);
+    return named?.[1] ?? null;
   } catch {
     return null;
   }
