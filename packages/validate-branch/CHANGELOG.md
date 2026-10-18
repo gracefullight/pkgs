@@ -1,5 +1,11 @@
 # @gracefullight/validate-branch
 
+## 1.1.6
+
+### Performance Improvements
+
+* read HEAD directly and drop isomorphic-git, chalk, and commander ([6facbf2](https://github.com/gracefullight/pkgs/commit/6facbf2))
+
 ## 1.1.5 (2026-10-03)
 
 - Find Git repositories from subdirectories and resolve relative worktree metadata.
